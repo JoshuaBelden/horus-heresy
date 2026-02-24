@@ -116,6 +116,54 @@ export const specialRules: SpecialRule[] = [
       'If a Shooting Attack made for a Weapon or Model with this Special Rule inflicts one or more wounds on a Target Unit, regardless of whether any Damage is inflicted, that Target Unit must make a Cool Check in the Morale Sub-Phase of the same Player Turn. If this Check is failed then all Models in the Unit gain the Pinned Status; if the Check is passed there is no further effect. The value of X attached to this Special Rule is applied as a negative modifier to the Cool Characteristic of Models in the Target Unit when making Checks caused by an attack with this Special Rule. If the attack includes multiple Weapons with different versions of this Special Rule the modifiers do not stack — use only the greatest modifier.',
   },
   {
+    name: 'Detonation',
+    summary: 'Weapons with this Special Rule can only attack Vehicles and immobile Models.',
+    description:
+      "A Weapon or attack with this Special Rule may only be selected during Step 2 of any Combat in the Fight Sub-Phase if the Unit making attacks is only Locked in Combat with enemy Units composed of Models with the Vehicle Type and Models with a Movement Characteristic of '-'. If a Unit is Locked in Combat with any enemy Units that include any Models that do not have the Vehicle Type or a Movement Characteristic of '0' or '-' then no Model may use a Weapon or other attack that has this Special Rule.\n\nA Weapon or other attack with this Special Rule may also be used to make attacks targeting a Model with the Building Type or a Terrain Piece that has a Toughness or Armour Characteristic.",
+  },
+  {
+    name: 'Sire of the Dark Angels',
+    summary: 'Grants special benefits to Dark Angels Detachments if certain Troops conditions are met.',
+    description:
+      'If a Model with this Special Rule is part of an Army, then the Controlling Player may apply the following Special Rules to all Auxiliary, Apex and Primary Detachments that have the same Faction Trait as the Model with this Special Rule:\n\nIf four or more Troops Battlefield Role Slots in the Primary Detachment of this Army are filled and these Slots contain at least one Tactical Squad Unit, at least one Assault Squad Unit and at least one Breacher Squad Unit, then all Force Organisation Slots with the Troops Battlefield Role in the Primary Detachment are considered Prime Slots.\n\nWhen the Controlling Player of a Model with this Special Rule makes a Reserve Roll for an Outrider Squadron Unit which only includes Models with the Dark Angels Trait or a Scimitar Jetbike Squadron Unit which only includes Models with the Dark Angels Trait, that Roll is modified by +1.',
+  },
+  {
+    name: 'Bulky',
+    summary: 'Models with this Special Rule take up more space on Transport Models.',
+    description:
+      'A Model with the Bulky (X) Special Rule does not use up 1 Point of Transport Capacity when it Embarks on a Model with the Transport Sub-Type. Instead it uses up a number of points of Transport Capacity equal to the value of X attached to the variant of the Bulky (X) possessed by that Model.',
+  },
+  {
+    name: 'Eternal Warrior',
+    summary: 'A Model with this Special Rule takes less Damage from attacks.',
+    description:
+      'When a Model with the Eternal Warrior (X) Special Rule is allocated an Unsaved Wound, the Damage of the Unsaved Wound is reduced by the value of X attached to the specific variant of the Eternal Warrior (X) Special Rule. The effects of this Special Rule cannot reduce the Damage of an Unsaved Wound to less than 1, regardless of the value of X.',
+  },
+  {
+    name: 'The Angels of Death',
+    summary: "Negative modifiers to Dark Angels' Leadership, Willpower, Cool and Intelligence are limited.",
+    description:
+      'Models with this Special Rule may never have their Leadership Characteristic modified to less than 6. Additionally, any variant of Fear (X) Special Rule may only reduce the Leadership, Willpower, Cool and Intelligence Characteristics of any Model with this Special Rule by a maximum of 1, regardless of the value of X.',
+  },
+  {
+    name: 'Sword of the Order',
+    summary: 'This Gambit may be chosen when using sword Weapons in Challenges.',
+    description:
+      "If this Gambit is selected, then as long as the Model under this Player's control is declared to be using a Chainsword, Power sword, Force sword, Paragon blade or Weapon with the Sword of the Order Trait, in Step 3 of the Challenge Sub-Phase, that Weapon's Attacks Modifier Characteristic is modified by -1 and it gains the Critical Hit (6+) Special Rule, or improves the value of X of an existing version of the Critical Hit (X) it already possesses by +1.",
+  },
+  {
+    name: 'Paragon Type',
+    summary: 'Paragons are extraordinary individual heroes whose Hits are allocated by their own Controlling Player.',
+    description:
+      'Any Hits inflicted by a Model with the Paragon Type, as part of either Shooting Attacks or in close combat, are allocated by the attacking Model\'s Controlling Player and not the Controlling Player of the Target Unit.\n\nModels with the Paragon Type may join and leave a Unit that includes Models with the Infantry Type, and Models with the Infantry Type may join and leave a Unit that includes one or more Models with the Paragon Type.\n\nModels with the Paragon Type may Embark and Disembark upon Models with the Transport Sub-Type.\n\nA Model with the Paragon Type may Issue and Accept Challenges.\n\nThe Controlling Player of a Unit that includes one or more Models with the Paragon Type may use the Characteristics of one of those Models to resolve any Characteristic Checks made for that Unit.\n\nIn Step 1 of the Resolution Sub-Phase, when deciding how many Models a Player controls in a Combat, a Model with the Paragon Type counts as a number of Models equal to that Model\'s Base Wounds Value.',
+  },
+  {
+    name: 'Unique Sub-Type',
+    summary: 'An Army may not include more than a single instance of a Model with the Unique Sub-Type.',
+    description:
+      'An Army may not include more than a single instance of a given Model with this Sub-Type.\n\nA Model with the Unique Sub-Type or a Unit composed entirely of Models with the Unique Sub-Type may not have any options other than those included on its Army List Profile selected for them.',
+  },
+  {
     name: 'Shock',
     summary:
       "Weapons with the Shock (X) Special Rule have a chance of inflicting Statuses on Vehicles even if it does not penetrate their armour.",

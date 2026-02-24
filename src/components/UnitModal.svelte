@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getHitTarget, hitProbability, woundProbability } from '../combat';
   import { lookupRule } from '../data/specialRules';
-  import type { ModelProfile, SpecialRule, UnitProfile } from '../data/types';
+  import type { Gambit, ModelProfile, SpecialRule, UnitProfile } from '../data/types';
 
   interface Props {
     unit: UnitProfile;
@@ -96,6 +96,26 @@
   function closePopover() {
     popover = null;
   }
+
+  function getTypeRuleName(type: string): string | null {
+    if (lookupRule(type + ' Type')) return type + ' Type';
+    if (lookupRule(type)) return type;
+    return null;
+  }
+
+  function getSubtypeRuleName(subtype: string): string | null {
+    if (lookupRule(subtype + ' Sub-Type')) return subtype + ' Sub-Type';
+    if (lookupRule(subtype)) return subtype;
+    return null;
+  }
+
+  function openGambit(e: MouseEvent, gambit: Gambit) {
+    e.stopPropagation();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = Math.min(rect.left, window.innerWidth - 340);
+    const y = Math.min(rect.bottom + 6, window.innerHeight - 220);
+    popover = { rule: gambit, x, y };
+  }
 </script>
 
 <svelte:window
@@ -168,13 +188,12 @@
             </thead>
             <tbody>
               {#each unit.models as model}
+                {@const typeRule = getTypeRuleName(model.type)}
                 <tr>
                   <td class="col-name"
-                    >{model.name}{model.subtype
-                      ? ` (${model.subtype})`
-                      : ''}</td
+                    >{model.name}{#if model.subtype}{@const subtypeRule = getSubtypeRuleName(model.subtype)}&nbsp;({#if subtypeRule}<button class="rule-link" onclick={(e) => openRule(e, subtypeRule)}>{model.subtype}</button>{:else}{model.subtype}{/if}){/if}</td
                   >
-                  <td class="col-type">{model.type}</td>
+                  <td class="col-type">{#if typeRule}<button class="rule-link type-link" onclick={(e) => openRule(e, typeRule)}>{model.type}</button>{:else}{model.type}{/if}</td>
                   {#each statKeys as stat}
                     <td
                       class:col-morale={stat === 'LD' ||
@@ -205,6 +224,7 @@
                   <th>RS</th>
                   <th>AP</th>
                   <th>D</th>
+                  <th class="col-traits">Special Rules</th>
                   <th class="col-traits">Traits</th>
                 </tr>
               </thead>
@@ -217,25 +237,35 @@
                     <td>{weapon.RS}</td>
                     <td>{weapon.AP}</td>
                     <td>{weapon.D}</td>
-                    <td class="col-traits">{weapon.traits.join(', ')}</td>
+                    <td>
+                      {#each weapon.specialRules as rule, i}
+                        {#if i > 0}<span class="rule-sep">, </span>{/if}
+                        {#if lookupRule(rule)}
+                          <button
+                            class="rule-link"
+                            onclick={(e) => openRule(e, rule)}>{rule}</button
+                          >
+                        {:else}
+                          <span class="rule-plain">{rule}</span>
+                        {/if}
+                      {/each}
+                      {#if weapon.specialRules.length === 0}—{/if}
+                    </td>
+                    <td class="col-traits">
+                      {#each weapon.traits as trait, i}
+                        {#if i > 0}<span class="rule-sep">, </span>{/if}
+                        {#if lookupRule(trait)}
+                          <button
+                            class="rule-link"
+                            onclick={(e) => openRule(e, trait)}>{trait}</button
+                          >
+                        {:else}
+                          <span>{trait}</span>
+                        {/if}
+                      {/each}
+                      {#if weapon.traits.length === 0}—{/if}
+                    </td>
                   </tr>
-                  {#if weapon.specialRules.length > 0}
-                    <tr class="rules-row">
-                      <td colspan="7">
-                        {#each weapon.specialRules as rule, i}
-                          {#if i > 0}<span class="rule-sep">, </span>{/if}
-                          {#if lookupRule(rule)}
-                            <button
-                              class="rule-link"
-                              onclick={(e) => openRule(e, rule)}>{rule}</button
-                            >
-                          {:else}
-                            <span class="rule-plain">{rule}</span>
-                          {/if}
-                        {/each}
-                      </td>
-                    </tr>
-                  {/if}
                 {/each}
               </tbody>
             </table>
@@ -422,7 +452,13 @@
           <h3 class="section-label">Special Rules</h3>
           <ul class="item-list">
             {#each unit.specialRules as rule}
-              <li>{rule}</li>
+              <li>
+                {#if lookupRule(rule)}
+                  <button class="rule-link" onclick={(e) => openRule(e, rule)}>{rule}</button>
+                {:else}
+                  {rule}
+                {/if}
+              </li>
             {/each}
           </ul>
         </section>
@@ -436,6 +472,24 @@
           </ul>
         </section>
       </div>
+
+      {#if unit.gambits && unit.gambits.length > 0}
+        <section class="section">
+          <h3 class="section-label">Gambits</h3>
+          <ul class="gambits-list">
+            {#each unit.gambits as gambit}
+              <li class="gambit-item">
+                <button class="rule-link gambit-name" onclick={(e) => openGambit(e, gambit)}
+                  >{gambit.name}</button
+                >
+                {#if gambit.summary}
+                  <span class="gambit-summary">{gambit.summary}</span>
+                {/if}
+              </li>
+            {/each}
+          </ul>
+        </section>
+      {/if}
 
       {#if unit.options.length > 0}
         <section class="section">
@@ -858,6 +912,39 @@
     font-size: 0.7rem;
   }
 
+  /* ── Gambits ─────────────────────────────── */
+  .gambits-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .gambit-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-raised);
+  }
+
+  .gambit-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .gambit-summary {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
   /* ── Options ─────────────────────────────── */
   .options-list {
     list-style: none;
@@ -962,13 +1049,6 @@
     background: rgba(0, 200, 255, 0.03);
   }
 
-  .weapons-table tr.rules-row td {
-    background: rgba(0, 0, 0, 0.15);
-    border-top: none;
-    padding: 0.3rem 0.6rem 0.45rem;
-    text-align: left;
-    font-size: 0.75rem;
-  }
 
   .rule-link {
     background: none;
@@ -989,6 +1069,16 @@
   .rule-link:hover {
     color: #fff;
     text-decoration-color: rgba(0, 200, 255, 0.7);
+  }
+
+  .type-link {
+    color: var(--color-text-muted);
+    text-decoration-color: rgba(100, 130, 150, 0.4);
+  }
+
+  .type-link:hover {
+    color: var(--color-text);
+    text-decoration-color: rgba(0, 200, 255, 0.5);
   }
 
   .rule-plain {

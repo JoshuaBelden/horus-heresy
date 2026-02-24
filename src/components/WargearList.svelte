@@ -1,6 +1,7 @@
 <script lang="ts">
   import { units } from '../data';
-  import type { RangedWeapon, MeleeWeapon, WargearDetail } from '../data/types';
+  import { lookupRule } from '../data/specialRules';
+  import type { RangedWeapon, MeleeWeapon, WargearDetail, SpecialRule } from '../data/types';
 
   type RangedEntry = RangedWeapon & { source: string };
   type MeleeEntry = MeleeWeapon & { source: string };
@@ -18,10 +19,39 @@
     (u) => (u.wargearDetails ?? []).map((wd) => ({ ...wd, source: u.name })),
   );
 
+  // ── Rule popover ──────────────────────────────────────────────────────────
+  interface Popover {
+    rule: SpecialRule;
+    x: number;
+    y: number;
+  }
+  let popover = $state<Popover | null>(null);
+
+  function openRule(e: MouseEvent, ruleName: string) {
+    const rule = lookupRule(ruleName);
+    if (!rule) return;
+    e.stopPropagation();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = Math.min(rect.left, window.innerWidth - 340);
+    const y = Math.min(rect.bottom + 6, window.innerHeight - 220);
+    popover = { rule, x, y };
+  }
+
+  function closePopover() {
+    popover = null;
+  }
+
   function fmtList(items: string[]): string {
     return items.length ? items.join(', ') : '—';
   }
 </script>
+
+<svelte:window
+  onkeydown={(e) => { if (e.key === 'Escape') closePopover(); }}
+  onclick={(e) => {
+    if (popover && !(e.target as HTMLElement).closest('.rule-popover')) closePopover();
+  }}
+/>
 
 <div class="wargear-container">
 
@@ -69,7 +99,17 @@
                 <td class="col-stat stat-cell">{w.RS}</td>
                 <td class="col-stat stat-cell">{w.AP}</td>
                 <td class="col-stat stat-cell">{w.D}</td>
-                <td class="col-rules rules-cell">{fmtList(w.specialRules)}</td>
+                <td class="col-rules rules-cell">
+                  {#if w.specialRules.length === 0}—{/if}
+                  {#each w.specialRules as rule, i}
+                    {#if i > 0}<span class="rule-sep">, </span>{/if}
+                    {#if lookupRule(rule)}
+                      <button class="rule-link" onclick={(e) => openRule(e, rule)}>{rule}</button>
+                    {:else}
+                      <span>{rule}</span>
+                    {/if}
+                  {/each}
+                </td>
                 <td class="col-traits traits-cell">{fmtList(w.traits)}</td>
               </tr>
             {/each}
@@ -123,7 +163,17 @@
                 <td class="col-stat stat-cell">{w.SM}</td>
                 <td class="col-stat stat-cell">{w.AP}</td>
                 <td class="col-stat stat-cell">{w.D}</td>
-                <td class="col-rules rules-cell">{fmtList(w.specialRules)}</td>
+                <td class="col-rules rules-cell">
+                  {#if w.specialRules.length === 0}—{/if}
+                  {#each w.specialRules as rule, i}
+                    {#if i > 0}<span class="rule-sep">, </span>{/if}
+                    {#if lookupRule(rule)}
+                      <button class="rule-link" onclick={(e) => openRule(e, rule)}>{rule}</button>
+                    {:else}
+                      <span>{rule}</span>
+                    {/if}
+                  {/each}
+                </td>
                 <td class="col-traits traits-cell">{fmtList(w.traits)}</td>
               </tr>
             {/each}
@@ -165,6 +215,27 @@
   {/if}
 
 </div>
+
+{#if popover}
+  <div
+    class="rule-popover"
+    style="left: {popover.x}px; top: {popover.y}px"
+    role="tooltip"
+  >
+    <div class="popover-header">
+      <span class="popover-name">{popover.rule.name}</span>
+      <button class="popover-close" onclick={closePopover} aria-label="Close">✕</button>
+    </div>
+    {#if popover.rule.summary}
+      <p class="popover-summary">"{popover.rule.summary}"</p>
+    {/if}
+    <div class="popover-body">
+      {#each popover.rule.description.split('\n\n') as para}
+        <p class="popover-para">{para}</p>
+      {/each}
+    </div>
+  </div>
+{/if}
 
 <style>
   .wargear-container {
@@ -349,6 +420,98 @@
     font-size: 0.8rem;
     color: var(--color-text);
     line-height: 1.5;
+  }
+
+  /* ── Rule Chips ──────────────────────────────── */
+  .rule-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.82rem;
+    color: var(--color-accent);
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+    transition: color 0.15s;
+  }
+
+  .rule-link:hover {
+    color: #fff;
+  }
+
+  .rule-sep {
+    color: var(--color-text-muted);
+  }
+
+  /* ── Rule Popover ─────────────────────────────── */
+  .rule-popover {
+    position: fixed;
+    z-index: 200;
+    width: 320px;
+    max-height: 50vh;
+    overflow-y: auto;
+    background: var(--color-bg-raised);
+    border: 1px solid var(--color-accent-dim);
+    box-shadow:
+      0 0 20px rgba(0, 200, 255, 0.12),
+      0 4px 16px rgba(0, 0, 0, 0.6);
+    padding: 0.85rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .popover-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .popover-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    letter-spacing: 0.05em;
+  }
+
+  .popover-close {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 0.1rem 0.3rem;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+
+  .popover-close:hover {
+    color: var(--color-text);
+  }
+
+  .popover-summary {
+    font-size: 0.75rem;
+    color: var(--color-gold);
+    font-style: italic;
+    line-height: 1.5;
+    border-left: 2px solid var(--color-gold);
+    padding-left: 0.5rem;
+  }
+
+  .popover-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .popover-para {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
   }
 
   /* ── Empty State ─────────────────────────────── */
