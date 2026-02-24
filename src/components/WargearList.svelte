@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { units } from '../data';
+  import { units, rangedWeapons as catalogueRanged, meleeWeapons as catalogueMelee } from '../data';
   import { lookupRule } from '../data/specialRules';
   import type { RangedWeapon, MeleeWeapon, WargearDetail, SpecialRule } from '../data/types';
 
@@ -7,16 +7,59 @@
   type MeleeEntry = MeleeWeapon & { source: string };
   type DetailEntry = WargearDetail & { source: string };
 
-  const rangedWeapons: RangedEntry[] = units.flatMap(
+  // Unit-sourced weapons (with unit name as source)
+  const unitRanged: RangedEntry[] = units.flatMap(
     (u) => (u.rangedWeapons ?? []).map((w) => ({ ...w, source: u.name })),
   );
-
-  const meleeWeapons: MeleeEntry[] = units.flatMap(
+  const unitMelee: MeleeEntry[] = units.flatMap(
     (u) => (u.meleeWeapons ?? []).map((w) => ({ ...w, source: u.name })),
   );
 
+  // Merge catalogue weapons; unit-sourced entries take precedence
+  const unitRangedNames = new Set(unitRanged.map((w) => w.name));
+  const unitMeleeNames = new Set(unitMelee.map((w) => w.name));
+
+  const rangedWeapons: RangedEntry[] = [
+    ...unitRanged,
+    ...catalogueRanged
+      .filter((w) => !unitRangedNames.has(w.name))
+      .map((w) => ({ ...w, source: '—' })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
+
+  const meleeWeapons: MeleeEntry[] = [
+    ...unitMelee,
+    ...catalogueMelee
+      .filter((w) => !unitMeleeNames.has(w.name))
+      .map((w) => ({ ...w, source: '—' })),
+  ].sort((a, b) => a.name.localeCompare(b.name));
+
   const wargearDetails: DetailEntry[] = units.flatMap(
     (u) => (u.wargearDetails ?? []).map((wd) => ({ ...wd, source: u.name })),
+  );
+
+  // ── Search ────────────────────────────────────────────────────────────────
+  let query = $state('');
+
+  const filteredRanged = $derived(
+    query.trim() === ''
+      ? rangedWeapons
+      : rangedWeapons.filter((w) =>
+          w.name.toLowerCase().includes(query.toLowerCase()) ||
+          w.source.toLowerCase().includes(query.toLowerCase()) ||
+          w.traits.some((t) => t.toLowerCase().includes(query.toLowerCase())) ||
+          w.specialRules.some((r) => r.toLowerCase().includes(query.toLowerCase())),
+        ),
+  );
+
+  const filteredMelee = $derived(
+    query.trim() === ''
+      ? meleeWeapons
+      : meleeWeapons.filter((w) =>
+          w.name.toLowerCase().includes(query.toLowerCase()) ||
+          w.source.toLowerCase().includes(query.toLowerCase()) ||
+          w.traits.some((t) => t.toLowerCase().includes(query.toLowerCase())) ||
+          w.specialRules.some((r) => r.toLowerCase().includes(query.toLowerCase())),
+        ),
   );
 
   // ── Rule popover ──────────────────────────────────────────────────────────
@@ -55,10 +98,24 @@
 
 <div class="wargear-container">
 
+  <!-- ── Search ───────────────────────────────────── -->
+  <div class="search-bar">
+    <span class="search-icon">⌕</span>
+    <input
+      class="search-input"
+      type="search"
+      placeholder="Search by name, source, trait, or rule…"
+      bind:value={query}
+    />
+    {#if query}
+      <button class="search-clear" onclick={() => (query = '')} aria-label="Clear search">✕</button>
+    {/if}
+  </div>
+
   <!-- ── Ranged Weapons ───────────────────────────── -->
   <section class="weapon-section">
     <div class="section-header">
-      <h2 class="section-title">Ranged Weapons</h2>
+      <h2 class="section-title">Ranged Weapons <span class="count">({filteredRanged.length})</span></h2>
       <div class="stat-legend">
         <span><abbr title="Range (inches)">R</abbr> Range</span>
         <span><abbr title="Firepower — number of shots">FP</abbr> Firepower</span>
@@ -68,15 +125,15 @@
       </div>
     </div>
 
-    {#if rangedWeapons.length === 0}
+    {#if filteredRanged.length === 0}
       <div class="empty-state">
         <span class="empty-icon">◈</span>
-        <p>No ranged weapon data yet.</p>
+        <p>{query ? 'No ranged weapons match your search.' : 'No ranged weapon data yet.'}</p>
       </div>
     {:else}
       <div class="table-container">
         <table class="weapon-table">
-          <thead>
+          <thead class="sticky-head">
             <tr>
               <th class="col-name">Ranged Weapon</th>
               <th class="col-source">Source</th>
@@ -90,7 +147,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each rangedWeapons as w (w.source + '::' + w.name)}
+            {#each filteredRanged as w (w.source + '::' + w.name)}
               <tr class="weapon-row">
                 <td class="col-name weapon-name">{w.name}</td>
                 <td class="col-source source-cell">{w.source}</td>
@@ -122,7 +179,7 @@
   <!-- ── Melee Weapons ────────────────────────────── -->
   <section class="weapon-section">
     <div class="section-header">
-      <h2 class="section-title">Melee Weapons</h2>
+      <h2 class="section-title">Melee Weapons <span class="count">({filteredMelee.length})</span></h2>
       <div class="stat-legend">
         <span><abbr title="Initiative Modifier">IM</abbr> Initiative</span>
         <span><abbr title="Attacks Modifier">AM</abbr> Attacks</span>
@@ -132,15 +189,15 @@
       </div>
     </div>
 
-    {#if meleeWeapons.length === 0}
+    {#if filteredMelee.length === 0}
       <div class="empty-state">
         <span class="empty-icon">◈</span>
-        <p>No melee weapon data yet.</p>
+        <p>{query ? 'No melee weapons match your search.' : 'No melee weapon data yet.'}</p>
       </div>
     {:else}
       <div class="table-container">
         <table class="weapon-table">
-          <thead>
+          <thead class="sticky-head">
             <tr>
               <th class="col-name">Melee Weapon</th>
               <th class="col-source">Source</th>
@@ -154,7 +211,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each meleeWeapons as w (w.source + '::' + w.name)}
+            {#each filteredMelee as w (w.source + '::' + w.name)}
               <tr class="weapon-row">
                 <td class="col-name weapon-name">{w.name}</td>
                 <td class="col-source source-cell">{w.source}</td>
@@ -247,6 +304,72 @@
     gap: 2.5rem;
   }
 
+  /* ── Search Bar ───────────────────────────────── */
+  .search-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--color-bg-raised);
+    border: 1px solid var(--color-border);
+  }
+
+  .search-icon {
+    padding: 0 0.75rem;
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+
+  .search-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    padding: 0.65rem 0.5rem 0.65rem 0;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    color: var(--color-text);
+    letter-spacing: 0.03em;
+  }
+
+  .search-input::placeholder {
+    color: var(--color-text-muted);
+    opacity: 0.6;
+  }
+
+  .search-input::-webkit-search-cancel-button {
+    display: none;
+  }
+
+  .search-clear {
+    background: none;
+    border: none;
+    padding: 0.65rem 0.85rem;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+
+  .search-clear:hover {
+    color: var(--color-text);
+  }
+
+  .search-bar:focus-within {
+    border-color: var(--color-accent-dim);
+  }
+
+  /* ── Count badge ─────────────────────────────── */
+  .count {
+    font-size: 0.7em;
+    color: var(--color-text-muted);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+
   /* ── Section ─────────────────────────────────── */
   .weapon-section {
     display: flex;
@@ -295,6 +418,8 @@
   .table-container {
     border: 1px solid var(--color-border);
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 65vh;
   }
 
   .weapon-table {
@@ -305,6 +430,20 @@
   .weapon-table thead tr {
     background: var(--color-bg-surface);
     border-bottom: 1px solid var(--color-border);
+  }
+
+  .sticky-head {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .sticky-head tr {
+    background: var(--color-bg-surface);
+  }
+
+  .sticky-head th {
+    box-shadow: 0 1px 0 var(--color-border);
   }
 
   .weapon-table th {

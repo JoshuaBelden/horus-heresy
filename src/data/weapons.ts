@@ -1,0 +1,4702 @@
+import type { RangedWeapon, MeleeWeapon } from './types';
+
+export const rangedWeapons: RangedWeapon[] = [
+  {
+    name: "Æther-fire blaster",
+    R: 18,
+    FP: 2,
+    RS: 6,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Psychic"
+    ]
+  },
+  {
+    name: "Æther-fire cannon",
+    R: 24,
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Blast (3\")",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Psychic",
+      "Assault"
+    ]
+  },
+  {
+    name: "Æther-fire magna-cannon",
+    R: 24,
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Blast (5\")",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Psychic"
+    ]
+  },
+  {
+    name: "Æther-fire pistol",
+    R: 10,
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Pistol",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Psychic"
+    ]
+  },
+  {
+    name: "Aiolos missile launcher",
+    R: 60,
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (FP)",
+      "Blast (3\")",
+      "Barrage (1)"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Alchem caster",
+    R: "Template",
+    FP: 1,
+    RS: 3,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Template",
+      "Pistol",
+      "Poisoned (2+)"
+    ],
+    traits: [
+      "Assault"
+    ]
+  },
+  {
+    name: "Alchem combi-flamer",
+    R: 24,
+    FP: 2,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Combi"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Alchem flamer",
+    R: "Template",
+    FP: 1,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Template",
+      "Poisoned (2+)"
+    ],
+    traits: []
+  },
+  {
+    name: "Anvillus autocannon battery",
+    R: 48,
+    FP: 6,
+    RS: 8,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Breaching (5+)",
+      "Rapid Tracking",
+      "Skyfire"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Anvillus snub autocannon",
+    R: 24,
+    FP: 3,
+    RS: 7,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Arachnus heavy lascannon battery",
+    R: 48,
+    FP: 2,
+    RS: 9,
+    AP: 2,
+    D: 4,
+    specialRules: [
+      "Heavy (RS)",
+      "Armourbane",
+      "Skyfire"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Arc rifle",
+    R: 30,
+    FP: 2,
+    RS: 5,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Suppressive (1)",
+      "Shock (Suppressed)"
+    ],
+    traits: [
+      "Arc"
+    ]
+  },
+  {
+    name: "Archeotech pistol",
+    R: 12,
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Pistol",
+      "Breaching (3+)"
+    ],
+    traits: [
+      "Assault"
+    ]
+  },
+  {
+    name: "Arcus missile launcher",
+    R: 36,
+    FP: 5,
+    RS: 8,
+    AP: 2,
+    D: 2,
+    specialRules: [],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Asphyx bolter",
+    R: 18,
+    FP: 2,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Rending (6+)"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Asphyx pistol",
+    R: 8,
+    FP: 1,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Pistol",
+      "Rending (6+)"
+    ],
+    traits: [
+      "Assault",
+      "Bolt"
+    ]
+  },
+  {
+    name: "Assault needler",
+    R: 18,
+    FP: 2,
+    RS: 2,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Poisoned (3+)",
+      "Pinning (1)"
+    ],
+    traits: [
+      "Assault",
+      "Needle"
+    ]
+  },
+  {
+    name: "Astartes shotgun",
+    R: 12,
+    FP: 2,
+    RS: 4,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Stun (0)"
+    ],
+    traits: [
+      "Assault",
+      "Auto"
+    ]
+  },
+  {
+    name: "Autocannon",
+    R: 48,
+    FP: 2,
+    RS: 7,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Breaching (6+)",
+      "Heavy (FP)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Baneblade cannon",
+    R: 82,
+    FP: 1,
+    RS: 8,
+    AP: 3,
+    D: 2,
+    specialRules: [
+      "Blast (7\")",
+      "Pinning (1)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Banestrike Bolt Cannon",
+    R: 24,
+    FP: 4,
+    RS: 6,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Banestrike bolter",
+    R: 18,
+    FP: 2,
+    RS: 4,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Banestrike combi-bolter",
+    R: 18,
+    FP: 4,
+    RS: 4,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Banestrike shotgun",
+    R: 12,
+    FP: 2,
+    RS: 4,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)",
+      "Shred (6+)",
+      "Stun (0)"
+    ],
+    traits: [
+      "Assault"
+    ]
+  },
+  {
+    name: "Battlecannon",
+    R: 48,
+    FP: 1,
+    RS: 8,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Heavy (AP)",
+      "Blast (3\")",
+      "Pinning (1)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Blast pistol",
+    R: 9,
+    FP: 2,
+    RS: 4,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Pistol",
+      "Rending (6+)",
+      "Shred (6+)"
+    ],
+    traits: [
+      "Assault",
+      "Las"
+    ]
+  },
+  {
+    name: "Bolt pistol",
+    R: 12,
+    FP: 1,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Pistol"
+    ],
+    traits: [
+      "Assault",
+      "Bolt"
+    ]
+  },
+  {
+    name: "Bolter",
+    R: 24,
+    FP: 2,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Boreas air defence missile",
+    R: 48,
+    FP: 1,
+    RS: 8,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Limited (1)",
+      "Skyfire",
+      "Rapid Tracking"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Combi-bolter",
+    R: 24,
+    FP: 4,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Combi-disintegrator",
+    R: 24,
+    FP: 2,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Combi"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Combi-flamer",
+    R: 24,
+    FP: 2,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Combi"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Combi-grav",
+    R: 24,
+    FP: 2,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Combi"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Combi-grenade",
+    R: 24,
+    FP: 2,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Combi"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Combi-melta",
+    R: 24,
+    FP: 2,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Combi"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Combi-plasma",
+    R: 24,
+    FP: 2,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Combi"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Combi-volkite",
+    R: 24,
+    FP: 2,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Combi"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Concussive resonator",
+    R: "Template",
+    FP: 2,
+    RS: 6,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Template",
+      "Overload (1)",
+      "Stun (2)"
+    ],
+    traits: [
+      "Assault",
+      "Sonic"
+    ]
+  },
+  {
+    name: "Conversion beam cannon",
+    R: ">30-45",
+    FP: 1,
+    RS: 8,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Heavy (RS)",
+      "Blast (3\")"
+    ],
+    traits: [
+      "Conversion"
+    ]
+  },
+  {
+    name: "Cyclone missile launcher",
+    R: 48,
+    FP: 2,
+    RS: 8,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (D)",
+      "Skyfire"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Cyclonic melta lance",
+    R: 12,
+    FP: 3,
+    RS: 8,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Heavy (RS)",
+      "Melta (8)"
+    ],
+    traits: [
+      "Melta"
+    ]
+  },
+  {
+    name: "Deathlock",
+    R: 18,
+    FP: 2,
+    RS: 6,
+    AP: 2,
+    D: 1,
+    specialRules: [
+      "Shred (6+)",
+      "Overload (2)"
+    ],
+    traits: [
+      "Xenos"
+    ]
+  },
+  {
+    name: "Deathstorm missile launcher",
+    R: 18,
+    FP: "D3",
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Pinning (1)"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Demolisher cannon",
+    R: 24,
+    FP: 1,
+    RS: 12,
+    AP: 3,
+    D: 3,
+    specialRules: [
+      "Blast (3\")",
+      "Breaching (5+)",
+      "Ordnance (D)",
+      "Stun (1)"
+    ],
+    traits: []
+  },
+  {
+    name: "Destroyer Missile Launcher",
+    R: 24,
+    FP: 2,
+    RS: 4,
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Poisoned (2+)",
+      "Phage (T)"
+    ],
+    traits: [
+      "Assault",
+      "Rad"
+    ]
+  },
+  {
+    name: "Disintegrator blaster",
+    R: 18,
+    FP: 1,
+    RS: 5,
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Overload (1)"
+    ],
+    traits: [
+      "Disintegrator"
+    ]
+  },
+  {
+    name: "Disintegrator cannon",
+    R: 24,
+    FP: 2,
+    RS: 9,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Overload (2)"
+    ],
+    traits: [
+      "Disintegrator"
+    ]
+  },
+  {
+    name: "Disintegrator pistol",
+    R: 12,
+    FP: 1,
+    RS: 4,
+    AP: 3,
+    D: 2,
+    specialRules: [
+      "Pistol",
+      "Overload (1)"
+    ],
+    traits: [
+      "Assault",
+      "Disintegrator"
+    ]
+  },
+  {
+    name: "Disintegrator rifle",
+    R: 24,
+    FP: 1,
+    RS: 4,
+    AP: 3,
+    D: 2,
+    specialRules: [
+      "Overload (1)"
+    ],
+    traits: [
+      "Disintegrator"
+    ]
+  },
+  {
+    name: "Doomlock",
+    R: 9,
+    FP: 2,
+    RS: 6,
+    AP: 2,
+    D: 1,
+    specialRules: [
+      "Pistol",
+      "Shred (6+)",
+      "Overload (2)"
+    ],
+    traits: [
+      "Xenos",
+      "Assault"
+    ]
+  },
+  {
+    name: "Dreadhammer siege cannon",
+    R: 24,
+    FP: 1,
+    RS: 12,
+    AP: 3,
+    D: 3,
+    specialRules: [
+      "Ordnance (D)",
+      "Blast (5\")",
+      "Breaching (5+)",
+      "Stun (1)"
+    ],
+    traits: []
+  },
+  {
+    name: "Earthshaker cannon",
+    R: 240,
+    FP: 1,
+    RS: 5,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Ordnance (RS)",
+      "Blast (5\")",
+      "Barrage (2)",
+      "Breaching (6+)",
+      "Pinning (1)"
+    ],
+    traits: []
+  },
+  {
+    name: "Executioner plasma destroyer",
+    R: 36,
+    FP: 1,
+    RS: 8,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Blast (5\")",
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Plasma"
+    ]
+  },
+  {
+    name: "Fellblade accelerator cannon",
+    R: 100,
+    FP: 1,
+    RS: 8,
+    AP: 3,
+    D: 2,
+    specialRules: [
+      "Blast (5\")",
+      "Stun (2)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Flamer",
+    R: "Template",
+    FP: 1,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Template",
+      "Panic (1)"
+    ],
+    traits: [
+      "Flame"
+    ]
+  },
+  {
+    name: "Flamestorm cannon",
+    R: "Template",
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Template",
+      "Panic (2)"
+    ],
+    traits: [
+      "Flame"
+    ]
+  },
+  {
+    name: "Forge-crafted flamer",
+    R: "Template",
+    FP: 1,
+    RS: 4,
+    AP: 5,
+    D: 2,
+    specialRules: [
+      "Template",
+      "Panic (1)"
+    ],
+    traits: [
+      "Flame"
+    ]
+  },
+  {
+    name: "Forge-crafted hand flamer",
+    R: "Template",
+    FP: 1,
+    RS: 3,
+    AP: "-",
+    D: 2,
+    specialRules: [
+      "Template",
+      "Pistol"
+    ],
+    traits: [
+      "Assault",
+      "Flame"
+    ]
+  },
+  {
+    name: "Forge-crafted heavy flamer",
+    R: "Template",
+    FP: 1,
+    RS: 5,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Template",
+      "Panic (2)"
+    ],
+    traits: [
+      "Flame"
+    ]
+  },
+  {
+    name: "Gorgon mortar battery",
+    R: 24,
+    FP: 2,
+    RS: 5,
+    AP: 5,
+    D: 2,
+    specialRules: [
+      "Ordnance (R)",
+      "Blast (5\")",
+      "Barrage (1)",
+      "Stun (1)",
+      "Limited (2)"
+    ],
+    traits: []
+  },
+  {
+    name: "Grav-flux bombard",
+    R: 18,
+    FP: 1,
+    RS: 7,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (D)",
+      "Blast (5\")",
+      "Breaching (6+)",
+      "Shock (Pinned)",
+      "Pinning (2)"
+    ],
+    traits: [
+      "Graviton"
+    ]
+  },
+  {
+    name: "Gravis autocannon",
+    R: 48,
+    FP: 3,
+    RS: 8,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Breaching (6+)",
+      "Heavy (FP)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Gravis autocannon battery",
+    R: 48,
+    FP: 5,
+    RS: 8,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Breaching (6+)",
+      "Heavy (FP)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Gravis bolt cannon",
+    R: 36,
+    FP: 6,
+    RS: 5,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Heavy (FP)"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Gravis heavy bolter battery",
+    R: 36,
+    FP: 8,
+    RS: 5,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Suppressive (2)"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Gravis melta cannon",
+    R: 24,
+    FP: 1,
+    RS: 9,
+    AP: 2,
+    D: 4,
+    specialRules: [
+      "Heavy (RS)",
+      "Melta (8)"
+    ],
+    traits: [
+      "Melta"
+    ]
+  },
+  {
+    name: "Gravis Missile Launcher",
+    R: 48,
+    FP: 1,
+    RS: 4,
+    AP: 6,
+    D: 1,
+    specialRules: [
+      "Heavy (RS)",
+      "Blast (5\")"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Gravis multi-laser array",
+    R: 36,
+    FP: 6,
+    RS: 6,
+    AP: 6,
+    D: 2,
+    specialRules: [
+      "Suppressive (1)"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Gravis plasma cannon",
+    R: 36,
+    FP: 1,
+    RS: 7,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Heavy (RS)",
+      "Blast (5\")",
+      "Breaching (5+)",
+      "Overload (1)"
+    ],
+    traits: [
+      "Plasma"
+    ]
+  },
+  {
+    name: "Graviton cannon",
+    R: 36,
+    FP: 1,
+    RS: 8,
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Heavy (D)",
+      "Blast (3\")",
+      "Breaching (6+)",
+      "Shock (Pinned)",
+      "Pinning (2)"
+    ],
+    traits: [
+      "Graviton"
+    ]
+  },
+  {
+    name: "Graviton gun",
+    R: 18,
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Blast (3\")",
+      "Breaching (6+)",
+      "Shock (Pinned)",
+      "Pinning (1)"
+    ],
+    traits: [
+      "Graviton"
+    ]
+  },
+  {
+    name: "Graviton pistol",
+    R: 12,
+    FP: 2,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Pistol",
+      "Breaching (6+)",
+      "Shock (Pinned)",
+      "Pinning (1)"
+    ],
+    traits: [
+      "Assault",
+      "Graviton"
+    ]
+  },
+  {
+    name: "Graviton pulveriser",
+    R: 18,
+    FP: 1,
+    RS: 9,
+    AP: 3,
+    D: 3,
+    specialRules: [
+      "Heavy (D)",
+      "Blast (3\")",
+      "Breaching (6+)",
+      "Shock (Pinned)",
+      "Pinning (3)"
+    ],
+    traits: [
+      "Graviton"
+    ]
+  },
+  {
+    name: "Graviton shredder",
+    R: 18,
+    FP: 2,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)",
+      "Shock (Pinned)",
+      "Pinning (1)"
+    ],
+    traits: [
+      "Assault",
+      "Graviton"
+    ]
+  },
+  {
+    name: "Graviton-charge cannon",
+    R: 24,
+    FP: 1,
+    RS: 9,
+    AP: 3,
+    D: 2,
+    specialRules: [
+      "Heavy (D)",
+      "Blast (5\")",
+      "Barrage (1)",
+      "Breaching (6+)",
+      "Shock (Pinned)",
+      "Pinning (3)"
+    ],
+    traits: [
+      "Graviton"
+    ]
+  },
+  {
+    name: "Grenade harness",
+    R: 6,
+    FP: 1,
+    RS: 5,
+    AP: 6,
+    D: 1,
+    specialRules: [
+      "Blast (3\")",
+      "Limited (1)"
+    ],
+    traits: []
+  },
+  {
+    name: "Grenade launcher",
+    R: 24,
+    FP: 1,
+    RS: 3,
+    AP: 6,
+    D: 1,
+    specialRules: [
+      "Blast (3\")"
+    ],
+    traits: []
+  },
+  {
+    name: "Hand flamer",
+    R: "Template",
+    FP: 1,
+    RS: 3,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Template",
+      "Pistol"
+    ],
+    traits: [
+      "Assault",
+      "Flame"
+    ]
+  },
+  {
+    name: "Havoc launcher",
+    R: 48,
+    FP: 1,
+    RS: 5,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Blast (3\")",
+      "Stun (1)"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Haywire grenades",
+    R: 8,
+    FP: 1,
+    RS: 4,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Shock (Stunned)"
+    ],
+    traits: [
+      "Haywire",
+      "Assault"
+    ]
+  },
+  {
+    name: "Heavy alchem flamer",
+    R: "Template",
+    FP: 1,
+    RS: 5,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Template",
+      "Poisoned (2+)"
+    ],
+    traits: [
+      "Assault"
+    ]
+  },
+  {
+    name: "Heavy bolter",
+    R: 36,
+    FP: 3,
+    RS: 5,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (FP)"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Heavy conversion beam cannon",
+    R: "0-15",
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (RS)",
+      "Blast (5\")"
+    ],
+    traits: [
+      "Conversion"
+    ]
+  },
+  {
+    name: "Heavy disintegrator",
+    R: 24,
+    FP: 1,
+    RS: 6,
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Heavy (FP)",
+      "Overload (1)"
+    ],
+    traits: [
+      "Disintegrator"
+    ]
+  },
+  {
+    name: "Heavy flamer",
+    R: "Template",
+    FP: 1,
+    RS: 5,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Template",
+      "Panic (1)"
+    ],
+    traits: [
+      "Flame"
+    ]
+  },
+  {
+    name: "Heavy lascannon",
+    R: 48,
+    FP: 1,
+    RS: 10,
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Ordnance (D)",
+      "Armourbane"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Heavy mining laser",
+    R: 9,
+    FP: 1,
+    RS: 10,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Heavy (RS)"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Heavy particle shredder",
+    R: "Template",
+    FP: 1,
+    RS: 6,
+    AP: 3,
+    D: 2,
+    specialRules: [
+      "Template",
+      "Breaching (6+)",
+      "Overload (1)"
+    ],
+    traits: [
+      "Assault",
+      "Particle"
+    ]
+  },
+  {
+    name: "Heavy plasma bombard",
+    R: 36,
+    FP: 1,
+    RS: 7,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Blast (5\")",
+      "Barrage (1)",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Plasma"
+    ]
+  },
+  {
+    name: "Heavy quad launcher",
+    R: 48,
+    FP: 4,
+    RS: 7,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Ordnance (FP)",
+      "Barrage (0)",
+      "Armourbane",
+      "Breaching (6+)"
+    ],
+    traits: []
+  },
+  {
+    name: "Heavy rocket bombard",
+    R: 48,
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Blast (7\")",
+      "Barrage (1)",
+      "Suppressive (2)"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Heavy seismic cannon",
+    R: "Template",
+    FP: 1,
+    RS: 7,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Template",
+      "Heavy (RS)",
+      "Breaching (5+)",
+      "Stun (1)"
+    ],
+    traits: [
+      "Sonic"
+    ]
+  },
+  {
+    name: "Heavy stubber",
+    R: 36,
+    FP: 3,
+    RS: 4,
+    AP: 6,
+    D: 1,
+    specialRules: [],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Hellfire plasma cannonade",
+    R: 36,
+    FP: 6,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (RS)",
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Plasma"
+    ]
+  },
+  {
+    name: "Hellstrike missile",
+    R: 48,
+    FP: 1,
+    RS: 9,
+    AP: 3,
+    D: 3,
+    specialRules: [
+      "Armourbane",
+      "Limited (1)"
+    ],
+    traits: [
+      "Guided",
+      "Missile"
+    ]
+  },
+  {
+    name: "Hunter-killer missile",
+    R: 48,
+    FP: 1,
+    RS: 9,
+    AP: 3,
+    D: 3,
+    specialRules: [
+      "Armourbane",
+      "Limited (1)"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Hyperios missile launcher",
+    R: 48,
+    FP: 3,
+    RS: 7,
+    AP: 3,
+    D: 2,
+    specialRules: [
+      "Skyfire",
+      "Rapid Tracking"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Iliastus Assault Cannon",
+    R: 24,
+    FP: 3,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (FP)",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Inferno Pistol",
+    R: 6,
+    FP: 1,
+    RS: 8,
+    AP: 2,
+    D: 1,
+    specialRules: [
+      "Pistol",
+      "Melta (3)"
+    ],
+    traits: [
+      "Assault",
+      "Melta"
+    ]
+  },
+  {
+    name: "Inversion beamer",
+    R: "<15",
+    FP: 1,
+    RS: 8,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Heavy (RS)",
+      "Blast (5\")"
+    ],
+    traits: [
+      "Conversion"
+    ]
+  },
+  {
+    name: "Kalliope rocket mortar",
+    R: 48,
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Blast (5\")",
+      "Barrage (1)",
+      "Suppressive (1)"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Kharybdis missile launcher",
+    R: 18,
+    FP: 5,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Pinning (1)"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Kheres assault cannon",
+    R: 24,
+    FP: 5,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)",
+      "Heavy (FP)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Kraken bolter",
+    R: 30,
+    FP: 2,
+    RS: 4,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Precision (4+)",
+      "Shot Selector"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Kratos battle cannon",
+    R: 36,
+    FP: 1,
+    RS: 8,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Ordnance (D)",
+      "Blast (5\")",
+      "Stun (1)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Las-lock",
+    R: 18,
+    FP: 1,
+    RS: 4,
+    AP: 6,
+    D: 1,
+    specialRules: [],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Lascannon",
+    R: 48,
+    FP: 1,
+    RS: 9,
+    AP: 2,
+    D: 1,
+    specialRules: [
+      "Heavy (D)",
+      "Armourbane"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Lascannon array",
+    R: 48,
+    FP: 2,
+    RS: 9,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Armourbane"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Lascutter",
+    R: 8,
+    FP: 1,
+    RS: 10,
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Ordnance (D)",
+      "Armourbane"
+    ],
+    traits: []
+  },
+  {
+    name: "Laser destroyer",
+    R: 36,
+    FP: 2,
+    RS: 10,
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Heavy (D)",
+      "Armourbane"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Laspistol",
+    R: 12,
+    FP: 1,
+    RS: 3,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Pistol"
+    ],
+    traits: [
+      "Assault",
+      "Las"
+    ]
+  },
+  {
+    name: "Lasrifle - Volley",
+    R: 30,
+    FP: 1,
+    RS: 3,
+    AP: 6,
+    D: 1,
+    specialRules: [
+      "Heavy (FP)"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Leviathan storm cannon",
+    R: 24,
+    FP: 4,
+    RS: 7,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Heavy (FP)",
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Magna laser destroyer",
+    R: 36,
+    FP: 2,
+    RS: 10,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Ordnance (D)",
+      "Armourbane"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Magna-melta cannon",
+    R: 36,
+    FP: 1,
+    RS: 9,
+    AP: 2,
+    D: 4,
+    specialRules: [
+      "Heavy (RS)",
+      "Melta (12)"
+    ],
+    traits: [
+      "Melta"
+    ]
+  },
+  {
+    name: "Medusa mortar",
+    R: 36,
+    FP: 1,
+    RS: 5,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Ordnance (RS)",
+      "Blast (5\")",
+      "Barrage (2)",
+      "Breaching (5+)",
+      "Pinning (2)"
+    ],
+    traits: []
+  },
+  {
+    name: "Melta blast-gun",
+    R: 36,
+    FP: 2,
+    RS: 9,
+    AP: 2,
+    D: 4,
+    specialRules: [
+      "Heavy (RS)",
+      "Melta (24)"
+    ],
+    traits: [
+      "Melta"
+    ]
+  },
+  {
+    name: "Melta cutters",
+    R: 6,
+    FP: 1,
+    RS: 8,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Heavy (RS)",
+      "Blast (3\")",
+      "Melta (3)"
+    ],
+    traits: [
+      "Melta"
+    ]
+  },
+  {
+    name: "Meltagun",
+    R: 12,
+    FP: 1,
+    RS: 8,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Melta (6)"
+    ],
+    traits: [
+      "Melta"
+    ]
+  },
+  {
+    name: "Militia carbine",
+    R: 18,
+    FP: 1,
+    RS: 3,
+    AP: "-",
+    D: 1,
+    specialRules: [],
+    traits: [
+      "Assault"
+    ]
+  },
+  {
+    name: "Militia longrifle",
+    R: 36,
+    FP: 1,
+    RS: 4,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Heavy (RS)",
+      "Breaching (6+)",
+      "Precision (5+)",
+      "Pinning (1)"
+    ],
+    traits: []
+  },
+  {
+    name: "Militia pistol",
+    R: 8,
+    FP: 1,
+    RS: 3,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Pistol"
+    ],
+    traits: [
+      "Assault"
+    ]
+  },
+  {
+    name: "Militia rifle",
+    R: 24,
+    FP: 1,
+    RS: 3,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Heavy (FP)"
+    ],
+    traits: []
+  },
+  {
+    name: "Militia shotgun",
+    R: 8,
+    FP: 1,
+    RS: 4,
+    AP: "-",
+    D: 1,
+    specialRules: [],
+    traits: [
+      "Assault"
+    ]
+  },
+  {
+    name: "Mining laser",
+    R: 6,
+    FP: 1,
+    RS: 9,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Heavy (RS)"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Missile launcher",
+    R: 48,
+    FP: 1,
+    RS: 8,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (D)",
+      "Skyfire"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Morbus bombard",
+    R: 36,
+    FP: 1,
+    RS: 9,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Ordnance (D)",
+      "Blast (5\")",
+      "Barrage (2)",
+      "Breaching (6+)",
+      "Pinning (1)"
+    ],
+    traits: []
+  },
+  {
+    name: "Mortar",
+    R: 36,
+    FP: 1,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Ordnance (R)",
+      "Blast (3\")",
+      "Barrage (1)",
+      "Stun (0)"
+    ],
+    traits: []
+  },
+  {
+    name: "Multi-laser",
+    R: 36,
+    FP: 3,
+    RS: 6,
+    AP: 6,
+    D: 1,
+    specialRules: [
+      "Suppressive (1)"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Multi-melta",
+    R: 24,
+    FP: 1,
+    RS: 8,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Heavy (RS)",
+      "Melta (8)"
+    ],
+    traits: [
+      "Melta"
+    ]
+  },
+  {
+    name: "Needle cannon",
+    R: 24,
+    FP: 3,
+    RS: 2,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Heavy (FP)",
+      "Poisoned (3+)",
+      "Pinning (1)"
+    ],
+    traits: [
+      "Assault",
+      "Needle"
+    ]
+  },
+  {
+    name: "Needle Pistol",
+    R: 12,
+    FP: 2,
+    RS: 2,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Poisoned (3+)",
+      "Pistol",
+      "Pinning (1)"
+    ],
+    traits: [
+      "Assault",
+      "Needle"
+    ]
+  },
+  {
+    name: "Needle rifle",
+    R: 48,
+    FP: 1,
+    RS: 2,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Poisoned (2+)",
+      "Precision (5+)",
+      "Breaching (6+)",
+      "Pinning (1)"
+    ],
+    traits: [
+      "Needle"
+    ]
+  },
+  {
+    name: "Nemesis bolter",
+    R: 48,
+    FP: 1,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Heavy (RS)",
+      "Breaching (5+)",
+      "Pinning (1)",
+      "Precision (4+)"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Nemesis rifle",
+    R: 48,
+    FP: 1,
+    RS: 6,
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Heavy (D)",
+      "Breaching (5+)",
+      "Pinning (1)",
+      "Precision (4+)"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Neutron beam laser",
+    R: 36,
+    FP: 2,
+    RS: 10,
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Ordnance (D)",
+      "Armourbane",
+      "Shock (Suppressed)"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Neutron blaster",
+    R: 24,
+    FP: 1,
+    RS: 9,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Armourbane",
+      "Shock (Suppressed)",
+      "Overload (1)"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Neutron laser battery",
+    R: 72,
+    FP: 3,
+    RS: 10,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Ordnance (D)",
+      "Armourbane",
+      "Shock (Suppressed)",
+      "Overload (1)"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Neutron wave cannon",
+    R: 120,
+    FP: 2,
+    RS: 12,
+    AP: 2,
+    D: 4,
+    specialRules: [
+      "Ordnance (D)",
+      "Armourbane",
+      "Shock (Stunned)"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Obsidite Rotor Cannon",
+    R: 24,
+    FP: 3,
+    RS: 3,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Heavy (FP)",
+      "Suppressive (1)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Omega plasma array",
+    R: 36,
+    FP: 6,
+    RS: 7,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Plasma"
+    ]
+  },
+  {
+    name: "Orias frag missile",
+    R: 48,
+    FP: 1,
+    RS: 6,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Barrage (3)",
+      "Blast (5\")",
+      "Limited (1)"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Overcharged plasma pistol",
+    R: 12,
+    FP: 3,
+    RS: 8,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Pistol",
+      "Breaching (4+)",
+      "Overload (1)"
+    ],
+    traits: [
+      "Assault",
+      "Plasma"
+    ]
+  },
+  {
+    name: "Overcharged volkite serpenta",
+    R: 10,
+    FP: 4,
+    RS: 6,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Pistol",
+      "Deflagrate (5)",
+      "Overload (1)"
+    ],
+    traits: [
+      "Assault",
+      "Volkite"
+    ]
+  },
+  {
+    name: "Paragon bolter",
+    R: 24,
+    FP: 2,
+    RS: 5,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Shred (6+)"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Particle Shredder",
+    R: "Template",
+    FP: 1,
+    RS: 6,
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Template",
+      "Breaching (6+)",
+      "Overload (1)"
+    ],
+    traits: [
+      "Assault",
+      "Particle"
+    ]
+  },
+  {
+    name: "Phosphex bombs",
+    R: 6,
+    FP: 1,
+    RS: 5,
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Blast (3\")",
+      "Poisoned (3+)",
+      "Panic (3)",
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Phosphex"
+    ]
+  },
+  {
+    name: "Phosphex discharger",
+    R: 18,
+    FP: 1,
+    RS: 5,
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Blast (3\")",
+      "Limited (3)",
+      "Poisoned (3+)",
+      "Panic (3)",
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Phosphex"
+    ]
+  },
+  {
+    name: "Photonic incinerator",
+    R: "Template",
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Template",
+      "Panic (2)"
+    ],
+    traits: [
+      "Assault",
+      "Flame"
+    ]
+  },
+  {
+    name: "Plasma blaster",
+    R: 18,
+    FP: 2,
+    RS: 7,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Plasma"
+    ]
+  },
+  {
+    name: "Plasma bombard",
+    R: 24,
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Blast (3\")",
+      "Barrage (1)",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Plasma"
+    ]
+  },
+  {
+    name: "Plasma cannon",
+    R: 36,
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (RS)",
+      "Blast (3\")",
+      "Breaching (5+)",
+      "Overload (2)"
+    ],
+    traits: [
+      "Plasma"
+    ]
+  },
+  {
+    name: "Plasma gun",
+    R: 24,
+    FP: 2,
+    RS: 7,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Breaching (5+)",
+      "Overload (1)"
+    ],
+    traits: [
+      "Plasma"
+    ]
+  },
+  {
+    name: "Plasma pistol",
+    R: 12,
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Pistol",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Assault",
+      "Plasma"
+    ]
+  },
+  {
+    name: "Plasma repeater",
+    R: 12,
+    FP: 3,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Breaching (5+)",
+      "Overload (1)"
+    ],
+    traits: [
+      "Plasma"
+    ]
+  },
+  {
+    name: "Predator cannon",
+    R: 48,
+    FP: 3,
+    RS: 8,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Breaching (6+)",
+      "Heavy (FP)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Proteus Assault Cannon",
+    R: 24,
+    FP: 3,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (FP)",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Punisher rotary cannon",
+    R: 36,
+    FP: 8,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Ordnance (FP)",
+      "Suppressive (2)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Pyroclast flame projector",
+    R: "Template",
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Template",
+      "Panic (1)"
+    ],
+    traits: [
+      "Flame",
+      "Melta"
+    ]
+  },
+  {
+    name: "Quad accelerator autocannon",
+    R: 48,
+    FP: 10,
+    RS: 7,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Breaching (6+)",
+      "Rapid Tracking",
+      "Skyfire"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Quad launcher",
+    R: 60,
+    FP: 1,
+    RS: 5,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Heavy (FP)",
+      "Blast (5\")",
+      "Barrage (2)"
+    ],
+    traits: []
+  },
+  {
+    name: "Rad Charges",
+    R: 8,
+    FP: 1,
+    RS: 4,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Phage (T)"
+    ],
+    traits: [
+      "Rad",
+      "Assault"
+    ]
+  },
+  {
+    name: "Rad grenades",
+    R: 8,
+    FP: 1,
+    RS: 4,
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Poisoned (2+)",
+      "Phage (T)"
+    ],
+    traits: [
+      "Rad"
+    ]
+  },
+  {
+    name: "Reaper autocannon",
+    R: 36,
+    FP: 2,
+    RS: 6,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Breaching (6+)",
+      "Heavy (FP)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Reclaimed autogun ",
+    R: 18,
+    FP: 3,
+    RS: 3,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Pistol"
+    ],
+    traits: [
+      "Auto",
+      "Assault"
+    ]
+  },
+  {
+    name: "Reclaimed autopistol",
+    R: 9,
+    FP: 3,
+    RS: 3,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Pistol"
+    ],
+    traits: [
+      "Auto",
+      "Assault"
+    ]
+  },
+  {
+    name: "Reclaimed heavy stubber",
+    R: 36,
+    FP: 5,
+    RS: 4,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Suppressive (0)"
+    ],
+    traits: [
+      "Auto",
+      "Assault"
+    ]
+  },
+  {
+    name: "Reclaimed lasgun",
+    R: 24,
+    FP: 2,
+    RS: 3,
+    AP: 6,
+    D: 1,
+    specialRules: [
+      "Pistol"
+    ],
+    traits: [
+      "Las",
+      "Assault"
+    ]
+  },
+  {
+    name: "Reclaimed laspistol",
+    R: 12,
+    FP: 2,
+    RS: 3,
+    AP: 6,
+    D: 1,
+    specialRules: [
+      "Pistol"
+    ],
+    traits: [
+      "Las",
+      "Assault"
+    ]
+  },
+  {
+    name: "Reclaimed Shotgun",
+    R: 12,
+    FP: 2,
+    RS: 4,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Stun (0)"
+    ],
+    traits: [
+      "Auto",
+      "Assault"
+    ]
+  },
+  {
+    name: "Ripper gun",
+    R: 12,
+    FP: 4,
+    RS: 5,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Shred (6+)"
+    ],
+    traits: [
+      "Assault",
+      "Auto"
+    ]
+  },
+  {
+    name: "Rotary missile launcher",
+    R: 48,
+    FP: 3,
+    RS: 8,
+    AP: 2,
+    D: 2,
+    specialRules: [],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Rotor cannon",
+    R: 24,
+    FP: 3,
+    RS: 3,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Heavy (FP)",
+      "Suppressive (1)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Sabre missile",
+    R: 36,
+    FP: 1,
+    RS: 7,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Breaching (6+)",
+      "Limited (1)"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Saturnine disruption fist w/ Particle shredder",
+    R: "Template",
+    FP: 1,
+    RS: 6,
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Template",
+      "Breaching (6+)",
+      "Overload (1)"
+    ],
+    traits: [
+      "Assault",
+      "Particle"
+    ]
+  },
+  {
+    name: "Scorpius missile launcher",
+    R: 48,
+    FP: 1,
+    RS: 8,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (FP)",
+      "Blast (3\")",
+      "Barrage (2)",
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Seismic cannon",
+    R: "Template",
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Template",
+      "Heavy (RS)",
+      "Breaching (6+)",
+      "Stun (1)"
+    ],
+    traits: [
+      "Sonic"
+    ]
+  },
+  {
+    name: "Sentry melta array",
+    R: 18,
+    FP: 2,
+    RS: 8,
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Heavy (RS)",
+      "Melta (8)"
+    ],
+    traits: [
+      "Melta"
+    ]
+  },
+  {
+    name: "Shrapnel bolter",
+    R: 18,
+    FP: 2,
+    RS: 4,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Pinning (0)"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Shrapnel cannon",
+    R: 36,
+    FP: 3,
+    RS: 5,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Pinning (0)",
+      "Shred (6+)"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Shrapnel pistol",
+    R: 10,
+    FP: 1,
+    RS: 4,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Pistol",
+      "Pinning (0)"
+    ],
+    traits: [
+      "Assault",
+      "Bolt"
+    ]
+  },
+  {
+    name: "Siege cannon",
+    R: 48,
+    FP: 1,
+    RS: 9,
+    AP: 4,
+    D: 4,
+    specialRules: [
+      "Heavy (AP)",
+      "Blast (3\")",
+      "Stun (1)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Siege mortar",
+    R: 48,
+    FP: 1,
+    RS: 4,
+    AP: 4,
+    D: 3,
+    specialRules: [
+      "Ordnance (RS)",
+      "Blast (5\")",
+      "Barrage (1)",
+      "Breaching (6+)",
+      "Pinning (1)"
+    ],
+    traits: []
+  },
+  {
+    name: "Siege-melta array",
+    R: 12,
+    FP: 1,
+    RS: 10,
+    AP: 2,
+    D: 4,
+    specialRules: [
+      "Heavy (RS)",
+      "Blast (5\")",
+      "Melta (6)"
+    ],
+    traits: [
+      "Melta"
+    ]
+  },
+  {
+    name: "Skyreaper battery",
+    R: 48,
+    FP: 6,
+    RS: 7,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Rapid Tracking",
+      "Skyfire"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Spicula rocket system",
+    R: 72,
+    FP: 1,
+    RS: 7,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Blast (7\")",
+      "Barrage (2)",
+      "Suppressive (1)"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Stub cannon",
+    R: 8,
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Stun (1)"
+    ],
+    traits: [
+      "Assault",
+      "Auto"
+    ]
+  },
+  {
+    name: "Tempest rocket",
+    R: 48,
+    FP: 1,
+    RS: 7,
+    AP: 4,
+    D: 3,
+    specialRules: [
+      "Armourbane",
+      "Limited (1)"
+    ],
+    traits: [
+      "Guided Missile"
+    ]
+  },
+  {
+    name: "Thunderblast battlecannon",
+    R: 48,
+    FP: 1,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (AP)",
+      "Blast (3\")",
+      "Pinning (0)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Turbo-laser destructor",
+    R: 96,
+    FP: 1,
+    RS: 12,
+    AP: 2,
+    D: 6,
+    specialRules: [
+      "Blast (3\")",
+      "Armourbane"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Twin accelerator autocannon",
+    R: 48,
+    FP: 6,
+    RS: 7,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Breaching (6+)",
+      "Rapid Tracking",
+      "Skyfire"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Twin avenger bolt cannon",
+    R: 36,
+    FP: 10,
+    RS: 6,
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Suppressive (2)"
+    ],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Twin bolter",
+    R: 24,
+    FP: 4,
+    RS: 4,
+    AP: 5,
+    D: 1,
+    specialRules: [],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Twin heavy bolter",
+    R: 36,
+    FP: 6,
+    RS: 5,
+    AP: 4,
+    D: 1,
+    specialRules: [],
+    traits: [
+      "Bolt"
+    ]
+  },
+  {
+    name: "Twin heavy disintegrator",
+    R: 24,
+    FP: 2,
+    RS: 7,
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Overload (2)"
+    ],
+    traits: [
+      "Disintegrator"
+    ]
+  },
+  {
+    name: "Twin heavy flamer",
+    R: "Template",
+    FP: 1,
+    RS: 5,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Template",
+      "Panic (2)"
+    ],
+    traits: [
+      "Flame"
+    ]
+  },
+  {
+    name: "Twin heavy stubber",
+    R: 36,
+    FP: 6,
+    RS: 4,
+    AP: 6,
+    D: 1,
+    specialRules: [],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Twin Iliastus Assault Cannon",
+    R: 24,
+    FP: 6,
+    RS: 6,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (FP)",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Twin lascannon",
+    R: 48,
+    FP: 2,
+    RS: 9,
+    AP: 2,
+    D: 1,
+    specialRules: [
+      "Heavy (D)",
+      "Armourbane"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Twin multi-laser",
+    R: 36,
+    FP: 6,
+    RS: 6,
+    AP: 6,
+    D: 1,
+    specialRules: [
+      "Suppressive (2)"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Twin multi-melta",
+    R: 24,
+    FP: 1,
+    RS: 9,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Heavy (RS)",
+      "Melta (8)"
+    ],
+    traits: [
+      "Melta"
+    ]
+  },
+  {
+    name: "Twin plasma gun",
+    R: 24,
+    FP: 2,
+    RS: 7,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Breaching (4+)",
+      "Overload (1)"
+    ],
+    traits: [
+      "Plasma"
+    ]
+  },
+  {
+    name: "Twin seismic cannon",
+    R: "Template",
+    FP: 2,
+    RS: 6,
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Template",
+      "Heavy (RS)",
+      "Breaching (6+)",
+      "Stun (1)"
+    ],
+    traits: [
+      "Sonic"
+    ]
+  },
+  {
+    name: "Twin volkite caliver",
+    R: 30,
+    FP: 3,
+    RS: 6,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Heavy (FP)",
+      "Deflagrate (6)"
+    ],
+    traits: [
+      "Volkite"
+    ]
+  },
+  {
+    name: "Twin volkite charger",
+    R: 15,
+    FP: 3,
+    RS: 5,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Deflagrate (5)"
+    ],
+    traits: [
+      "Volkite"
+    ]
+  },
+  {
+    name: "Twin volkite culverin",
+    R: 45,
+    FP: 6,
+    RS: 6,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Heavy (FP)",
+      "Deflagrate (6)"
+    ],
+    traits: [
+      "Volkite"
+    ]
+  },
+  {
+    name: "Vanquisher cannon",
+    R: 72,
+    FP: 1,
+    RS: 10,
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Heavy (D)",
+      "Critical Hit (6+)"
+    ],
+    traits: [
+      "Auto"
+    ]
+  },
+  {
+    name: "Vengeance launcher",
+    R: 48,
+    FP: 1,
+    RS: 7,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Blast (5\")"
+    ],
+    traits: [
+      "Missile"
+    ]
+  },
+  {
+    name: "Venom Sphere",
+    R: 8,
+    FP: 1,
+    RS: 1,
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Blast (3\")",
+      "Poisoned (4+)"
+    ],
+    traits: [
+      "Assault"
+    ]
+  },
+  {
+    name: "Volcano Cannon",
+    R: 120,
+    FP: 1,
+    RS: 13,
+    AP: 2,
+    D: 12,
+    specialRules: [
+      "Blast (3\")",
+      "Macro-auspex"
+    ],
+    traits: [
+      "Las"
+    ]
+  },
+  {
+    name: "Volkite caliver",
+    R: 30,
+    FP: 2,
+    RS: 6,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Deflagrate (6)"
+    ],
+    traits: [
+      "Volkite"
+    ]
+  },
+  {
+    name: "Volkite cardanelle",
+    R: 45,
+    FP: 12,
+    RS: 7,
+    AP: 5,
+    D: 2,
+    specialRules: [
+      "Deflagrate (7)",
+      "Suppressive (1)"
+    ],
+    traits: [
+      "Volkite"
+    ]
+  },
+  {
+    name: "Volkite carronade",
+    R: 45,
+    FP: 12,
+    RS: 8,
+    AP: 3,
+    D: 2,
+    specialRules: [
+      "Deflagrate (8)"
+    ],
+    traits: [
+      "Volkite"
+    ]
+  },
+  {
+    name: "Volkite charger",
+    R: 15,
+    FP: 2,
+    RS: 5,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Deflagrate (5)"
+    ],
+    traits: [
+      "Assault",
+      "Volkite"
+    ]
+  },
+  {
+    name: "Volkite culverin",
+    R: 45,
+    FP: 3,
+    RS: 6,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Heavy (FP)",
+      "Deflagrate (6)"
+    ],
+    traits: [
+      "Volkite"
+    ]
+  },
+  {
+    name: "Volkite falconet",
+    R: 45,
+    FP: 10,
+    RS: 7,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Deflagrate (7)",
+      "Pinning (2)"
+    ],
+    traits: [
+      "Volkite"
+    ]
+  },
+  {
+    name: "Volkite macro saker",
+    R: 45,
+    FP: 8,
+    RS: 6,
+    AP: 5,
+    D: 2,
+    specialRules: [
+      "Deflagrate (6)"
+    ],
+    traits: [
+      "Volkite"
+    ]
+  },
+  {
+    name: "Volkite saker",
+    R: 25,
+    FP: 6,
+    RS: 6,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Deflagrate (6)"
+    ],
+    traits: [
+      "Volkite"
+    ]
+  },
+  {
+    name: "Volkite serpenta",
+    R: 10,
+    FP: 2,
+    RS: 5,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Pistol",
+      "Deflagrate (5)"
+    ],
+    traits: [
+      "Assault",
+      "Volkite"
+    ]
+  },
+  {
+    name: "Voltlock arquebus",
+    R: 20,
+    FP: 2,
+    RS: 5,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Deflagrate (5)"
+    ],
+    traits: [
+      "Volkite"
+    ]
+  },
+  {
+    name: "Voltlock handgun",
+    R: 10,
+    FP: 1,
+    RS: 5,
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Pistol",
+      "Deflagrate (5)"
+    ],
+    traits: [
+      "Volkite",
+      "Assault"
+    ]
+  },
+  {
+    name: "Warpfire blaster",
+    R: 24,
+    FP: 2,
+    RS: 5,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Breaching (5+)",
+      "Shred (6+)"
+    ],
+    traits: [
+      "Plasma"
+    ]
+  },
+  {
+    name: "Warpfire pistol",
+    R: 12,
+    FP: 1,
+    RS: 5,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Pistol",
+      "Breaching (5+)",
+      "Shred (6+)"
+    ],
+    traits: [
+      "Assault",
+      "Plasma"
+    ]
+  },
+  {
+    name: "Warpfire projector",
+    R: 36,
+    FP: 1,
+    RS: 5,
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Heavy (RS)",
+      "Blast (3\")",
+      "Breaching (5+)",
+      "Shred (6+)"
+    ],
+    traits: [
+      "Plasma"
+    ]
+  },
+  {
+    name: "Webber",
+    R: "Template",
+    FP: 1,
+    RS: 4,
+    AP: "-",
+    D: 0,
+    specialRules: [
+      "Pinning (1)"
+    ],
+    traits: [
+      "Assault"
+    ]
+  }
+];
+
+export const meleeWeapons: MeleeWeapon[] = [
+  {
+    name: "Achea pattern force sword",
+    IM: "I",
+    AM: "A",
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Psychic"
+    ]
+  },
+  {
+    name: "Auctorit sceptre",
+    IM: "I",
+    AM: "A",
+    SM: "+1",
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)",
+      "Icon of Authority"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Axe of Perdition",
+    IM: "-1",
+    AM: "A",
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (5+)",
+      "Aflame (1)"
+    ],
+    traits: [
+      "Power",
+      "Flame"
+    ]
+  },
+  {
+    name: "Barb-hook lash",
+    IM: "+1",
+    AM: "A",
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Critical Hit (6+)",
+      "Phage (S)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Basic close combat weapon",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: "-",
+    D: 1,
+    specialRules: [],
+    traits: [
+      "Melee"
+    ]
+  },
+  {
+    name: "Bayonet",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: 5,
+    D: 1,
+    specialRules: [],
+    traits: [
+      "Bayonet"
+    ]
+  },
+  {
+    name: "Blade of Perdition",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)",
+      "Aflame (1)"
+    ],
+    traits: [
+      "Power",
+      "Flame"
+    ]
+  },
+  {
+    name: "Calibanite Warblade",
+    IM: "I",
+    AM: "A",
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Sword of the Order"
+    ]
+  },
+  {
+    name: "Carsoran power axe",
+    IM: "-1",
+    AM: "A",
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (5+)",
+      "Shred (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Carsoran power tabar",
+    IM: "-2",
+    AM: "A",
+    SM: "+2",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (5+)",
+      "Shred (5+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Chain bayonet",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Shred (6+)"
+    ],
+    traits: [
+      "Bayonet",
+      "Chain"
+    ]
+  },
+  {
+    name: "Chainaxe",
+    IM: "-1",
+    AM: "A",
+    SM: "+1",
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Shred (6+)"
+    ],
+    traits: [
+      "Chain"
+    ]
+  },
+  {
+    name: "Chainfist",
+    IM: "-3",
+    AM: -1,
+    SM: "+6",
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Armourbane",
+      "Shred (6+)"
+    ],
+    traits: [
+      "Chain"
+    ]
+  },
+  {
+    name: "Chainglaive",
+    IM: "I",
+    AM: "A",
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)",
+      "Shred (6+)"
+    ],
+    traits: [
+      "Chain"
+    ]
+  },
+  {
+    name: "Chainsword",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Shred (6+)"
+    ],
+    traits: [
+      "Chain"
+    ]
+  },
+  {
+    name: "Charnabal sabre",
+    IM: "+1",
+    AM: "A",
+    SM: "S",
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Breaching (6+)",
+      "Duellist’s Edge (1)"
+    ],
+    traits: [
+      "Charnabal"
+    ]
+  },
+  {
+    name: "Charnabal tabar",
+    IM: "I",
+    AM: "A",
+    SM: "+1",
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Breaching (6+)",
+      "Duellist's Edge (1)"
+    ],
+    traits: [
+      "Charnabal"
+    ]
+  },
+  {
+    name: "Close combat weapon",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: "-",
+    D: 1,
+    specialRules: [],
+    traits: []
+  },
+  {
+    name: "Corposant stave",
+    IM: "I",
+    AM: "A",
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Shock (Pinning",
+      "Stunned",
+      "Suppressed)"
+    ],
+    traits: []
+  },
+  {
+    name: "Crozius arcanum",
+    IM: "I",
+    AM: "A",
+    SM: "+2",
+    AP: 3,
+    D: 2,
+    specialRules: [
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Escaton power claw",
+    IM: "-2",
+    AM: "A",
+    SM: "+3",
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Shred (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Excoriator chainaxe",
+    IM: "-2",
+    AM: "A",
+    SM: "+2",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)",
+      "Shred (6+)"
+    ],
+    traits: [
+      "Chain"
+    ]
+  },
+  {
+    name: "Fenrisian axe",
+    IM: "I",
+    AM: "A",
+    SM: "+1",
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Reaping Blow (1)"
+    ],
+    traits: [
+      "None"
+    ]
+  },
+  {
+    name: "Force axe",
+    IM: "-1",
+    AM: "A",
+    SM: "+2",
+    AP: 2,
+    D: 1,
+    specialRules: [
+      "Force (D)"
+    ],
+    traits: [
+      "Psychic"
+    ]
+  },
+  {
+    name: "Force maul",
+    IM: "-1",
+    AM: "A",
+    SM: "+3",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Force (D)"
+    ],
+    traits: [
+      "Psychic"
+    ]
+  },
+  {
+    name: "Force staff",
+    IM: "+1",
+    AM: "A",
+    SM: "+2",
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Force (D)"
+    ],
+    traits: [
+      "Psychic"
+    ]
+  },
+  {
+    name: "Force sword",
+    IM: "I",
+    AM: "A",
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Force (D)"
+    ],
+    traits: [
+      "Psychic"
+    ]
+  },
+  {
+    name: "Force Weapon",
+    IM: "I",
+    AM: -1,
+    SM: "+2",
+    AP: 3,
+    D: 2,
+    specialRules: [
+      "Impact (IM)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Forge-crafted power axe",
+    IM: "-1",
+    AM: 1,
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Forge-crafted power fist",
+    IM: "-3",
+    AM: "A",
+    SM: "+4",
+    AP: 2,
+    D: 3,
+    specialRules: [],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Forge-crafted power lance",
+    IM: "+1",
+    AM: 1,
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Precision (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Forge-crafted power maul",
+    IM: "-1",
+    AM: 1,
+    SM: "+2",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Forge-crafted power sword",
+    IM: "I",
+    AM: 1,
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Forge-crafted thunder hammer",
+    IM: "-2",
+    AM: 1,
+    SM: "+3",
+    AP: 2,
+    D: 2,
+    specialRules: [],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Frost axe",
+    IM: "-1",
+    AM: "A",
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (4+)",
+      "Reaping Blow (1)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Frost claw",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (4+)",
+      "Reaping Blow (1)",
+      "Shred (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Frost sword",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (5+)",
+      "Reaping Blow (1)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Gravis chainfist",
+    IM: "-1",
+    AM: "A",
+    SM: "+4",
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Armourbane",
+      "Shred (6+)"
+    ],
+    traits: [
+      "Chain"
+    ]
+  },
+  {
+    name: "Gravis power fist",
+    IM: "I",
+    AM: "A",
+    SM: "+3",
+    AP: 2,
+    D: 3,
+    specialRules: [],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Graviton crusher",
+    IM: "-2",
+    AM: "A",
+    SM: "+4",
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Armourbane",
+      "Shock (Pinned)"
+    ],
+    traits: [
+      "Graviton"
+    ]
+  },
+  {
+    name: "Graviton gauntlet",
+    IM: "-3",
+    AM: "A",
+    SM: "+3",
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Shock (Pinned)"
+    ],
+    traits: [
+      "Graviton",
+      "Power"
+    ]
+  },
+  {
+    name: "Graviton mace",
+    IM: "-1",
+    AM: "A",
+    SM: "+3",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Armourbane",
+      "Shock (Pinned)"
+    ],
+    traits: [
+      "Graviton"
+    ]
+  },
+  {
+    name: "Great Frost Blade",
+    IM: "-2",
+    AM: "A",
+    SM: "+3",
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Reaping Blow (1)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Halo Blade",
+    IM: "I",
+    AM: "A",
+    SM: "+2",
+    AP: 2,
+    D: 1,
+    specialRules: [
+      "Shred (5+)"
+    ],
+    traits: [
+      "Xenos"
+    ]
+  },
+  {
+    name: "Headsman&apos;s axe",
+    IM: "-2",
+    AM: "A",
+    SM: "+2",
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Critical Hit (6+)"
+    ],
+    traits: [
+      "Chain"
+    ]
+  },
+  {
+    name: "Heavy chainaxe",
+    IM: "-2",
+    AM: "A",
+    SM: "+3",
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Shred (6+)"
+    ],
+    traits: [
+      "Chain"
+    ]
+  },
+  {
+    name: "Heavy chainsword",
+    IM: "-1",
+    AM: "A",
+    SM: "+2",
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Shred (6+)"
+    ],
+    traits: [
+      "Chain"
+    ]
+  },
+  {
+    name: "Heavy industrial weapon",
+    IM: "-2",
+    AM: "A",
+    SM: "+4",
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Armour-breaker (5+)"
+    ],
+    traits: []
+  },
+  {
+    name: "Krak grenades",
+    IM: "-3",
+    AM: 1,
+    SM: "6",
+    AP: 4,
+    D: 2,
+    specialRules: [
+      "Detonation"
+    ],
+    traits: []
+  },
+  {
+    name: "Lascutter",
+    IM: "-3",
+    AM: 1,
+    SM: "12",
+    AP: 2,
+    D: 4,
+    specialRules: [],
+    traits: []
+  },
+  {
+    name: "Legatine axe",
+    IM: "I",
+    AM: "A",
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (4+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Leviathan siege claw",
+    IM: "I",
+    AM: "A",
+    SM: "+2",
+    AP: 2,
+    D: 3,
+    specialRules: [],
+    traits: []
+  },
+  {
+    name: "Leviathan siege drill",
+    IM: "-2",
+    AM: "A",
+    SM: "+4",
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Armourbane"
+    ],
+    traits: []
+  },
+  {
+    name: "Lightning claw",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Rending (6+)",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Maul of Perdition",
+    IM: "-1",
+    AM: "A",
+    SM: "+2",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)",
+      "Aflame (1)"
+    ],
+    traits: [
+      "Power",
+      "Flame"
+    ]
+  },
+  {
+    name: "Melta bombs",
+    IM: "-3",
+    AM: 1,
+    SM: "9",
+    AP: 2,
+    D: 4,
+    specialRules: [
+      "Armourbane",
+      "Detonation"
+    ],
+    traits: []
+  },
+  {
+    name: "Meteor hammer",
+    IM: "1",
+    AM: -1,
+    SM: "+2",
+    AP: 3,
+    D: 2,
+    specialRules: [
+      "Impact (IM)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Militia lance",
+    IM: "+2",
+    AM: 0,
+    SM: "+3",
+    AP: 3,
+    D: 2,
+    specialRules: [
+      "Impact (AM)"
+    ],
+    traits: []
+  },
+  {
+    name: "Pair of industrial weapons",
+    IM: "-2",
+    AM: 1,
+    SM: "+3",
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Armour-breaker (6+)"
+    ],
+    traits: []
+  },
+  {
+    name: "Pair of lightning claws",
+    IM: "I",
+    AM: 2,
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Rending (6+)",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Pair of Raven&apos;s Talons",
+    IM: "I",
+    AM: 2,
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Impact (IM)",
+      "Rending (6+)",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Paired close combat weapons",
+    IM: "I",
+    AM: 1,
+    SM: "S",
+    AP: "-",
+    D: 1,
+    specialRules: [],
+    traits: []
+  },
+  {
+    name: "Paired falax blades",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [],
+    traits: []
+  },
+  {
+    name: "Paired Gravis chainfists",
+    IM: "-1",
+    AM: "A",
+    SM: "+4",
+    AP: 2,
+    D: 4,
+    specialRules: [
+      "Armourbane",
+      "Shred (6+)"
+    ],
+    traits: [
+      "Chain"
+    ]
+  },
+  {
+    name: "Paired Gravis power fists",
+    IM: "I",
+    AM: 1,
+    SM: "+3",
+    AP: 2,
+    D: 3,
+    specialRules: [],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Paired Leviathan siege claws",
+    IM: "I",
+    AM: 1,
+    SM: "+2",
+    AP: 2,
+    D: 3,
+    specialRules: [],
+    traits: []
+  },
+  {
+    name: "Paired Leviathan siege drills",
+    IM: "-2",
+    AM: "A",
+    SM: "+4",
+    AP: 2,
+    D: 4,
+    specialRules: [
+      "Armourbane"
+    ],
+    traits: []
+  },
+  {
+    name: "Paired Saturnine Disruption Fists",
+    IM: "-2",
+    AM: 1,
+    SM: "+2",
+    AP: 2,
+    D: 3,
+    specialRules: [],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Paragon blade",
+    IM: "I",
+    AM: "A",
+    SM: "+1",
+    AP: 2,
+    D: 1,
+    specialRules: [
+      "Critical Hit (6+)"
+    ],
+    traits: []
+  },
+  {
+    name: "Phase claw",
+    IM: "-3",
+    AM: "A",
+    SM: "+3",
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Rending (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Phoenix power spear",
+    IM: "+1",
+    AM: "A",
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Impact (D)",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Phoenix rapier",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Impact (D)",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Power axe",
+    IM: "-1",
+    AM: "A",
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Power dagger",
+    IM: "+2",
+    AM: "A",
+    SM: "-1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Power fist",
+    IM: "-3",
+    AM: "A",
+    SM: "+4",
+    AP: 2,
+    D: 2,
+    specialRules: [],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Power glaive",
+    IM: "I",
+    AM: "A",
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Impact (AP)",
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Power lance",
+    IM: "+1",
+    AM: "A",
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Precision (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Power lash",
+    IM: "+1",
+    AM: "A",
+    SM: "-1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Power maul",
+    IM: "-1",
+    AM: "A",
+    SM: "+2",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Power scythe",
+    IM: "-1",
+    AM: "A",
+    SM: "+1",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Reaping Blow (2)",
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Power sword",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Raven&apos;s Talons",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Impact (IM)",
+      "Rending (6+)",
+      "Breaching (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Reclaimed melee weapon",
+    IM: "-1",
+    AM: "A",
+    SM: "+1",
+    AP: 5,
+    D: 1,
+    specialRules: [
+      "Rending (6+)"
+    ],
+    traits: []
+  },
+  {
+    name: "Saturnine concussion hammer",
+    IM: "-3",
+    AM: "A",
+    SM: "x2",
+    AP: 2,
+    D: 3,
+    specialRules: [
+      "Critical Hit (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Saturnine disruption fist",
+    IM: "-2",
+    AM: "A",
+    SM: "+2",
+    AP: 2,
+    D: 3,
+    specialRules: [],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Saturnine disruption fist w/ Particle shredder",
+    IM: "-2",
+    AM: "A",
+    SM: "+2",
+    AP: 2,
+    D: 3,
+    specialRules: [],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Saturnine war axe",
+    IM: "I",
+    AM: "A",
+    SM: "+1",
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Reaping Blow (2)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Shock maul",
+    IM: "-1",
+    AM: "A",
+    SM: "+2",
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Aflame (1)"
+    ],
+    traits: []
+  },
+  {
+    name: "Solarite Power Gauntlet",
+    IM: "-3",
+    AM: "A",
+    SM: "+4",
+    AP: 2,
+    D: 2,
+    specialRules: [
+      "Critical Hit (6+)"
+    ],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Spear of Perdition",
+    IM: "+1",
+    AM: "A",
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Precision(6+)",
+      "Aflame (1)"
+    ],
+    traits: [
+      "Power",
+      "Flame"
+    ]
+  },
+  {
+    name: "Tainted implements",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: "-",
+    D: 1,
+    specialRules: [
+      "Rending (6+)"
+    ],
+    traits: []
+  },
+  {
+    name: "Tainted Weapon",
+    IM: "I",
+    AM: "A",
+    SM: "S",
+    AP: 3,
+    D: 1,
+    specialRules: [
+      "Breaching (6+)",
+      "Phage (S)"
+    ],
+    traits: [
+      "Psychic"
+    ]
+  },
+  {
+    name: "Terranic greatsword",
+    IM: "-1",
+    AM: "A",
+    SM: "+2",
+    AP: 3,
+    D: 2,
+    specialRules: [
+      "Breaching (5+)"
+    ],
+    traits: [
+      "Sword of the Order"
+    ]
+  },
+  {
+    name: "Thunder hammer",
+    IM: "-2",
+    AM: "A",
+    SM: "+3",
+    AP: 2,
+    D: 2,
+    specialRules: [],
+    traits: [
+      "Power"
+    ]
+  },
+  {
+    name: "Voltlock arquebus",
+    IM: "I",
+    AM: "A",
+    SM: "+1",
+    AP: 4,
+    D: 1,
+    specialRules: [
+      "Impact (I)"
+    ],
+    traits: []
+  }
+];

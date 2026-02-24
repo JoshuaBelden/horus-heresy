@@ -70,10 +70,10 @@ export interface SpecialRule {
 export interface RangedWeapon {
   name: string;
   R: number | string;
-  FP: number;
+  FP: number | string;
   RS: number;
   AP: number | string;
-  D: number;
+  D: number | string;
   specialRules: string[];
   traits: string[];
 }
