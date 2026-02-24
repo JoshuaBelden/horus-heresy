@@ -1,0 +1,340 @@
+import type { UnitProfile } from './types';
+
+export const tacticalSquad: UnitProfile = {
+  name: 'Tactical Squad',
+  role: 'Troops',
+  points: 100,
+  description:
+    'Tactical squads are the mainstay of the Space Marine Legions and the force by which the Great Crusade has reconquered much of the galaxy.',
+  composition: '1 Sergeant, 9 Legionaries. May include up to 10 additional Legionaries at +10 Points per Model.',
+  models: [
+    {
+      name: 'Legionary',
+      type: 'Infantry',
+      M: 7,
+      WS: 4,
+      BS: 4,
+      S: 4,
+      T: 4,
+      W: 1,
+      I: 4,
+      A: 1,
+      LD: 7,
+      CL: 7,
+      WP: 7,
+      IN: 7,
+      SAV: '3+',
+      INV: '-',
+    },
+    {
+      name: 'Sergeant',
+      type: 'Infantry',
+      subtype: 'Sergeant',
+      M: 7,
+      WS: 4,
+      BS: 4,
+      S: 4,
+      T: 4,
+      W: 1,
+      I: 4,
+      A: 1,
+      LD: 8,
+      CL: 7,
+      WP: 7,
+      IN: 7,
+      SAV: '3+',
+      INV: '-',
+    },
+  ],
+  wargear: ['Bolter', 'Bolt pistol', 'Frag grenades', 'Krak grenades'],
+  specialRules: ['Fury of the Legion', 'Line (2)'],
+  traits: ['Allegiance', 'Legiones Astartes'],
+  options: [
+    {
+      description:
+        'The Sergeant in this Unit may have its bolter and/or bolt pistol exchanged for one item each from the Legion Sergeant Melee Weapons list.',
+    },
+    {
+      description: 'Any model in this unit with a bolter may have one of the following selected for it:',
+      choices: [
+        { description: 'Bayonet', pointsPerModel: 1 },
+        { description: 'Chain Bayonet', pointsPerModel: 2 },
+      ],
+    },
+  ],
+};
+
+export const veteranTacticalSquad: UnitProfile = {
+  name: 'Veteran Tactical Squad',
+  role: 'Elites',
+  points: 150,
+  description:
+    'Veteran Tactical Squads are composed of the most experienced warriors of the Legion — warriors who have served through scores of campaigns and earned their place among the elite.',
+  composition: '1 Veteran Sergeant, 4 Veteran Legionaries. May include up to 10 additional Veteran Legionaries at +15 Points per Model.',
+  models: [
+    {
+      name: 'Veteran Legionary',
+      type: 'Infantry',
+      M: 7,
+      WS: 5,
+      BS: 4,
+      S: 4,
+      T: 4,
+      W: 1,
+      I: 4,
+      A: 2,
+      LD: 8,
+      CL: 8,
+      WP: 8,
+      IN: 8,
+      SAV: '3+',
+      INV: '-',
+    },
+    {
+      name: 'Veteran Sergeant',
+      type: 'Infantry',
+      subtype: 'Sergeant',
+      M: 7,
+      WS: 5,
+      BS: 5,
+      S: 4,
+      T: 4,
+      W: 2,
+      I: 5,
+      A: 3,
+      LD: 9,
+      CL: 8,
+      WP: 8,
+      IN: 8,
+      SAV: '3+',
+      INV: '5+',
+    },
+  ],
+  wargear: ['Bolter', 'Bolt pistol', 'Frag grenades', 'Krak grenades'],
+  specialRules: ['Fury of the Legion', 'Line (1)', 'Counter-attack (1)', 'Stubborn'],
+  traits: ['Allegiance', 'Legiones Astartes'],
+  options: [
+    {
+      description: 'The entire unit may exchange their bolters for one of the following:',
+      choices: [
+        { description: 'Shotguns', pointsPerModel: 0 },
+        { description: 'Volkite Chargers', pointsPerModel: 5 },
+      ],
+    },
+    {
+      description: 'Up to two Veteran Legionaries may take one of the following heavy weapons:',
+      choices: [
+        { description: 'Heavy bolter', points: 15 },
+        { description: 'Plasma gun', points: 15 },
+        { description: 'Melta gun', points: 15 },
+      ],
+    },
+  ],
+};
+
+export const contemptorDreadnought: UnitProfile = {
+  name: 'Contemptor Dreadnought',
+  role: 'Elites',
+  points: 175,
+  description:
+    'The Contemptor Pattern Dreadnought is an ancient and venerated war machine, its design predating many of the more common patterns in use by the Legiones Astartes at the time of the Horus Heresy.',
+  composition: '1 Contemptor Dreadnought.',
+  models: [
+    {
+      name: 'Contemptor Dreadnought',
+      type: 'Walker',
+      M: 7,
+      WS: 5,
+      BS: 5,
+      S: 7,
+      T: 7,
+      W: 4,
+      I: 5,
+      A: 3,
+      LD: 10,
+      CL: 9,
+      WP: 9,
+      IN: 9,
+      SAV: '3+',
+      INV: '5+',
+    },
+  ],
+  wargear: ['Contemptor dreadnought chainfist', 'Combi-bolter (built-in)', 'Dreadnought close combat weapon'],
+  specialRules: ['Atomantic Shielding', 'Bulky (3)', 'Crushing Blow', 'Fleet', 'Rampage (1)'],
+  traits: ['Legiones Astartes'],
+  options: [
+    {
+      description: 'May replace one close combat weapon arm with one of the following:',
+      choices: [
+        { description: 'Kheres pattern assault cannon', points: 20 },
+        { description: 'Multi-melta', points: 15 },
+        { description: 'Plasma cannon', points: 20 },
+      ],
+    },
+    {
+      description: 'May take a Dreadnought drop pod as a dedicated transport.',
+    },
+  ],
+};
+
+export const sicaranBattleTank: UnitProfile = {
+  name: 'Sicaran Battle Tank',
+  role: 'Armour',
+  points: 135,
+  description:
+    'The Sicaran was a relatively recent development at the onset of the Horus Heresy, its hull optimised for high-speed flanking operations and the rapid destruction of enemy vehicles and infantry alike.',
+  composition: '1 Sicaran Battle Tank.',
+  models: [
+    {
+      name: 'Sicaran Battle Tank',
+      type: 'Vehicle',
+      M: 10,
+      WS: 4,
+      BS: 4,
+      S: 7,
+      T: 7,
+      W: 3,
+      I: 4,
+      A: 0,
+      LD: 9,
+      CL: 9,
+      WP: 9,
+      IN: 9,
+      SAV: '2+',
+      INV: '-',
+    },
+  ],
+  wargear: ['Twin-linked accelerator autocannon', 'Two lascannon sponsons', 'Hull-mounted heavy bolter'],
+  specialRules: ['Exposed Crew (1)', 'Power of the Machine Spirit', 'Reinforced Hull'],
+  traits: ['Legiones Astartes'],
+  options: [
+    {
+      description: 'May replace the hull-mounted heavy bolter with one of the following:',
+      choices: [
+        { description: 'Hull-mounted heavy flamer', points: 0 },
+        { description: 'Hull-mounted multi-melta', points: 10 },
+      ],
+    },
+    {
+      description: 'May take one of the following upgrades:',
+      choices: [
+        { description: 'Dozer blade', points: 5 },
+        { description: 'Hunter-killer missile', points: 5 },
+        { description: 'Searchlight', points: 1 },
+      ],
+    },
+  ],
+};
+
+export const lionElJohnson: UnitProfile = {
+  name: "Lion El'Johnson",
+  role: 'Warlord',
+  points: 460,
+  description:
+    "The Lion, Primarch of the Dark Angels Legion, is one of the mightiest warriors of the Imperium — a paragon of martial perfection whose counsel and blade have turned the tide of countless campaigns across the Great Crusade.",
+  composition: "1x Lion El'Johnson.",
+  models: [
+    {
+      name: "Lion El'Johnson",
+      type: 'Paragon',
+      subtype: 'Unique',
+      M: 8,
+      WS: 8,
+      BS: 6,
+      S: 7,
+      T: 6,
+      W: 6,
+      I: 7,
+      A: 7,
+      LD: 12,
+      CL: 10,
+      WP: 10,
+      IN: 10,
+      SAV: '2+',
+      INV: '4+',
+    },
+  ],
+  wargear: ['Frag grenades', 'Stasis grenades', 'The Fusil Actinaeus', 'The Lion Sword'],
+  wargearDetails: [
+    {
+      name: 'Frag grenades',
+      summary: 'Frag grenades can be used to make attacks during the Volley Step.',
+      description:
+        'When making Volley Attacks during Step 4 of the Charge Procedure with a Unit that includes at least one Model with frag grenades, the Controlling Player may choose to make a single attack with a frag grenade instead of making a normal Shooting Attack.',
+    },
+    {
+      name: 'Stasis grenades',
+      summary: 'Stasis grenades reduce the Combat Initiative of enemies.',
+      description:
+        'Once per Battle, the first time a Model with stasis grenades and any Unit it has joined is successfully Charged, the Combat Initiative of all Models in the Charging Unit is modified by -2 for the duration of the current Assault Phase. This modifier does not affect Models in the Charging Unit that are engaged in a Challenge.',
+    },
+  ],
+  rangedWeapons: [
+    {
+      name: 'Frag grenades',
+      R: 6,
+      FP: 1,
+      RS: 3,
+      AP: 6,
+      D: 1,
+      specialRules: ['Blast (3")'],
+      traits: ['Assault'],
+    },
+    {
+      name: 'The Fusil Actinaeus',
+      R: 18,
+      FP: 2,
+      RS: 7,
+      AP: 3,
+      D: 2,
+      specialRules: ['Breaching (4+)'],
+      traits: ['Assault', 'Plasma'],
+    },
+  ],
+  meleeWeapons: [
+    {
+      name: 'The Lion Sword',
+      IM: 'I',
+      AM: 'A',
+      SM: '+2',
+      AP: 2,
+      D: 3,
+      specialRules: [],
+      traits: ['Power', 'Sword of the Order'],
+    },
+    {
+      name: 'Krak grenades',
+      IM: '-3',
+      AM: '1',
+      SM: '6',
+      AP: 4,
+      D: 2,
+      specialRules: ['Detonation'],
+      traits: [],
+    },
+  ],
+  gambits: [
+    {
+      name: "The Lion's Choler",
+      summary: 'The Lion gains a bonus to Focus Rolls when he is wounded.',
+      description:
+        "While a Model with this Special Rule is engaged in a Challenge, if it has 2 or fewer Wounds remaining, its Controlling Player can select the following Gambit: The Lion's Choler: If this Gambit is selected, the Model for which this Gambit has been selected's Controlling Player add a +2 Modifier to the Focus Roll, and does not suffer a -1 modifier for each point of difference between this Model's Base Wounds Characteristic and its current Wounds Characteristic.",
+    },
+  ],
+  specialRules: [
+    'Blast (3")',
+    'Detonation',
+    'Sire of the Dark Angels',
+    'Bulky (4)',
+    'Eternal Warrior (2)',
+    'The Angels of Death',
+    'Unique Sub-Type',
+    'Paragon Type',
+    'Breaching (4+)',
+  ],
+  traits: ['Master of the Legion', 'Dark Angels', 'Loyalist'],
+  categories: ['Warlord', 'Warlord or Lord of War', 'Dark Angels', 'Unique Model Sub-Type', 'Paragon Model Type'],
+  options: [],
+};
+
+export const units: UnitProfile[] = [tacticalSquad, veteranTacticalSquad, contemptorDreadnought, sicaranBattleTank, lionElJohnson];

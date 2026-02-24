@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg:          #080b10;
+  --color-bg-surface:  #0d1117;
+  --color-bg-raised:   #111827;
+  --color-border:      #1e3a4a;
+  --color-border-glow: #00c8ff;
+  --color-accent:      #00c8ff;
+  --color-accent-dim:  #005f7a;
+  --color-gold:        #c9933a;
+  --color-gold-dim:    #6b4a15;
+  --color-text:        #c8d8e8;
+  --color-text-muted:  #5a7080;
+  --color-danger:      #b03030;
+
+  color-scheme: dark;
+  font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color: var(--color-text);
+  background-color: var(--color-bg);
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  min-height: 100vh;
+  width: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-accent-dim); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
