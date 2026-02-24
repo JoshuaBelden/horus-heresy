@@ -3,8 +3,9 @@
   import CombatTest from './components/CombatTest.svelte';
   import WargearList from './components/WargearList.svelte';
   import ArmyManager from './components/ArmyManager.svelte';
+  import SpecialRulesList from './components/SpecialRulesList.svelte';
 
-  let section = $state<'roster' | 'wargear' | 'combat' | 'army'>('army');
+  let section = $state<'roster' | 'wargear' | 'combat' | 'army' | 'rules'>('army');
 </script>
 
 <div class="layout">
@@ -44,6 +45,11 @@
       class:active={section === 'combat'}
       onclick={() => (section = 'combat')}
     >Combat Simulator</button>
+    <button
+      class="nav-btn"
+      class:active={section === 'rules'}
+      onclick={() => (section = 'rules')}
+    >Special Rules</button>
   </nav>
 
   <main class="main-content">
@@ -53,6 +59,8 @@
       <UnitList />
     {:else if section === 'wargear'}
       <WargearList />
+    {:else if section === 'rules'}
+      <SpecialRulesList />
     {:else}
       <CombatTest />
     {/if}
