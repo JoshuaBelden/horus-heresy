@@ -338,7 +338,7 @@ export const lionElJohnson: UnitProfile = {
       INV: '4+',
     },
   ],
-  wargear: ['Frag grenades', 'Stasis grenades', 'The Fusil Actinaeus', 'The Lion Sword'],
+  wargear: ['Frag grenades', 'Stasis grenades', 'The Fusil Actinaeus', 'The Lion Sword or The Wolf Blade'],
   wargearDetails: [
     {
       name: 'Frag grenades',
@@ -387,6 +387,16 @@ export const lionElJohnson: UnitProfile = {
       traits: ['Power', 'Sword of the Order'],
     },
     {
+      name: 'The Wolf Blade',
+      IM: 'I',
+      AM: 'A+1',
+      SM: 'User',
+      AP: 2,
+      D: 2,
+      specialRules: ['Rending (4+)'],
+      traits: ['Power'],
+    },
+    {
       name: 'Krak grenades',
       IM: '-3',
       AM: '1',
@@ -418,7 +428,14 @@ export const lionElJohnson: UnitProfile = {
   ],
   traits: ['Master of the Legion', 'Dark Angels', 'Loyalist'],
   categories: ['Warlord', 'Warlord or Lord of War', 'Dark Angels', 'Unique Model Sub-Type', 'Paragon Model Type'],
-  options: [],
+  options: [
+    {
+      description: "May replace The Lion Sword with:",
+      choices: [
+        { description: 'The Wolf Blade', points: 0 },
+      ],
+    },
+  ],
 };
 
 export const units: UnitProfile[] = [tacticalSquad, veteranTacticalSquad, contemptorDreadnought, sicaranBattleTank, lionElJohnson];
