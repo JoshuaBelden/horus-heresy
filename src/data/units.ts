@@ -1,7 +1,9 @@
 import type { UnitProfile } from './types';
+import { legionesAstartesUnits } from './legiones-astartes';
 
 export const tacticalSquad: UnitProfile = {
   name: 'Tactical Squad',
+  catalog: 'Legiones Astartes',
   role: 'Troops',
   points: 100,
   description:
@@ -98,6 +100,7 @@ export const tacticalSquad: UnitProfile = {
 
 export const veteranTacticalSquad: UnitProfile = {
   name: 'Veteran Tactical Squad',
+  catalog: 'Legiones Astartes',
   role: 'Elites',
   points: 150,
   description:
@@ -218,6 +221,7 @@ export const veteranTacticalSquad: UnitProfile = {
 
 export const contemptorDreadnought: UnitProfile = {
   name: 'Contemptor Dreadnought',
+  catalog: 'Legiones Astartes',
   role: 'Elites',
   points: 175,
   description:
@@ -263,6 +267,7 @@ export const contemptorDreadnought: UnitProfile = {
 
 export const sicaranBattleTank: UnitProfile = {
   name: 'Sicaran Battle Tank',
+  catalog: 'Legiones Astartes',
   role: 'Armour',
   points: 135,
   description:
@@ -312,6 +317,7 @@ export const sicaranBattleTank: UnitProfile = {
 
 export const lionElJohnson: UnitProfile = {
   name: "Lion El'Johnson",
+  catalog: 'Dark Angels',
   role: 'Warlord',
   points: 460,
   description:
@@ -438,4 +444,11 @@ export const lionElJohnson: UnitProfile = {
   ],
 };
 
-export const units: UnitProfile[] = [tacticalSquad, veteranTacticalSquad, contemptorDreadnought, sicaranBattleTank, lionElJohnson];
+export const units: UnitProfile[] = [
+  tacticalSquad,
+  veteranTacticalSquad,
+  contemptorDreadnought,
+  sicaranBattleTank,
+  lionElJohnson,
+  ...legionesAstartesUnits,
+];

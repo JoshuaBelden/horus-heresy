@@ -1,11 +1,13 @@
 <script lang="ts">
-  import UnitList from './components/UnitList.svelte';
-  import CombatTest from './components/CombatTest.svelte';
-  import WargearList from './components/WargearList.svelte';
   import ArmyManager from './components/ArmyManager.svelte';
+  import CombatTest from './components/CombatTest.svelte';
   import SpecialRulesList from './components/SpecialRulesList.svelte';
+  import UnitList from './components/UnitList.svelte';
+  import WargearList from './components/WargearList.svelte';
 
-  let section = $state<'roster' | 'wargear' | 'combat' | 'army' | 'rules'>('army');
+  let section = $state<'roster' | 'wargear' | 'combat' | 'army' | 'rules'>(
+    'army',
+  );
 </script>
 
 <div class="layout">
@@ -28,28 +30,28 @@
     <button
       class="nav-btn"
       class:active={section === 'army'}
-      onclick={() => (section = 'army')}
-    >Army Builder</button>
+      onclick={() => (section = 'army')}>Army Builder</button
+    >
     <button
       class="nav-btn"
       class:active={section === 'roster'}
-      onclick={() => (section = 'roster')}
-    >Unit Roster</button>
+      onclick={() => (section = 'roster')}>Unit Roster</button
+    >
     <button
       class="nav-btn"
       class:active={section === 'wargear'}
-      onclick={() => (section = 'wargear')}
-    >Wargear</button>
+      onclick={() => (section = 'wargear')}>Wargear</button
+    >
     <button
       class="nav-btn"
       class:active={section === 'combat'}
-      onclick={() => (section = 'combat')}
-    >Combat Simulator</button>
+      onclick={() => (section = 'combat')}>Combat Simulator</button
+    >
     <button
       class="nav-btn"
       class:active={section === 'rules'}
-      onclick={() => (section = 'rules')}
-    >Special Rules</button>
+      onclick={() => (section = 'rules')}>Special Rules</button
+    >
   </nav>
 
   <main class="main-content">
@@ -67,7 +69,9 @@
   </main>
 
   <footer class="site-footer">
-    <span class="footer-text">The Emperor Protects &mdash; Build your forces wisely.</span>
+    <span class="footer-text"
+      >The Emperor Protects &mdash; Build your forces wisely.</span
+    >
   </footer>
 </div>
 
@@ -82,7 +86,11 @@
   /* ── Header ─────────────────────────────────── */
   .site-header {
     width: 100%;
-    background: linear-gradient(180deg, #050709 0%, var(--color-bg-surface) 100%);
+    background: linear-gradient(
+      180deg,
+      #050709 0%,
+      var(--color-bg-surface) 100%
+    );
     border-bottom: 1px solid var(--color-border);
     padding: 2.5rem 1rem 2rem;
     text-align: center;
@@ -186,6 +194,7 @@
   /* ── Nav ─────────────────────────────────────── */
   .section-nav {
     display: flex;
+    justify-content: center;
     border-bottom: 1px solid var(--color-border);
     background: var(--color-bg-surface);
     padding: 0 1.5rem;
@@ -203,7 +212,9 @@
     text-transform: uppercase;
     padding: 0.85rem 1.25rem;
     cursor: pointer;
-    transition: color 0.15s, border-color 0.15s;
+    transition:
+      color 0.15s,
+      border-color 0.15s;
     margin-bottom: -1px;
   }
 

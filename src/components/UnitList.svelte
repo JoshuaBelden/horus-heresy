@@ -11,7 +11,12 @@
       const q = searchQuery.toLowerCase().trim();
       if (!q) return true;
       const types = [...new Set(u.models.map((m) => m.type))].join(' ').toLowerCase();
-      return u.name.toLowerCase().includes(q) || u.role.toLowerCase().includes(q) || types.includes(q);
+      return (
+        u.name.toLowerCase().includes(q) ||
+        u.role.toLowerCase().includes(q) ||
+        u.catalog.toLowerCase().includes(q) ||
+        types.includes(q)
+      );
     }),
   );
 
@@ -29,8 +34,19 @@
       'Fast Attack': '#ffdd00',
       'Heavy Assault': '#ff6633',
       'Lord of War': '#ff4444',
+      Transport: '#4488bb',
+      'Heavy Transport': '#3366aa',
+      'War-Engine': '#bb4444',
     };
     return map[role] ?? '#5a7080';
+  }
+
+  function getCatalogColor(catalog: string): string {
+    const map: Record<string, string> = {
+      'Legiones Astartes': '#c9933a',
+      'Dark Angels': '#2a6b3a',
+    };
+    return map[catalog] ?? '#5a7080';
   }
 
   function getModelTypes(unit: UnitProfile): string {
@@ -67,6 +83,7 @@
         <thead>
           <tr>
             <th class="col-name">Unit Name</th>
+            <th class="col-catalog">Catalog</th>
             <th class="col-role">Role</th>
             <th class="col-pts">Pts</th>
             <th class="col-type">Type</th>
@@ -79,6 +96,13 @@
                 <button class="unit-name-btn" onclick={() => (selectedUnit = unit)}>
                   {unit.name}
                 </button>
+              </td>
+              <td class="col-catalog">
+                <span
+                  class="catalog-badge"
+                  style="color: {getCatalogColor(unit.catalog)}; border-color: {getCatalogColor(unit.catalog)}44"
+                  >{unit.catalog}</span
+                >
               </td>
               <td class="col-role">
                 <span
@@ -243,15 +267,19 @@
 
   /* ── Columns ─────────────────────────────── */
   .col-name {
-    width: 40%;
+    width: 30%;
+  }
+
+  .col-catalog {
+    width: 18%;
   }
 
   .col-role {
-    width: 20%;
+    width: 18%;
   }
 
   .col-pts {
-    width: 10%;
+    width: 9%;
     text-align: right;
     font-family: 'Orbitron', monospace;
     font-size: 0.8rem;
@@ -260,7 +288,7 @@
   }
 
   .col-type {
-    width: 30%;
+    width: 25%;
     font-size: 0.8rem;
     color: var(--color-text-muted);
     letter-spacing: 0.03em;
@@ -284,6 +312,18 @@
   .unit-name-btn:hover {
     color: #fff;
     text-shadow: 0 0 12px rgba(0, 200, 255, 0.6);
+  }
+
+  /* ── Catalog Badge ───────────────────────── */
+  .catalog-badge {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid;
+    padding: 0.2em 0.55em;
+    white-space: nowrap;
   }
 
   /* ── Role Badge ──────────────────────────── */

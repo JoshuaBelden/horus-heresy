@@ -1,3 +1,5 @@
+export type UnitCatalog = 'Legiones Astartes' | 'Dark Angels';
+
 export type BattlefieldRole =
   | 'Warlord'
   | 'High Command'
@@ -103,6 +105,7 @@ export interface Gambit {
 
 export interface UnitProfile {
   name: string;
+  catalog: UnitCatalog;
   role: BattlefieldRole;
   points: number;
   description: string;
