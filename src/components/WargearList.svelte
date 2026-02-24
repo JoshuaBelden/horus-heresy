@@ -32,8 +32,8 @@
       <div class="stat-legend">
         <span><abbr title="Range (inches)">R</abbr> Range</span>
         <span><abbr title="Firepower — number of shots">FP</abbr> Firepower</span>
-        <span><abbr title="Ranged Strength">RS</abbr> Str</span>
-        <span><abbr title="Armour Penetration">AP</abbr> AP</span>
+        <span><abbr title="Ranged Strength">RS</abbr> Ranged Strength</span>
+        <span><abbr title="Armour Penetration">AP</abbr> Armour Penetration</span>
         <span><abbr title="Damage — wounds/hull points lost per hit">D</abbr> Damage</span>
       </div>
     </div>
@@ -86,7 +86,7 @@
       <div class="stat-legend">
         <span><abbr title="Initiative Modifier">IM</abbr> Initiative</span>
         <span><abbr title="Attacks Modifier">AM</abbr> Attacks</span>
-        <span><abbr title="Strength Modifier">SM</abbr> Str</span>
+        <span><abbr title="Strength Modifier">SM</abbr> Strength</span>
         <span><abbr title="Armour Penetration">AP</abbr> AP</span>
         <span><abbr title="Damage">D</abbr> Damage</span>
       </div>

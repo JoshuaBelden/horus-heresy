@@ -63,6 +63,7 @@ export interface UnitOption {
 
 export interface SpecialRule {
   name: string;
+  summary?: string;
   description: string;
 }
 
@@ -71,7 +72,7 @@ export interface RangedWeapon {
   R: number | string;
   FP: number;
   RS: number;
-  AP: number;
+  AP: number | string;
   D: number;
   specialRules: string[];
   traits: string[];
@@ -82,7 +83,7 @@ export interface MeleeWeapon {
   IM: string;  // e.g. "I", "-3", "I-1"
   AM: number | string;  // attacks modifier, e.g. "A" or a fixed number
   SM: number | string;  // strength modifier, e.g. "+2" or a fixed number
-  AP: number;
+  AP: number | string;
   D: number;
   specialRules: string[];
   traits: string[];

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { ModelProfile, UnitProfile } from '../data/types';
   import { getHitTarget, hitProbability, woundProbability } from '../combat';
+  import { lookupRule } from '../data/specialRules';
+  import type { ModelProfile, SpecialRule, UnitProfile } from '../data/types';
 
   interface Props {
     unit: UnitProfile;
@@ -9,11 +10,28 @@
 
   let { unit, onclose }: Props = $props();
 
-  const statKeys = ['M', 'WS', 'BS', 'S', 'T', 'W', 'I', 'A', 'LD', 'CL', 'WP', 'IN', 'SAV', 'INV'] as const;
+  const statKeys = [
+    'M',
+    'WS',
+    'BS',
+    'S',
+    'T',
+    'W',
+    'I',
+    'A',
+    'LD',
+    'CL',
+    'WP',
+    'IN',
+    'SAV',
+    'INV',
+  ] as const;
   type StatKey = (typeof statKeys)[number];
 
   function getStat(model: ModelProfile, stat: StatKey): string | number {
-    return (model as unknown as Record<string, unknown>)[stat] as string | number;
+    return (model as unknown as Record<string, unknown>)[stat] as
+      | string
+      | number;
   }
 
   function pct(n: number): string {
@@ -22,8 +40,8 @@
 
   function targetLabel(bs: number, mode: 'standard' | 'snapshot'): string {
     const t = getHitTarget(bs, mode);
-    if (t.kind === 'auto')      return 'Auto';
-    if (t.kind === 'fail')      return 'Fail';
+    if (t.kind === 'auto') return 'Auto';
+    if (t.kind === 'fail') return 'Fail';
     if (t.kind === 'threshold') return `${t.min}+`;
     return `C${t.criticalMin}+`;
   }
@@ -56,22 +74,68 @@
   function handleBackdrop(e: MouseEvent) {
     if (e.target === e.currentTarget) onclose();
   }
+
+  // ── Rule popover ──────────────────────────────────────────────────────────
+  interface Popover {
+    rule: SpecialRule;
+    x: number;
+    y: number;
+  }
+  let popover = $state<Popover | null>(null);
+
+  function openRule(e: MouseEvent, ruleName: string) {
+    const rule = lookupRule(ruleName);
+    if (!rule) return;
+    e.stopPropagation();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = Math.min(rect.left, window.innerWidth - 340);
+    const y = Math.min(rect.bottom + 6, window.innerHeight - 220);
+    popover = { rule, x, y };
+  }
+
+  function closePopover() {
+    popover = null;
+  }
 </script>
 
-<svelte:window onkeydown={(e) => e.key === 'Escape' && onclose()} />
+<svelte:window
+  onkeydown={(e) => {
+    if (e.key === 'Escape') {
+      if (popover) {
+        closePopover();
+      } else {
+        onclose();
+      }
+    }
+  }}
+  onclick={(e) => {
+    if (popover && !(e.target as HTMLElement).closest('.rule-popover')) {
+      closePopover();
+    }
+  }}
+/>
 
 <div class="backdrop" onclick={handleBackdrop} role="presentation">
-  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div
+    class="panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+  >
     <div class="panel-header">
       <div class="title-group">
-        <span class="role-badge" style="color: {getRoleColor(unit.role)}; border-color: {getRoleColor(unit.role)}44"
-          >{unit.role}</span
+        <span
+          class="role-badge"
+          style="color: {getRoleColor(unit.role)}; border-color: {getRoleColor(
+            unit.role,
+          )}44">{unit.role}</span
         >
         <h2 id="modal-title" class="unit-name">{unit.name}</h2>
       </div>
       <div class="header-actions">
         <span class="pts-tag">{unit.points} pts</span>
-        <button class="close-btn" onclick={onclose} aria-label="Close">✕</button>
+        <button class="close-btn" onclick={onclose} aria-label="Close">✕</button
+        >
       </div>
     </div>
 
@@ -82,7 +146,7 @@
         <h3 class="section-label">Composition</h3>
         <p class="composition-text">{unit.composition}</p>
       </section>
-
+      
       <section class="section">
         <h3 class="section-label">Unit Profiles</h3>
         <div class="table-scroll">
@@ -92,8 +156,13 @@
                 <th class="col-name">Name</th>
                 <th class="col-type">Type</th>
                 {#each statKeys as stat}
-                  <th class:col-morale={stat === 'LD' || stat === 'CL' || stat === 'WP' || stat === 'IN'}
-                      class:col-morale-start={stat === 'LD'}>{stat}</th>
+                  <th
+                    class:col-morale={stat === 'LD' ||
+                      stat === 'CL' ||
+                      stat === 'WP' ||
+                      stat === 'IN'}
+                    class:col-morale-start={stat === 'LD'}>{stat}</th
+                  >
                 {/each}
               </tr>
             </thead>
@@ -101,12 +170,20 @@
               {#each unit.models as model}
                 <tr>
                   <td class="col-name"
-                    >{model.name}{model.subtype ? ` (${model.subtype})` : ''}</td
+                    >{model.name}{model.subtype
+                      ? ` (${model.subtype})`
+                      : ''}</td
                   >
                   <td class="col-type">{model.type}</td>
                   {#each statKeys as stat}
-                    <td class:col-morale={stat === 'LD' || stat === 'CL' || stat === 'WP' || stat === 'IN'}
-                        class:col-morale-start={stat === 'LD'}>{getStat(model, stat)}</td>
+                    <td
+                      class:col-morale={stat === 'LD' ||
+                        stat === 'CL' ||
+                        stat === 'WP' ||
+                        stat === 'IN'}
+                      class:col-morale-start={stat === 'LD'}
+                      >{getStat(model, stat)}</td
+                    >
                   {/each}
                 </tr>
               {/each}
@@ -114,6 +191,119 @@
           </table>
         </div>
       </section>
+
+      {#if unit.rangedWeapons && unit.rangedWeapons.length > 0}
+        <section class="section">
+          <h3 class="section-label">Ranged Weapons</h3>
+          <div class="table-scroll">
+            <table class="weapons-table">
+              <thead>
+                <tr>
+                  <th class="col-wname">Ranged Weapon</th>
+                  <th>R</th>
+                  <th>FP</th>
+                  <th>RS</th>
+                  <th>AP</th>
+                  <th>D</th>
+                  <th class="col-traits">Traits</th>
+                </tr>
+              </thead>
+              <tbody>
+                {#each unit.rangedWeapons as weapon}
+                  <tr class="weapon-row">
+                    <td class="col-wname">{weapon.name}</td>
+                    <td>{weapon.R}</td>
+                    <td>{weapon.FP}</td>
+                    <td>{weapon.RS}</td>
+                    <td>{weapon.AP}</td>
+                    <td>{weapon.D}</td>
+                    <td class="col-traits">{weapon.traits.join(', ')}</td>
+                  </tr>
+                  {#if weapon.specialRules.length > 0}
+                    <tr class="rules-row">
+                      <td colspan="7">
+                        {#each weapon.specialRules as rule, i}
+                          {#if i > 0}<span class="rule-sep">, </span>{/if}
+                          {#if lookupRule(rule)}
+                            <button
+                              class="rule-link"
+                              onclick={(e) => openRule(e, rule)}>{rule}</button
+                            >
+                          {:else}
+                            <span class="rule-plain">{rule}</span>
+                          {/if}
+                        {/each}
+                      </td>
+                    </tr>
+                  {/if}
+                {/each}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      {/if}
+
+      {#if unit.meleeWeapons && unit.meleeWeapons.length > 0}
+        <section class="section">
+          <h3 class="section-label">Melee Weapons</h3>
+          <div class="table-scroll">
+            <table class="weapons-table">
+              <thead>
+                <tr>
+                  <th class="col-wname">Melee Weapon</th>
+                  <th>IM</th>
+                  <th>AM</th>
+                  <th>SM</th>
+                  <th>AP</th>
+                  <th>D</th>
+                  <th class="col-traits">Special Rules</th>
+                  <th class="col-traits">Traits</th>
+                </tr>
+              </thead>
+              <tbody>
+                {#each unit.meleeWeapons as weapon}
+                  <tr>
+                    <td class="col-wname">{weapon.name}</td>
+                    <td>{weapon.IM}</td>
+                    <td>{weapon.AM}</td>
+                    <td>{weapon.SM}</td>
+                    <td>{weapon.AP}</td>
+                    <td>{weapon.D}</td>
+                    <td>
+                      {#each weapon.specialRules as rule, i}
+                        {#if i > 0}<span class="rule-sep">, </span>{/if}
+                        {#if lookupRule(rule)}
+                          <button
+                            class="rule-link"
+                            onclick={(e) => openRule(e, rule)}>{rule}</button
+                          >
+                        {:else}
+                          <span class="rule-plain">{rule}</span>
+                        {/if}
+                      {/each}
+                      {#if weapon.specialRules.length === 0}—{/if}
+                    </td>
+                    <td class="col-traits">
+                      {#each weapon.traits as trait, i}
+                        {#if i > 0}<span class="rule-sep">, </span>{/if}
+                        {#if lookupRule(trait)}
+                          <button
+                            class="rule-link"
+                            onclick={(e) => openRule(e, trait)}>{trait}</button
+                          >
+                        {:else}
+                          <span>{trait}</span>
+                        {/if}
+                      {/each}
+                      {#if weapon.traits.length === 0}—{/if}
+                    </td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      {/if}
 
       <section class="section">
         <h3 class="section-label">Ranged Accuracy</h3>
@@ -137,21 +327,31 @@
             </thead>
             <tbody>
               {#each unit.models as model}
-                {@const std  = hitProbability(model.BS, 'standard')}
+                {@const std = hitProbability(model.BS, 'standard')}
                 {@const snap = hitProbability(model.BS, 'snapshot')}
                 <tr>
-                  <td class="col-model">{model.name}{model.subtype ? ` (${model.subtype})` : ''}</td>
+                  <td class="col-model"
+                    >{model.name}{model.subtype
+                      ? ` (${model.subtype})`
+                      : ''}</td
+                  >
                   <td class="col-bs">{model.BS}</td>
-                  <td class="col-target">{targetLabel(model.BS, 'standard')}</td>
+                  <td class="col-target">{targetLabel(model.BS, 'standard')}</td
+                  >
                   <td class="col-pct">
                     <span class="hit-pct">{pct(std.hitChance)}</span>
                     {#if std.critChance > 0}
-                      <span class="crit-pct" title="Critical Hit chance">{pct(std.critChance)} crit</span>
+                      <span class="crit-pct" title="Critical Hit chance"
+                        >{pct(std.critChance)} crit</span
+                      >
                     {/if}
                   </td>
-                  <td class="col-target">{targetLabel(model.BS, 'snapshot')}</td>
+                  <td class="col-target">{targetLabel(model.BS, 'snapshot')}</td
+                  >
                   <td class="col-pct">
-                    <span class:zero-pct={snap.hitChance === 0}>{pct(snap.hitChance)}</span>
+                    <span class:zero-pct={snap.hitChance === 0}
+                      >{pct(snap.hitChance)}</span
+                    >
                   </td>
                 </tr>
               {/each}
@@ -176,15 +376,27 @@
             <tbody>
               {#each unit.models as model}
                 <tr>
-                  <td class="col-model">{model.name}{model.subtype ? ` (${model.subtype})` : ''}</td>
+                  <td class="col-model"
+                    >{model.name}{model.subtype
+                      ? ` (${model.subtype})`
+                      : ''}</td
+                  >
                   <td class="col-bs">{model.S}</td>
                   {#each woundToughnesses as t}
                     {@const result = woundProbability(model.S, t)}
-                    <td class="col-wound" class:wound-impossible={result.target.kind === 'impossible'}>
+                    <td
+                      class="col-wound"
+                      class:wound-impossible={result.target.kind ===
+                        'impossible'}
+                    >
                       <div class="wound-cell">
-                        <span class="wound-target">{woundTargetLabel(model.S, t)}</span>
+                        <span class="wound-target"
+                          >{woundTargetLabel(model.S, t)}</span
+                        >
                         {#if result.target.kind !== 'impossible'}
-                          <span class="wound-pct">{pct(result.woundChance)}</span>
+                          <span class="wound-pct"
+                            >{pct(result.woundChance)}</span
+                          >
                         {/if}
                       </div>
                     </td>
@@ -238,7 +450,9 @@
                       <li>
                         {choice.description}
                         {#if choice.pointsPerModel !== undefined}
-                          <span class="pts-note">+{choice.pointsPerModel} pts/model</span>
+                          <span class="pts-note"
+                            >+{choice.pointsPerModel} pts/model</span
+                          >
                         {:else if choice.points !== undefined}
                           <span class="pts-note">+{choice.points} pts</span>
                         {/if}
@@ -247,7 +461,9 @@
                   </ul>
                 {/if}
                 {#if option.pointsPerModel !== undefined}
-                  <span class="pts-note">+{option.pointsPerModel} pts/model</span>
+                  <span class="pts-note"
+                    >+{option.pointsPerModel} pts/model</span
+                  >
                 {:else if option.points !== undefined}
                   <span class="pts-note">+{option.points} pts</span>
                 {/if}
@@ -259,6 +475,29 @@
     </div>
   </div>
 </div>
+
+{#if popover}
+  <div
+    class="rule-popover"
+    style="left: {popover.x}px; top: {popover.y}px"
+    role="tooltip"
+  >
+    <div class="popover-header">
+      <span class="popover-name">{popover.rule.name}</span>
+      <button class="popover-close" onclick={closePopover} aria-label="Close"
+        >✕</button
+      >
+    </div>
+    {#if popover.rule.summary}
+      <p class="popover-summary">"{popover.rule.summary}"</p>
+    {/if}
+    <div class="popover-body">
+      {#each popover.rule.description.split('\n\n') as para}
+        <p class="popover-para">{para}</p>
+      {/each}
+    </div>
+  </div>
+{/if}
 
 <style>
   .backdrop {
@@ -354,7 +593,9 @@
     align-items: center;
     justify-content: center;
     font-size: 0.85rem;
-    transition: color 0.15s, border-color 0.15s;
+    transition:
+      color 0.15s,
+      border-color 0.15s;
   }
 
   .close-btn:hover {
@@ -667,5 +908,163 @@
     font-size: 0.65rem;
     color: var(--color-gold);
     margin-left: 0.25rem;
+  }
+
+  /* ── Weapons Table ───────────────────────── */
+  .weapons-table {
+    width: 100%;
+    min-width: 540px;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+  }
+
+  .weapons-table th {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    background: var(--color-bg-raised);
+    padding: 0.5rem 0.6rem;
+    text-align: center;
+    border: 1px solid var(--color-border);
+    white-space: nowrap;
+  }
+
+  .weapons-table th.col-wname,
+  .weapons-table th.col-traits {
+    text-align: left;
+  }
+
+  .weapons-table td {
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--color-border);
+    text-align: center;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .weapons-table td.col-wname {
+    text-align: left;
+    color: var(--color-accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .weapons-table td.col-traits {
+    text-align: left;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+  }
+
+  .weapons-table tr.weapon-row:hover td {
+    background: rgba(0, 200, 255, 0.03);
+  }
+
+  .weapons-table tr.rules-row td {
+    background: rgba(0, 0, 0, 0.15);
+    border-top: none;
+    padding: 0.3rem 0.6rem 0.45rem;
+    text-align: left;
+    font-size: 0.75rem;
+  }
+
+  .rule-link {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-accent);
+    font-size: inherit;
+    font-family: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgba(0, 200, 255, 0.35);
+    text-underline-offset: 2px;
+    transition:
+      color 0.15s,
+      text-decoration-color 0.15s;
+  }
+
+  .rule-link:hover {
+    color: #fff;
+    text-decoration-color: rgba(0, 200, 255, 0.7);
+  }
+
+  .rule-plain {
+    color: var(--color-text-muted);
+  }
+
+  .rule-sep {
+    color: var(--color-text-muted);
+  }
+
+  /* ── Rule Popover ────────────────────────── */
+  .rule-popover {
+    position: fixed;
+    z-index: 200;
+    width: 320px;
+    max-height: 50vh;
+    overflow-y: auto;
+    background: var(--color-bg-raised);
+    border: 1px solid var(--color-accent-dim);
+    box-shadow:
+      0 0 20px rgba(0, 200, 255, 0.12),
+      0 4px 16px rgba(0, 0, 0, 0.6);
+    padding: 0.85rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .popover-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .popover-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    letter-spacing: 0.05em;
+  }
+
+  .popover-close {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 0.1rem 0.3rem;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+
+  .popover-close:hover {
+    color: var(--color-text);
+  }
+
+  .popover-summary {
+    font-size: 0.75rem;
+    color: var(--color-gold);
+    font-style: italic;
+    line-height: 1.5;
+    border-left: 2px solid var(--color-gold);
+    padding-left: 0.5rem;
+  }
+
+  .popover-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .popover-para {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
   }
 </style>
