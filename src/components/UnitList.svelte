@@ -7,17 +7,19 @@
   let selectedUnit = $state<UnitProfile | null>(null);
 
   const filteredUnits = $derived(
-    units.filter((u) => {
-      const q = searchQuery.toLowerCase().trim();
-      if (!q) return true;
-      const types = [...new Set(u.models.map((m) => m.type))].join(' ').toLowerCase();
-      return (
-        u.name.toLowerCase().includes(q) ||
-        u.role.toLowerCase().includes(q) ||
-        u.catalog.toLowerCase().includes(q) ||
-        types.includes(q)
-      );
-    }),
+    units
+      .filter((u) => {
+        const q = searchQuery.toLowerCase().trim();
+        if (!q) return true;
+        const types = [...new Set(u.models.map((m) => m.type))].join(' ').toLowerCase();
+        return (
+          u.name.toLowerCase().includes(q) ||
+          u.role.toLowerCase().includes(q) ||
+          u.catalog.toLowerCase().includes(q) ||
+          types.includes(q)
+        );
+      })
+      .sort((a, b) => a.name.localeCompare(b.name)),
   );
 
   function getRoleColor(role: string): string {

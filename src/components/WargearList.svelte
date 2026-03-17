@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { units, rangedWeapons as catalogueRanged, meleeWeapons as catalogueMelee } from '../data';
+  import { units, rangedWeapons as catalogueRanged, meleeWeapons as catalogueMelee, weaponLists } from '../data';
   import { lookupRule } from '../data/specialRules';
   import type { RangedWeapon, MeleeWeapon, WargearDetail, SpecialRule } from '../data/types';
 
@@ -36,6 +36,10 @@
   const wargearDetails: DetailEntry[] = units.flatMap(
     (u) => (u.wargearDetails ?? []).map((wd) => ({ ...wd, source: u.name })),
   );
+
+  // ── Tabs ──────────────────────────────────────────────────────────────────
+  type Tab = 'ranged' | 'melee' | 'wargear' | 'lists';
+  let activeTab = $state<Tab>('ranged');
 
   // ── Search ────────────────────────────────────────────────────────────────
   let query = $state('');
@@ -98,176 +102,255 @@
 
 <div class="wargear-container">
 
-  <!-- ── Search ───────────────────────────────────── -->
-  <div class="search-bar">
-    <span class="search-icon">⌕</span>
-    <input
-      class="search-input"
-      type="search"
-      placeholder="Search by name, source, trait, or rule…"
-      bind:value={query}
-    />
-    {#if query}
-      <button class="search-clear" onclick={() => (query = '')} aria-label="Clear search">✕</button>
+  <!-- ── Tabs + Search row ─────────────────────────── -->
+  <div class="top-bar">
+    <nav class="tab-bar" role="tablist">
+      <button
+        class="tab-btn"
+        class:active={activeTab === 'ranged'}
+        role="tab"
+        aria-selected={activeTab === 'ranged'}
+        onclick={() => { activeTab = 'ranged'; query = ''; }}
+      >Ranged <span class="tab-count">({rangedWeapons.length})</span></button>
+      <button
+        class="tab-btn"
+        class:active={activeTab === 'melee'}
+        role="tab"
+        aria-selected={activeTab === 'melee'}
+        onclick={() => { activeTab = 'melee'; query = ''; }}
+      >Melee <span class="tab-count">({meleeWeapons.length})</span></button>
+      <button
+        class="tab-btn"
+        class:active={activeTab === 'wargear'}
+        role="tab"
+        aria-selected={activeTab === 'wargear'}
+        onclick={() => { activeTab = 'wargear'; query = ''; }}
+      >Wargear <span class="tab-count">({wargearDetails.length})</span></button>
+      <button
+        class="tab-btn"
+        class:active={activeTab === 'lists'}
+        role="tab"
+        aria-selected={activeTab === 'lists'}
+        onclick={() => { activeTab = 'lists'; query = ''; }}
+      >Weapons Lists <span class="tab-count">({weaponLists.length})</span></button>
+    </nav>
+
+    {#if activeTab === 'ranged' || activeTab === 'melee'}
+      <div class="search-bar">
+        <span class="search-icon">⌕</span>
+        <input
+          class="search-input"
+          type="search"
+          placeholder="Search by name, source, trait, or rule…"
+          bind:value={query}
+        />
+        {#if query}
+          <button class="search-clear" onclick={() => (query = '')} aria-label="Clear search">✕</button>
+        {/if}
+      </div>
     {/if}
   </div>
 
   <!-- ── Ranged Weapons ───────────────────────────── -->
-  <section class="weapon-section">
-    <div class="section-header">
-      <h2 class="section-title">Ranged Weapons <span class="count">({filteredRanged.length})</span></h2>
-      <div class="stat-legend">
-        <span><abbr title="Range (inches)">R</abbr> Range</span>
-        <span><abbr title="Firepower — number of shots">FP</abbr> Firepower</span>
-        <span><abbr title="Ranged Strength">RS</abbr> Ranged Strength</span>
-        <span><abbr title="Armour Penetration">AP</abbr> Armour Penetration</span>
-        <span><abbr title="Damage — wounds/hull points lost per hit">D</abbr> Damage</span>
-      </div>
-    </div>
-
-    {#if filteredRanged.length === 0}
-      <div class="empty-state">
-        <span class="empty-icon">◈</span>
-        <p>{query ? 'No ranged weapons match your search.' : 'No ranged weapon data yet.'}</p>
-      </div>
-    {:else}
-      <div class="table-container">
-        <table class="weapon-table">
-          <thead class="sticky-head">
-            <tr>
-              <th class="col-name">Ranged Weapon</th>
-              <th class="col-source">Source</th>
-              <th class="col-stat">R</th>
-              <th class="col-stat">FP</th>
-              <th class="col-stat">RS</th>
-              <th class="col-stat">AP</th>
-              <th class="col-stat">D</th>
-              <th class="col-rules">Special Rules</th>
-              <th class="col-traits">Traits</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each filteredRanged as w (w.source + '::' + w.name)}
-              <tr class="weapon-row">
-                <td class="col-name weapon-name">{w.name}</td>
-                <td class="col-source source-cell">{w.source}</td>
-                <td class="col-stat stat-cell">{w.R}</td>
-                <td class="col-stat stat-cell">{w.FP}</td>
-                <td class="col-stat stat-cell">{w.RS}</td>
-                <td class="col-stat stat-cell">{w.AP}</td>
-                <td class="col-stat stat-cell">{w.D}</td>
-                <td class="col-rules rules-cell">
-                  {#if w.specialRules.length === 0}—{/if}
-                  {#each w.specialRules as rule, i}
-                    {#if i > 0}<span class="rule-sep">, </span>{/if}
-                    {#if lookupRule(rule)}
-                      <button class="rule-link" onclick={(e) => openRule(e, rule)}>{rule}</button>
-                    {:else}
-                      <span>{rule}</span>
-                    {/if}
-                  {/each}
-                </td>
-                <td class="col-traits traits-cell">{fmtList(w.traits)}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
-    {/if}
-  </section>
-
-  <!-- ── Melee Weapons ────────────────────────────── -->
-  <section class="weapon-section">
-    <div class="section-header">
-      <h2 class="section-title">Melee Weapons <span class="count">({filteredMelee.length})</span></h2>
-      <div class="stat-legend">
-        <span><abbr title="Initiative Modifier">IM</abbr> Initiative</span>
-        <span><abbr title="Attacks Modifier">AM</abbr> Attacks</span>
-        <span><abbr title="Strength Modifier">SM</abbr> Strength</span>
-        <span><abbr title="Armour Penetration">AP</abbr> AP</span>
-        <span><abbr title="Damage">D</abbr> Damage</span>
-      </div>
-    </div>
-
-    {#if filteredMelee.length === 0}
-      <div class="empty-state">
-        <span class="empty-icon">◈</span>
-        <p>{query ? 'No melee weapons match your search.' : 'No melee weapon data yet.'}</p>
-      </div>
-    {:else}
-      <div class="table-container">
-        <table class="weapon-table">
-          <thead class="sticky-head">
-            <tr>
-              <th class="col-name">Melee Weapon</th>
-              <th class="col-source">Source</th>
-              <th class="col-stat">IM</th>
-              <th class="col-stat">AM</th>
-              <th class="col-stat">SM</th>
-              <th class="col-stat">AP</th>
-              <th class="col-stat">D</th>
-              <th class="col-rules">Special Rules</th>
-              <th class="col-traits">Traits</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each filteredMelee as w (w.source + '::' + w.name)}
-              <tr class="weapon-row">
-                <td class="col-name weapon-name">{w.name}</td>
-                <td class="col-source source-cell">{w.source}</td>
-                <td class="col-stat stat-cell">{w.IM}</td>
-                <td class="col-stat stat-cell">{w.AM}</td>
-                <td class="col-stat stat-cell">{w.SM}</td>
-                <td class="col-stat stat-cell">{w.AP}</td>
-                <td class="col-stat stat-cell">{w.D}</td>
-                <td class="col-rules rules-cell">
-                  {#if w.specialRules.length === 0}—{/if}
-                  {#each w.specialRules as rule, i}
-                    {#if i > 0}<span class="rule-sep">, </span>{/if}
-                    {#if lookupRule(rule)}
-                      <button class="rule-link" onclick={(e) => openRule(e, rule)}>{rule}</button>
-                    {:else}
-                      <span>{rule}</span>
-                    {/if}
-                  {/each}
-                </td>
-                <td class="col-traits traits-cell">{fmtList(w.traits)}</td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
-    {/if}
-  </section>
-
-  <!-- ── Wargear Details ──────────────────────────── -->
-  {#if wargearDetails.length > 0}
+  {#if activeTab === 'ranged'}
     <section class="weapon-section">
       <div class="section-header">
-        <h2 class="section-title">Wargear</h2>
+        <div class="stat-legend">
+          <span><abbr title="Range (inches)">R</abbr> Range</span>
+          <span><abbr title="Firepower — number of shots">FP</abbr> Firepower</span>
+          <span><abbr title="Ranged Strength">RS</abbr> Ranged Strength</span>
+          <span><abbr title="Armour Penetration">AP</abbr> Armour Penetration</span>
+          <span><abbr title="Damage — wounds/hull points lost per hit">D</abbr> Damage</span>
+        </div>
       </div>
-      <div class="table-container">
-        <table class="weapon-table wargear-table">
-          <thead>
-            <tr>
-              <th class="col-wargear-name">Wargear</th>
-              <th class="col-source">Source</th>
-              <th class="col-wargear-summary">Summary</th>
-              <th class="col-wargear-desc">Rule</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each wargearDetails as wd (wd.source + '::' + wd.name)}
-              <tr class="weapon-row">
-                <td class="col-wargear-name weapon-name">{wd.name}</td>
-                <td class="col-source source-cell">{wd.source}</td>
-                <td class="col-wargear-summary summary-cell">"{wd.summary}"</td>
-                <td class="col-wargear-desc desc-cell">{wd.description}</td>
+
+      {#if filteredRanged.length === 0}
+        <div class="empty-state">
+          <span class="empty-icon">◈</span>
+          <p>{query ? 'No ranged weapons match your search.' : 'No ranged weapon data yet.'}</p>
+        </div>
+      {:else}
+        <div class="table-container">
+          <table class="weapon-table">
+            <thead class="sticky-head">
+              <tr>
+                <th class="col-name">Ranged Weapon</th>
+                <th class="col-source">Source</th>
+                <th class="col-stat">R</th>
+                <th class="col-stat">FP</th>
+                <th class="col-stat">RS</th>
+                <th class="col-stat">AP</th>
+                <th class="col-stat">D</th>
+                <th class="col-rules">Special Rules</th>
+                <th class="col-traits">Traits</th>
               </tr>
-            {/each}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {#each filteredRanged as w (w.source + '::' + w.name)}
+                <tr class="weapon-row">
+                  <td class="col-name weapon-name">{w.name}</td>
+                  <td class="col-source source-cell">{w.source}</td>
+                  <td class="col-stat stat-cell">{w.R}</td>
+                  <td class="col-stat stat-cell">{w.FP}</td>
+                  <td class="col-stat stat-cell">{w.RS}</td>
+                  <td class="col-stat stat-cell">{w.AP}</td>
+                  <td class="col-stat stat-cell">{w.D}</td>
+                  <td class="col-rules rules-cell">
+                    {#if w.specialRules.length === 0}—{/if}
+                    {#each w.specialRules as rule, i}
+                      {#if i > 0}<span class="rule-sep">, </span>{/if}
+                      {#if lookupRule(rule)}
+                        <button class="rule-link" onclick={(e) => openRule(e, rule)}>{rule}</button>
+                      {:else}
+                        <span>{rule}</span>
+                      {/if}
+                    {/each}
+                  </td>
+                  <td class="col-traits traits-cell">{fmtList(w.traits)}</td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/if}
+    </section>
+  {/if}
+
+  <!-- ── Melee Weapons ────────────────────────────── -->
+  {#if activeTab === 'melee'}
+    <section class="weapon-section">
+      <div class="section-header">
+        <div class="stat-legend">
+          <span><abbr title="Initiative Modifier">IM</abbr> Initiative</span>
+          <span><abbr title="Attacks Modifier">AM</abbr> Attacks</span>
+          <span><abbr title="Strength Modifier">SM</abbr> Strength</span>
+          <span><abbr title="Armour Penetration">AP</abbr> AP</span>
+          <span><abbr title="Damage">D</abbr> Damage</span>
+        </div>
       </div>
+
+      {#if filteredMelee.length === 0}
+        <div class="empty-state">
+          <span class="empty-icon">◈</span>
+          <p>{query ? 'No melee weapons match your search.' : 'No melee weapon data yet.'}</p>
+        </div>
+      {:else}
+        <div class="table-container">
+          <table class="weapon-table">
+            <thead class="sticky-head">
+              <tr>
+                <th class="col-name">Melee Weapon</th>
+                <th class="col-source">Source</th>
+                <th class="col-stat">IM</th>
+                <th class="col-stat">AM</th>
+                <th class="col-stat">SM</th>
+                <th class="col-stat">AP</th>
+                <th class="col-stat">D</th>
+                <th class="col-rules">Special Rules</th>
+                <th class="col-traits">Traits</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each filteredMelee as w (w.source + '::' + w.name)}
+                <tr class="weapon-row">
+                  <td class="col-name weapon-name">{w.name}</td>
+                  <td class="col-source source-cell">{w.source}</td>
+                  <td class="col-stat stat-cell">{w.IM}</td>
+                  <td class="col-stat stat-cell">{w.AM}</td>
+                  <td class="col-stat stat-cell">{w.SM}</td>
+                  <td class="col-stat stat-cell">{w.AP}</td>
+                  <td class="col-stat stat-cell">{w.D}</td>
+                  <td class="col-rules rules-cell">
+                    {#if w.specialRules.length === 0}—{/if}
+                    {#each w.specialRules as rule, i}
+                      {#if i > 0}<span class="rule-sep">, </span>{/if}
+                      {#if lookupRule(rule)}
+                        <button class="rule-link" onclick={(e) => openRule(e, rule)}>{rule}</button>
+                      {:else}
+                        <span>{rule}</span>
+                      {/if}
+                    {/each}
+                  </td>
+                  <td class="col-traits traits-cell">{fmtList(w.traits)}</td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/if}
+    </section>
+  {/if}
+
+  <!-- ── Weapons Lists ────────────────────────────── -->
+  {#if activeTab === 'lists'}
+    <section class="weapon-section">
+      {#if weaponLists.length === 0}
+        <div class="empty-state">
+          <span class="empty-icon">◈</span>
+          <p>No weapons lists yet.</p>
+        </div>
+      {:else}
+        <div class="lists-grid">
+          {#each weaponLists as list}
+            <div class="list-card">
+              <div class="list-card-header">
+                <h3 class="list-card-title">{list.name}</h3>
+              </div>
+              <table class="weapon-table">
+                <thead>
+                  <tr>
+                    <th class="col-name">Weapon</th>
+                    <th class="col-pts">Pts</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {#each list.entries as entry}
+                    <tr class="weapon-row">
+                      <td class="col-name weapon-name">{entry.weaponName}</td>
+                      <td class="col-pts stat-cell">{entry.points === 0 ? '—' : '+' + entry.points}</td>
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
+            </div>
+          {/each}
+        </div>
+      {/if}
+    </section>
+  {/if}
+
+  <!-- ── Wargear Details ──────────────────────────── -->
+  {#if activeTab === 'wargear'}
+    <section class="weapon-section">
+      {#if wargearDetails.length === 0}
+        <div class="empty-state">
+          <span class="empty-icon">◈</span>
+          <p>No wargear data yet.</p>
+        </div>
+      {:else}
+        <div class="table-container">
+          <table class="weapon-table wargear-table">
+            <thead class="sticky-head">
+              <tr>
+                <th class="col-wargear-name">Wargear</th>
+                <th class="col-source">Source</th>
+                <th class="col-wargear-summary">Summary</th>
+                <th class="col-wargear-desc">Rule</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each wargearDetails as wd (wd.source + '::' + wd.name)}
+                <tr class="weapon-row">
+                  <td class="col-wargear-name weapon-name">{wd.name}</td>
+                  <td class="col-source source-cell">{wd.source}</td>
+                  <td class="col-wargear-summary summary-cell">"{wd.summary}"</td>
+                  <td class="col-wargear-desc desc-cell">{wd.description}</td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/if}
     </section>
   {/if}
 
@@ -301,17 +384,64 @@
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 2.5rem;
+    gap: 1.5rem;
+  }
+
+  /* ── Top Bar ──────────────────────────────────── */
+  .top-bar {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    border: 1px solid var(--color-border);
+  }
+
+  /* ── Tab Bar ──────────────────────────────────── */
+  .tab-bar {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .tab-btn {
+    background: var(--color-bg-raised);
+    border: none;
+    border-right: 1px solid var(--color-border);
+    padding: 0.65rem 1.25rem;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover {
+    color: var(--color-text);
+    background: var(--color-bg-surface);
+  }
+
+  .tab-btn.active {
+    color: var(--color-accent);
+    background: var(--color-bg-surface);
+    box-shadow: inset 0 -2px 0 var(--color-accent);
+  }
+
+  .tab-count {
+    font-size: 0.6em;
+    opacity: 0.6;
+    letter-spacing: 0.05em;
   }
 
   /* ── Search Bar ───────────────────────────────── */
   .search-bar {
+    flex: 1;
     position: relative;
     display: flex;
     align-items: center;
     gap: 0;
     background: var(--color-bg-raised);
-    border: 1px solid var(--color-border);
   }
 
   .search-icon {
@@ -358,7 +488,7 @@
     color: var(--color-text);
   }
 
-  .search-bar:focus-within {
+  .top-bar:focus-within {
     border-color: var(--color-accent-dim);
   }
 
@@ -380,9 +510,9 @@
   .section-header {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 1rem;
-    padding: 1rem 1.25rem;
+    padding: 0.6rem 1.25rem;
     border: 1px solid var(--color-border);
     border-bottom: none;
     background: var(--color-bg-raised);
@@ -651,6 +781,39 @@
     font-size: 0.75rem;
     color: var(--color-text-muted);
     line-height: 1.6;
+  }
+
+  /* ── Weapons Lists Grid ──────────────────────── */
+  .lists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .list-card {
+    border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .list-card-header {
+    padding: 0.75rem 1rem;
+    background: var(--color-bg-raised);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .list-card-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .col-pts {
+    width: 48px;
+    text-align: center;
   }
 
   /* ── Empty State ─────────────────────────────── */
