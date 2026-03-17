@@ -191,7 +191,7 @@
               </tr>
             </thead>
             <tbody>
-              {#each filteredRanged as w (w.name)}
+              {#each filteredRanged as w, i (w.name + i)}
                 <tr class="weapon-row">
                   <td class="col-name weapon-name">{w.name}</td>
                   <td class="col-stat stat-cell">{w.R}</td>
@@ -261,7 +261,7 @@
               </tr>
             </thead>
             <tbody>
-              {#each filteredMelee as w (w.name)}
+              {#each filteredMelee as w, i (w.name + i)}
                 <tr class="weapon-row">
                   <td class="col-name weapon-name">{w.name}</td>
                   <td class="col-stat stat-cell">{w.IM}</td>

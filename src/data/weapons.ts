@@ -2417,7 +2417,7 @@ export const meleeWeapons: MeleeWeapon[] = [
     traits: ['Power'],
   },
   {
-    name: 'Krak grenades',
+    name: 'Krak Grenades',
     IM: '-3',
     AM: '1',
     SM: '6',
@@ -2911,16 +2911,6 @@ export const meleeWeapons: MeleeWeapon[] = [
     AP: 4,
     D: 1,
     specialRules: ['Armour-breaker (5+)'],
-    traits: [],
-  },
-  {
-    name: 'Krak grenades',
-    IM: '-3',
-    AM: 1,
-    SM: '6',
-    AP: 4,
-    D: 2,
-    specialRules: ['Detonation'],
     traits: [],
   },
   {
