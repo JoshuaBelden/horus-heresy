@@ -1,44 +1,21 @@
 <script lang="ts">
-  import { units, rangedWeapons as catalogueRanged, meleeWeapons as catalogueMelee, weaponLists } from '../data';
+  import {
+    meleeWeapons as catalogueMelee,
+    rangedWeapons as catalogueRanged,
+    weaponLists,
+  } from '../data';
   import { lookupRule } from '../data/specialRules';
-  import type { RangedWeapon, MeleeWeapon, WargearDetail, SpecialRule } from '../data/types';
+  import type { MeleeWeapon, RangedWeapon, SpecialRule } from '../data/types';
 
-  type RangedEntry = RangedWeapon & { source: string };
-  type MeleeEntry = MeleeWeapon & { source: string };
-  type DetailEntry = WargearDetail & { source: string };
-
-  // Unit-sourced weapons (with unit name as source)
-  const unitRanged: RangedEntry[] = units.flatMap(
-    (u) => (u.rangedWeapons ?? []).map((w) => ({ ...w, source: u.name })),
+  const rangedWeapons: RangedWeapon[] = [...catalogueRanged].sort((a, b) =>
+    a.name.localeCompare(b.name),
   );
-  const unitMelee: MeleeEntry[] = units.flatMap(
-    (u) => (u.meleeWeapons ?? []).map((w) => ({ ...w, source: u.name })),
-  );
-
-  // Merge catalogue weapons; unit-sourced entries take precedence
-  const unitRangedNames = new Set(unitRanged.map((w) => w.name));
-  const unitMeleeNames = new Set(unitMelee.map((w) => w.name));
-
-  const rangedWeapons: RangedEntry[] = [
-    ...unitRanged,
-    ...catalogueRanged
-      .filter((w) => !unitRangedNames.has(w.name))
-      .map((w) => ({ ...w, source: '—' })),
-  ].sort((a, b) => a.name.localeCompare(b.name));
-
-  const meleeWeapons: MeleeEntry[] = [
-    ...unitMelee,
-    ...catalogueMelee
-      .filter((w) => !unitMeleeNames.has(w.name))
-      .map((w) => ({ ...w, source: '—' })),
-  ].sort((a, b) => a.name.localeCompare(b.name));
-
-  const wargearDetails: DetailEntry[] = units.flatMap(
-    (u) => (u.wargearDetails ?? []).map((wd) => ({ ...wd, source: u.name })),
+  const meleeWeapons: MeleeWeapon[] = [...catalogueMelee].sort((a, b) =>
+    a.name.localeCompare(b.name),
   );
 
   // ── Tabs ──────────────────────────────────────────────────────────────────
-  type Tab = 'ranged' | 'melee' | 'wargear' | 'lists';
+  type Tab = 'ranged' | 'melee' | 'lists';
   let activeTab = $state<Tab>('ranged');
 
   // ── Search ────────────────────────────────────────────────────────────────
@@ -47,22 +24,30 @@
   const filteredRanged = $derived(
     query.trim() === ''
       ? rangedWeapons
-      : rangedWeapons.filter((w) =>
-          w.name.toLowerCase().includes(query.toLowerCase()) ||
-          w.source.toLowerCase().includes(query.toLowerCase()) ||
-          w.traits.some((t) => t.toLowerCase().includes(query.toLowerCase())) ||
-          w.specialRules.some((r) => r.toLowerCase().includes(query.toLowerCase())),
+      : rangedWeapons.filter(
+          (w) =>
+            w.name.toLowerCase().includes(query.toLowerCase()) ||
+            w.traits.some((t) =>
+              t.toLowerCase().includes(query.toLowerCase()),
+            ) ||
+            w.specialRules.some((r) =>
+              r.toLowerCase().includes(query.toLowerCase()),
+            ),
         ),
   );
 
   const filteredMelee = $derived(
     query.trim() === ''
       ? meleeWeapons
-      : meleeWeapons.filter((w) =>
-          w.name.toLowerCase().includes(query.toLowerCase()) ||
-          w.source.toLowerCase().includes(query.toLowerCase()) ||
-          w.traits.some((t) => t.toLowerCase().includes(query.toLowerCase())) ||
-          w.specialRules.some((r) => r.toLowerCase().includes(query.toLowerCase())),
+      : meleeWeapons.filter(
+          (w) =>
+            w.name.toLowerCase().includes(query.toLowerCase()) ||
+            w.traits.some((t) =>
+              t.toLowerCase().includes(query.toLowerCase()),
+            ) ||
+            w.specialRules.some((r) =>
+              r.toLowerCase().includes(query.toLowerCase()),
+            ),
         ),
   );
 
@@ -94,14 +79,16 @@
 </script>
 
 <svelte:window
-  onkeydown={(e) => { if (e.key === 'Escape') closePopover(); }}
+  onkeydown={(e) => {
+    if (e.key === 'Escape') closePopover();
+  }}
   onclick={(e) => {
-    if (popover && !(e.target as HTMLElement).closest('.rule-popover')) closePopover();
+    if (popover && !(e.target as HTMLElement).closest('.rule-popover'))
+      closePopover();
   }}
 />
 
 <div class="wargear-container">
-
   <!-- ── Tabs + Search row ─────────────────────────── -->
   <div class="top-bar">
     <nav class="tab-bar" role="tablist">
@@ -110,29 +97,34 @@
         class:active={activeTab === 'ranged'}
         role="tab"
         aria-selected={activeTab === 'ranged'}
-        onclick={() => { activeTab = 'ranged'; query = ''; }}
-      >Ranged <span class="tab-count">({rangedWeapons.length})</span></button>
+        onclick={() => {
+          activeTab = 'ranged';
+          query = '';
+        }}
+        >Ranged <span class="tab-count">({rangedWeapons.length})</span></button
+      >
       <button
         class="tab-btn"
         class:active={activeTab === 'melee'}
         role="tab"
         aria-selected={activeTab === 'melee'}
-        onclick={() => { activeTab = 'melee'; query = ''; }}
-      >Melee <span class="tab-count">({meleeWeapons.length})</span></button>
-      <button
-        class="tab-btn"
-        class:active={activeTab === 'wargear'}
-        role="tab"
-        aria-selected={activeTab === 'wargear'}
-        onclick={() => { activeTab = 'wargear'; query = ''; }}
-      >Wargear <span class="tab-count">({wargearDetails.length})</span></button>
+        onclick={() => {
+          activeTab = 'melee';
+          query = '';
+        }}>Melee <span class="tab-count">({meleeWeapons.length})</span></button
+      >
       <button
         class="tab-btn"
         class:active={activeTab === 'lists'}
         role="tab"
         aria-selected={activeTab === 'lists'}
-        onclick={() => { activeTab = 'lists'; query = ''; }}
-      >Weapons Lists <span class="tab-count">({weaponLists.length})</span></button>
+        onclick={() => {
+          activeTab = 'lists';
+          query = '';
+        }}
+        >Weapons Lists <span class="tab-count">({weaponLists.length})</span
+        ></button
+      >
     </nav>
 
     {#if activeTab === 'ranged' || activeTab === 'melee'}
@@ -141,11 +133,15 @@
         <input
           class="search-input"
           type="search"
-          placeholder="Search by name, source, trait, or rule…"
+          placeholder="Search by name, trait, or rule…"
           bind:value={query}
         />
         {#if query}
-          <button class="search-clear" onclick={() => (query = '')} aria-label="Clear search">✕</button>
+          <button
+            class="search-clear"
+            onclick={() => (query = '')}
+            aria-label="Clear search">✕</button
+          >
         {/if}
       </div>
     {/if}
@@ -157,17 +153,27 @@
       <div class="section-header">
         <div class="stat-legend">
           <span><abbr title="Range (inches)">R</abbr> Range</span>
-          <span><abbr title="Firepower — number of shots">FP</abbr> Firepower</span>
+          <span
+            ><abbr title="Firepower — number of shots">FP</abbr> Firepower</span
+          >
           <span><abbr title="Ranged Strength">RS</abbr> Ranged Strength</span>
-          <span><abbr title="Armour Penetration">AP</abbr> Armour Penetration</span>
-          <span><abbr title="Damage — wounds/hull points lost per hit">D</abbr> Damage</span>
+          <span
+            ><abbr title="Armour Penetration">AP</abbr> Armour Penetration</span
+          >
+          <span
+            ><abbr title="Damage — wounds/hull points lost per hit">D</abbr> Damage</span
+          >
         </div>
       </div>
 
       {#if filteredRanged.length === 0}
         <div class="empty-state">
           <span class="empty-icon">◈</span>
-          <p>{query ? 'No ranged weapons match your search.' : 'No ranged weapon data yet.'}</p>
+          <p>
+            {query
+              ? 'No ranged weapons match your search.'
+              : 'No ranged weapon data yet.'}
+          </p>
         </div>
       {:else}
         <div class="table-container">
@@ -175,7 +181,6 @@
             <thead class="sticky-head">
               <tr>
                 <th class="col-name">Ranged Weapon</th>
-                <th class="col-source">Source</th>
                 <th class="col-stat">R</th>
                 <th class="col-stat">FP</th>
                 <th class="col-stat">RS</th>
@@ -186,10 +191,9 @@
               </tr>
             </thead>
             <tbody>
-              {#each filteredRanged as w (w.source + '::' + w.name)}
+              {#each filteredRanged as w (w.name)}
                 <tr class="weapon-row">
                   <td class="col-name weapon-name">{w.name}</td>
-                  <td class="col-source source-cell">{w.source}</td>
                   <td class="col-stat stat-cell">{w.R}</td>
                   <td class="col-stat stat-cell">{w.FP}</td>
                   <td class="col-stat stat-cell">{w.RS}</td>
@@ -200,7 +204,10 @@
                     {#each w.specialRules as rule, i}
                       {#if i > 0}<span class="rule-sep">, </span>{/if}
                       {#if lookupRule(rule)}
-                        <button class="rule-link" onclick={(e) => openRule(e, rule)}>{rule}</button>
+                        <button
+                          class="rule-link"
+                          onclick={(e) => openRule(e, rule)}>{rule}</button
+                        >
                       {:else}
                         <span>{rule}</span>
                       {/if}
@@ -232,7 +239,11 @@
       {#if filteredMelee.length === 0}
         <div class="empty-state">
           <span class="empty-icon">◈</span>
-          <p>{query ? 'No melee weapons match your search.' : 'No melee weapon data yet.'}</p>
+          <p>
+            {query
+              ? 'No melee weapons match your search.'
+              : 'No melee weapon data yet.'}
+          </p>
         </div>
       {:else}
         <div class="table-container">
@@ -240,7 +251,6 @@
             <thead class="sticky-head">
               <tr>
                 <th class="col-name">Melee Weapon</th>
-                <th class="col-source">Source</th>
                 <th class="col-stat">IM</th>
                 <th class="col-stat">AM</th>
                 <th class="col-stat">SM</th>
@@ -251,10 +261,9 @@
               </tr>
             </thead>
             <tbody>
-              {#each filteredMelee as w (w.source + '::' + w.name)}
+              {#each filteredMelee as w (w.name)}
                 <tr class="weapon-row">
                   <td class="col-name weapon-name">{w.name}</td>
-                  <td class="col-source source-cell">{w.source}</td>
                   <td class="col-stat stat-cell">{w.IM}</td>
                   <td class="col-stat stat-cell">{w.AM}</td>
                   <td class="col-stat stat-cell">{w.SM}</td>
@@ -265,7 +274,10 @@
                     {#each w.specialRules as rule, i}
                       {#if i > 0}<span class="rule-sep">, </span>{/if}
                       {#if lookupRule(rule)}
-                        <button class="rule-link" onclick={(e) => openRule(e, rule)}>{rule}</button>
+                        <button
+                          class="rule-link"
+                          onclick={(e) => openRule(e, rule)}>{rule}</button
+                        >
                       {:else}
                         <span>{rule}</span>
                       {/if}
@@ -307,7 +319,9 @@
                   {#each list.entries as entry}
                     <tr class="weapon-row">
                       <td class="col-name weapon-name">{entry.weaponName}</td>
-                      <td class="col-pts stat-cell">{entry.points === 0 ? '—' : '+' + entry.points}</td>
+                      <td class="col-pts stat-cell"
+                        >{entry.points === 0 ? '—' : '+' + entry.points}</td
+                      >
                     </tr>
                   {/each}
                 </tbody>
@@ -318,42 +332,6 @@
       {/if}
     </section>
   {/if}
-
-  <!-- ── Wargear Details ──────────────────────────── -->
-  {#if activeTab === 'wargear'}
-    <section class="weapon-section">
-      {#if wargearDetails.length === 0}
-        <div class="empty-state">
-          <span class="empty-icon">◈</span>
-          <p>No wargear data yet.</p>
-        </div>
-      {:else}
-        <div class="table-container">
-          <table class="weapon-table wargear-table">
-            <thead class="sticky-head">
-              <tr>
-                <th class="col-wargear-name">Wargear</th>
-                <th class="col-source">Source</th>
-                <th class="col-wargear-summary">Summary</th>
-                <th class="col-wargear-desc">Rule</th>
-              </tr>
-            </thead>
-            <tbody>
-              {#each wargearDetails as wd (wd.source + '::' + wd.name)}
-                <tr class="weapon-row">
-                  <td class="col-wargear-name weapon-name">{wd.name}</td>
-                  <td class="col-source source-cell">{wd.source}</td>
-                  <td class="col-wargear-summary summary-cell">"{wd.summary}"</td>
-                  <td class="col-wargear-desc desc-cell">{wd.description}</td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-      {/if}
-    </section>
-  {/if}
-
 </div>
 
 {#if popover}
@@ -364,7 +342,9 @@
   >
     <div class="popover-header">
       <span class="popover-name">{popover.rule.name}</span>
-      <button class="popover-close" onclick={closePopover} aria-label="Close">✕</button>
+      <button class="popover-close" onclick={closePopover} aria-label="Close"
+        >✕</button
+      >
     </div>
     {#if popover.rule.summary}
       <p class="popover-summary">"{popover.rule.summary}"</p>
@@ -413,7 +393,9 @@
     text-transform: uppercase;
     color: var(--color-text-muted);
     cursor: pointer;
-    transition: color 0.15s, background 0.15s;
+    transition:
+      color 0.15s,
+      background 0.15s;
     white-space: nowrap;
   }
 
@@ -492,14 +474,6 @@
     border-color: var(--color-accent-dim);
   }
 
-  /* ── Count badge ─────────────────────────────── */
-  .count {
-    font-size: 0.7em;
-    color: var(--color-text-muted);
-    font-weight: 400;
-    letter-spacing: 0.05em;
-  }
-
   /* ── Section ─────────────────────────────────── */
   .weapon-section {
     display: flex;
@@ -517,15 +491,6 @@
     border-bottom: none;
     background: var(--color-bg-raised);
     flex-wrap: wrap;
-  }
-
-  .section-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--color-accent);
   }
 
   .stat-legend {
@@ -613,10 +578,6 @@
     min-width: 160px;
   }
 
-  .col-source {
-    min-width: 140px;
-  }
-
   .col-stat {
     width: 52px;
     text-align: center;
@@ -630,32 +591,11 @@
     min-width: 120px;
   }
 
-  .col-wargear-name {
-    min-width: 140px;
-    white-space: nowrap;
-  }
-
-  .col-wargear-summary {
-    min-width: 200px;
-    max-width: 280px;
-  }
-
-  .col-wargear-desc {
-    min-width: 260px;
-  }
-
   /* ── Cell Styles ─────────────────────────────── */
   .weapon-name {
     font-weight: 600;
     color: var(--color-text);
     letter-spacing: 0.02em;
-  }
-
-  .source-cell {
-    color: var(--color-accent);
-    font-size: 0.78rem;
-    letter-spacing: 0.03em;
-    opacity: 0.8;
   }
 
   .stat-cell {
@@ -676,19 +616,6 @@
     font-size: 0.82rem;
     color: var(--color-text-muted);
     letter-spacing: 0.02em;
-  }
-
-  .summary-cell {
-    font-size: 0.8rem;
-    color: var(--color-text-muted);
-    font-style: italic;
-    line-height: 1.4;
-  }
-
-  .desc-cell {
-    font-size: 0.8rem;
-    color: var(--color-text);
-    line-height: 1.5;
   }
 
   /* ── Rule Chips ──────────────────────────────── */

@@ -94,7 +94,8 @@ export interface UnitOptionChoice {
   description: string;
   pointsPerModel?: number;
   points?: number;
-  weaponName?: string;  // references a weapon in rangedWeapons or meleeWeapons
+  weaponName?: string; // references a weapon in rangedWeapons or meleeWeapons
+  wargearName?: string; // references an item in wargear catalog
 }
 
 export interface UnitOption {
@@ -134,9 +135,9 @@ export interface RangedWeapon {
 
 export interface MeleeWeapon {
   name: string;
-  IM: string;  // e.g. "I", "-3", "I-1"
-  AM: number | string;  // attacks modifier, e.g. "A" or a fixed number
-  SM: number | string;  // strength modifier, e.g. "+2" or a fixed number
+  IM: string; // e.g. "I", "-3", "I-1"
+  AM: number | string; // attacks modifier, e.g. "A" or a fixed number
+  SM: number | string; // strength modifier, e.g. "+2" or a fixed number
   AP: number | string;
   D: number;
   specialRules: string[];
@@ -165,9 +166,6 @@ export interface UnitProfile {
   composition: string;
   models: ModelProfile[];
   wargear: string[];
-  wargearDetails?: WargearDetail[];
-  rangedWeapons?: RangedWeapon[];
-  meleeWeapons?: MeleeWeapon[];
   gambits?: Gambit[];
   categories?: string[];
   specialRules: string[];

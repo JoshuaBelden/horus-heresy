@@ -189,6 +189,7 @@
               {/each}
             </div>
           {/if}
+
         </div>
       {/if}
     {/each}
@@ -466,4 +467,5 @@
     white-space: nowrap;
     flex-shrink: 0;
   }
+
 </style>

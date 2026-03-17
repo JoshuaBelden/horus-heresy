@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { UnitProfile, SpecialRule } from '../data/types';
-  import { units, specialRules as specialRulesData } from '../data';
+  import type { UnitProfile, SpecialRule, RangedWeapon, MeleeWeapon, WargearDetail } from '../data/types';
+  import { units, specialRules as specialRulesData, rangedWeapons as catalogueRanged, meleeWeapons as catalogueMelee, weaponLists, wargear as wargearCatalogue } from '../data';
   import { armiesStore, calcArmyPoints } from '../stores/armies.svelte';
 
   const { armyId, onback }: { armyId: string; onback: () => void } = $props();
@@ -22,20 +22,90 @@
     [...new Map(allFilledProfiles.map((p) => [p.name, p])).values()],
   );
 
-  const rangedWeapons = $derived([
-    ...new Map(
-      uniqueProfiles.flatMap((p) => p.rangedWeapons ?? []).map((w) => [w.name, w]),
-    ).values(),
-  ]);
+  // Collect all weapon names across all slotted units: defaults + chosen options
+  const allWargearNames = $derived(
+    army
+      ? [
+          ...new Set(
+            army.detachments
+              .flatMap((d) => d.slots)
+              .filter((s) => s.unit !== null)
+              .flatMap((s) => {
+                const profile = units.find((u) => u.name === s.unit!.unitName);
+                if (!profile) return [];
+                const names: string[] = [...profile.wargear];
+                for (const sc of s.unit!.selectedChoices) {
+                  const opt = profile.options[sc.optionIndex];
+                  if (!opt) continue;
+                  if (opt.weaponListNames) {
+                    const entries = opt.weaponListNames.flatMap(
+                      (n) => weaponLists.find((l) => l.name === n)?.entries ?? [],
+                    );
+                    const entry = entries[sc.choiceIndex];
+                    if (entry) names.push(entry.weaponName);
+                  } else if (opt.choices) {
+                    const choice = opt.choices[sc.choiceIndex];
+                    if (choice?.weaponName) names.push(choice.weaponName);
+                  }
+                }
+                for (const group of s.unit!.modelGroups ?? []) {
+                  if (group.choiceIndex === null) continue;
+                  const opt = profile.options[group.optionIndex];
+                  const choice = opt?.choices?.[group.choiceIndex];
+                  if (choice?.weaponName) names.push(choice.weaponName);
+                }
+                return names;
+              }),
+          ),
+        ]
+      : [],
+  );
 
-  const meleeWeapons = $derived([
-    ...new Map(
-      uniqueProfiles.flatMap((p) => p.meleeWeapons ?? []).map((w) => [w.name, w]),
-    ).values(),
-  ]);
+  // Collect selected wargear items (non-weapon equipment like Vexilla, Nuncio-vox, etc.)
+  const selectedWargear = $derived(
+    army
+      ? [
+          ...new Map(
+            army.detachments
+              .flatMap((d) => d.slots)
+              .filter((s) => s.unit !== null)
+              .flatMap((s) => {
+                const profile = units.find((u) => u.name === s.unit!.unitName);
+                if (!profile) return [];
+                const names: string[] = [];
+                for (const sc of s.unit!.selectedChoices) {
+                  const opt = profile.options[sc.optionIndex];
+                  const choice = opt?.choices?.[sc.choiceIndex];
+                  if (choice?.wargearName) names.push(choice.wargearName);
+                }
+                return names;
+              })
+              .map((n) => wargearCatalogue.find((g) => g.name === n))
+              .filter((g): g is WargearDetail => g !== undefined)
+              .map((g) => [g.name, g] as [string, WargearDetail]),
+          ).values(),
+        ]
+      : [],
+  );
+
+  const rangedWeapons = $derived(
+    allWargearNames
+      .map((n) => catalogueRanged.find((w) => w.name === n))
+      .filter((w): w is RangedWeapon => w !== undefined),
+  );
+
+  const meleeWeapons = $derived(
+    allWargearNames
+      .map((n) => catalogueMelee.find((w) => w.name === n))
+      .filter((w): w is MeleeWeapon => w !== undefined),
+  );
+
+  const weaponSpecialRules = $derived(
+    [...new Set([...rangedWeapons, ...meleeWeapons].flatMap((w) => w.specialRules))].sort(),
+  );
 
   const specialRules = $derived(
-    [...new Set(uniqueProfiles.flatMap((p) => p.specialRules))].sort(),
+    [...new Set([...uniqueProfiles.flatMap((p) => p.specialRules), ...weaponSpecialRules])].sort(),
   );
 
   const STAT_KEYS = ['M', 'WS', 'BS', 'S', 'T', 'W', 'I', 'A', 'LD', 'SAV'];
@@ -209,7 +279,20 @@
             </div>
           {/if}
 
-          {#if rangedWeapons.length === 0 && meleeWeapons.length === 0}
+          {#if selectedWargear.length > 0}
+            <h4 class="subsection-title">Equipment</h4>
+            <ul class="wargear-list">
+              {#each selectedWargear as item (item.name)}
+                <li class="wargear-item">
+                  <span class="wargear-name">{item.name}</span>
+                  <span class="wargear-summary">{item.summary}</span>
+                  <p class="wargear-desc">{item.description}</p>
+                </li>
+              {/each}
+            </ul>
+          {/if}
+
+          {#if rangedWeapons.length === 0 && meleeWeapons.length === 0 && selectedWargear.length === 0}
             <p class="empty-note">No detailed wargear data available for assigned units.</p>
           {/if}
         </section>
@@ -805,6 +888,47 @@
     color: var(--color-text-muted);
     font-style: italic;
     margin: 0;
+  }
+
+  .wargear-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .wargear-item {
+    border: 1px solid var(--color-border);
+    padding: 0.6rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .wargear-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    letter-spacing: 0.05em;
+  }
+
+  .wargear-summary {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+
+  .wargear-desc {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.82rem;
+    color: var(--color-text);
+    margin: 0.2rem 0 0;
+    line-height: 1.5;
   }
 
   /* ── Unit Blocks ─────────────────────────────── */
