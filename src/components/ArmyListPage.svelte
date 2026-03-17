@@ -2,7 +2,7 @@
   import type { Faction } from '../data/types';
   import { armiesStore, createCrusadeDetachment, calcArmyPoints } from '../stores/armies.svelte';
 
-  const { onopen }: { onopen: (id: string) => void } = $props();
+  const { onopen, onreport }: { onopen: (id: string) => void; onreport: (id: string) => void } = $props();
 
   const FACTIONS: Faction[] = [
     'Dark Angels',
@@ -119,41 +119,47 @@
         {@const filled = filledSlots(army)}
         {@const total = totalSlots(army)}
         <div class="army-card">
-          <button class="card-body" onclick={() => onopen(army.id)}>
-            <div class="card-top">
-              <span class="army-name">{army.name}</span>
-              <span
-                class="faction-badge"
-                style="color: {FACTION_COLORS[army.faction]}; border-color: {FACTION_COLORS[army.faction]}55"
-              >{army.faction}</span>
-            </div>
-            <div class="card-bottom">
-              <div class="card-stat">
-                <span class="stat-value points">{pts}</span>
-                <span class="stat-label">pts</span>
+          <div class="card-main">
+            <button class="card-body" onclick={() => onopen(army.id)}>
+              <div class="card-top">
+                <span class="army-name">{army.name}</span>
+                <span
+                  class="faction-badge"
+                  style="color: {FACTION_COLORS[army.faction]}; border-color: {FACTION_COLORS[army.faction]}55"
+                >{army.faction}</span>
               </div>
-              <div class="card-stat">
-                <span class="stat-value">{filled}/{total}</span>
-                <span class="stat-label">slots filled</span>
+              <div class="card-bottom">
+                <div class="card-stat">
+                  <span class="stat-value points">{pts}</span>
+                  <span class="stat-label">pts</span>
+                </div>
+                <div class="card-stat">
+                  <span class="stat-value">{filled}/{total}</span>
+                  <span class="stat-label">slots filled</span>
+                </div>
+                <div class="card-stat">
+                  <span class="stat-value allegiance">{army.allegiance}</span>
+                </div>
               </div>
-              <div class="card-stat">
-                <span class="stat-value allegiance">{army.allegiance}</span>
-              </div>
-            </div>
-          </button>
+            </button>
 
-          <button
-            class="delete-btn"
-            class:pressing={pressingId === army.id}
-            onpointerdown={() => startPress(army.id)}
-            onpointerup={cancelPress}
-            onpointerleave={cancelPress}
-            onpointercancel={cancelPress}
-            title="Hold to delete"
-            aria-label="Delete army"
-          >
-            <span class="delete-icon">⊗</span>
-            <span class="delete-fill"></span>
+            <button
+              class="delete-btn"
+              class:pressing={pressingId === army.id}
+              onpointerdown={() => startPress(army.id)}
+              onpointerup={cancelPress}
+              onpointerleave={cancelPress}
+              onpointercancel={cancelPress}
+              title="Hold to delete"
+              aria-label="Delete army"
+            >
+              <span class="delete-icon">⊗</span>
+              <span class="delete-fill"></span>
+            </button>
+          </div>
+
+          <button class="report-btn" onclick={() => onreport(army.id)}>
+            ⚔ Battle Report
           </button>
         </div>
       {/each}
@@ -317,11 +323,17 @@
     border: 1px solid var(--color-border);
     background: var(--color-bg-raised);
     display: flex;
+    flex-direction: column;
     transition: border-color 0.15s;
   }
 
   .army-card:hover {
     border-color: var(--color-accent-dim);
+  }
+
+  .card-main {
+    display: flex;
+    flex: 1;
   }
 
   .card-body {
@@ -410,6 +422,32 @@
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-text-muted);
+  }
+
+  /* ── Report Button ───────────────────────────── */
+  .report-btn {
+    width: 100%;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--color-border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .report-btn:hover {
+    color: var(--color-accent);
+    background: rgba(0, 200, 255, 0.06);
   }
 
   /* ── Delete Button ───────────────────────────── */

@@ -50,6 +50,15 @@ export function createWarlordDetachment(): ArmyDetachment {
   };
 }
 
+export function createHeavySupportDetachment(): ArmyDetachment {
+  return {
+    type: 'Heavy Support',
+    slots: [
+      makeSlot('War-Engine', 1),
+    ],
+  };
+}
+
 // ── Points calculation ────────────────────────────────────────────────────────
 
 export function calcSlottedUnitPoints(slottedUnit: SlottedUnit): number {

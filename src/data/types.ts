@@ -54,6 +54,7 @@ export interface UnitOptionChoice {
   description: string;
   pointsPerModel?: number;
   points?: number;
+  weaponName?: string;  // references a weapon in rangedWeapons or meleeWeapons
 }
 
 export interface UnitOption {
@@ -144,7 +145,8 @@ export type DetachmentSlotType =
   | 'Transport'
   | 'Warlord'
   | 'Retinue'
-  | 'Heavy Transport';
+  | 'Heavy Transport'
+  | 'War-Engine';
 
 export interface SelectedChoice {
   optionIndex: number;
@@ -163,7 +165,7 @@ export interface DetachmentSlot {
 }
 
 export interface ArmyDetachment {
-  type: 'Crusade Primary' | 'Warlord';
+  type: 'Crusade Primary' | 'Warlord' | 'Heavy Support';
   slots: DetachmentSlot[];
 }
 

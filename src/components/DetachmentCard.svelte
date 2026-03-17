@@ -50,6 +50,7 @@
       Warlord: '#ff4444',
       Retinue: '#cc88ff',
       'Heavy Transport': '#888888',
+      'War-Engine': '#cc4400',
     };
     return map[slotType] ?? '#5a7080';
   }

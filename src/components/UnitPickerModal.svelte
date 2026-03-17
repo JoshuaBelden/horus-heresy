@@ -1,6 +1,14 @@
 <script lang="ts">
-  import type { DetachmentSlotType, SlottedUnit, UnitProfile } from '../data/types';
-  import { units } from '../data';
+  import type { DetachmentSlotType, SlottedUnit, UnitProfile, MeleeWeapon, RangedWeapon } from '../data/types';
+  import { units, meleeWeapons, rangedWeapons } from '../data';
+
+  function findWeapon(name: string): MeleeWeapon | RangedWeapon | undefined {
+    return meleeWeapons.find((w) => w.name === name) ?? rangedWeapons.find((w) => w.name === name);
+  }
+
+  function isMelee(w: MeleeWeapon | RangedWeapon): w is MeleeWeapon {
+    return 'IM' in w;
+  }
 
   const {
     slotType,
@@ -109,6 +117,7 @@
       'Lord of War': '#ff4444',
       Transport: '#5a7080',
       'Heavy Transport': '#888888',
+      'War-Engine': '#cc4400',
     };
     return map[role] ?? '#5a7080';
   }
@@ -195,22 +204,55 @@
                   <div class="choice-list">
                     {#each option.choices as choice, choiceIdx}
                       {@const isSelected = selectedChoices[optIdx] === choiceIdx}
+                      {@const weapon = choice.weaponName ? findWeapon(choice.weaponName) : undefined}
                       <button
                         class="choice-btn"
                         class:selected={isSelected}
                         onclick={() => toggleChoice(optIdx, choiceIdx)}
                       >
-                        <span class="choice-radio">{isSelected ? '◉' : '○'}</span>
-                        <span class="choice-desc">{choice.description}</span>
-                        <span class="choice-cost">
-                          {#if choice.points !== undefined && choice.points !== 0}
-                            +{choice.points} pts
-                          {:else if choice.pointsPerModel !== undefined && choice.pointsPerModel !== 0}
-                            +{choice.pointsPerModel} pts/model
-                          {:else}
-                            Free
-                          {/if}
-                        </span>
+                        <div class="choice-main">
+                          <span class="choice-radio">{isSelected ? '◉' : '○'}</span>
+                          <span class="choice-desc">{choice.description}</span>
+                          <span class="choice-cost">
+                            {#if choice.points !== undefined && choice.points !== 0}
+                              +{choice.points} pts
+                            {:else if choice.pointsPerModel !== undefined && choice.pointsPerModel !== 0}
+                              +{choice.pointsPerModel} pts/model
+                            {:else}
+                              Free
+                            {/if}
+                          </span>
+                        </div>
+                        {#if weapon}
+                          <div class="weapon-stats">
+                            {#if isMelee(weapon)}
+                              <span class="ws-cell ws-header">IM</span>
+                              <span class="ws-cell ws-header">AM</span>
+                              <span class="ws-cell ws-header">SM</span>
+                              <span class="ws-cell ws-header">AP</span>
+                              <span class="ws-cell ws-header">D</span>
+                              <span class="ws-cell">{weapon.IM}</span>
+                              <span class="ws-cell">{weapon.AM}</span>
+                              <span class="ws-cell">{weapon.SM}</span>
+                              <span class="ws-cell">{weapon.AP}</span>
+                              <span class="ws-cell">{weapon.D}</span>
+                            {:else}
+                              <span class="ws-cell ws-header">R</span>
+                              <span class="ws-cell ws-header">FP</span>
+                              <span class="ws-cell ws-header">RS</span>
+                              <span class="ws-cell ws-header">AP</span>
+                              <span class="ws-cell ws-header">D</span>
+                              <span class="ws-cell">{weapon.R}</span>
+                              <span class="ws-cell">{weapon.FP}</span>
+                              <span class="ws-cell">{(weapon as import('../data/types').RangedWeapon).RS}</span>
+                              <span class="ws-cell">{weapon.AP}</span>
+                              <span class="ws-cell">{weapon.D}</span>
+                            {/if}
+                            {#if weapon.specialRules.length > 0}
+                              <span class="ws-rules">{weapon.specialRules.join(', ')}</span>
+                            {/if}
+                          </div>
+                        {/if}
                       </button>
                     {/each}
                   </div>
@@ -536,8 +578,8 @@
 
   .choice-btn {
     display: flex;
-    align-items: center;
-    gap: 0.6rem;
+    flex-direction: column;
+    gap: 0.4rem;
     width: 100%;
     background: none;
     border: 1px solid var(--color-border);
@@ -545,6 +587,52 @@
     cursor: pointer;
     text-align: left;
     transition: border-color 0.1s, background 0.1s;
+  }
+
+  .choice-main {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+  }
+
+  .weapon-stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    margin-left: 1.5rem;
+    border: 1px solid var(--color-border);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.68rem;
+  }
+
+  .ws-cell {
+    padding: 0.2rem 0.35rem;
+    text-align: center;
+    color: var(--color-text);
+    border-right: 1px solid var(--color-border);
+  }
+
+  .ws-cell:last-of-type {
+    border-right: none;
+  }
+
+  .ws-header {
+    color: var(--color-text-muted);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .ws-rules {
+    grid-column: 1 / -1;
+    padding: 0.2rem 0.35rem;
+    color: var(--color-text-muted);
+    font-size: 0.62rem;
+    font-style: italic;
+    border-top: 1px solid var(--color-border);
   }
 
   .choice-btn:hover {

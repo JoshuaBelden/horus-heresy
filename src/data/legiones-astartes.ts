@@ -95,7 +95,14 @@ export const legionesAstartesUnits: UnitProfile[] = [
     wargear: [],
     specialRules: [],
     traits: ['Legiones Astartes'],
-    options: [],
+    options: [
+      {
+        description: 'May take one of the following weapons',
+        choices: [
+          { description: 'Power sword', weaponName: 'Power sword', points: 10 },
+        ],
+      },
+    ],
   },
   {
     name: "Praetor in Saturnine Terminator Armour",

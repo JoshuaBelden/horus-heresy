@@ -222,8 +222,8 @@ export const veteranTacticalSquad: UnitProfile = {
 export const contemptorDreadnought: UnitProfile = {
   name: 'Contemptor Dreadnought',
   catalog: 'Legiones Astartes',
-  role: 'Elites',
-  points: 175,
+  role: 'War-Engine',
+  points: 150,
   description:
     'The Contemptor Pattern Dreadnought is an ancient and venerated war machine, its design predating many of the more common patterns in use by the Legiones Astartes at the time of the Horus Heresy.',
   composition: '1 Contemptor Dreadnought.',
