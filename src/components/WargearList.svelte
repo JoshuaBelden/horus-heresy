@@ -3,6 +3,7 @@
     meleeWeapons as catalogueMelee,
     rangedWeapons as catalogueRanged,
     weaponLists,
+    wargear,
   } from '../data';
   import { lookupRule } from '../data/specialRules';
   import type { MeleeWeapon, RangedWeapon, SpecialRule } from '../data/types';
@@ -15,7 +16,7 @@
   );
 
   // ── Tabs ──────────────────────────────────────────────────────────────────
-  type Tab = 'ranged' | 'melee' | 'lists';
+  type Tab = 'ranged' | 'melee' | 'wargear' | 'lists';
   let activeTab = $state<Tab>('ranged');
 
   // ── Search ────────────────────────────────────────────────────────────────
@@ -112,6 +113,17 @@
           activeTab = 'melee';
           query = '';
         }}>Melee <span class="tab-count">({meleeWeapons.length})</span></button
+      >
+      <button
+        class="tab-btn"
+        class:active={activeTab === 'wargear'}
+        role="tab"
+        aria-selected={activeTab === 'wargear'}
+        onclick={() => {
+          activeTab = 'wargear';
+          query = '';
+        }}
+        >Wargear <span class="tab-count">({wargear.length})</span></button
       >
       <button
         class="tab-btn"
@@ -288,6 +300,34 @@
               {/each}
             </tbody>
           </table>
+        </div>
+      {/if}
+    </section>
+  {/if}
+
+  <!-- ── Wargear ──────────────────────────────────── -->
+  {#if activeTab === 'wargear'}
+    <section class="weapon-section">
+      {#if wargear.length === 0}
+        <div class="empty-state">
+          <span class="empty-icon">◈</span>
+          <p>No wargear data yet.</p>
+        </div>
+      {:else}
+        <div class="lists-grid">
+          {#each wargear as item}
+            <div class="list-card">
+              <div class="list-card-header">
+                <h3 class="list-card-title">{item.name}</h3>
+              </div>
+              <div class="wargear-card-body">
+                {#if item.summary}
+                  <p class="wargear-summary">"{item.summary}"</p>
+                {/if}
+                <p class="wargear-desc">{item.description}</p>
+              </div>
+            </div>
+          {/each}
         </div>
       {/if}
     </section>
@@ -741,6 +781,31 @@
   .col-pts {
     width: 48px;
     text-align: center;
+  }
+
+  /* ── Wargear Cards ───────────────────────────── */
+  .wargear-card-body {
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .wargear-summary {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.82rem;
+    color: var(--color-gold);
+    font-style: italic;
+    line-height: 1.5;
+    border-left: 2px solid var(--color-gold);
+    padding-left: 0.5rem;
+  }
+
+  .wargear-desc {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
   }
 
   /* ── Empty State ─────────────────────────────── */
