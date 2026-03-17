@@ -443,7 +443,8 @@ export const rangedWeapons: RangedWeapon[] = [
     specialRules: [],
     traits: [
       "Bolt"
-    ]
+    ],
+    category: "Combi Weapons"
   },
   {
     name: "Combi-disintegrator",
@@ -457,7 +458,8 @@ export const rangedWeapons: RangedWeapon[] = [
     ],
     traits: [
       "Bolt"
-    ]
+    ],
+    category: "Combi Weapons"
   },
   {
     name: "Combi-flamer",
@@ -471,7 +473,8 @@ export const rangedWeapons: RangedWeapon[] = [
     ],
     traits: [
       "Bolt"
-    ]
+    ],
+    category: "Combi Weapons"
   },
   {
     name: "Combi-grav",
@@ -485,7 +488,8 @@ export const rangedWeapons: RangedWeapon[] = [
     ],
     traits: [
       "Bolt"
-    ]
+    ],
+    category: "Combi Weapons"
   },
   {
     name: "Combi-grenade",
@@ -499,7 +503,8 @@ export const rangedWeapons: RangedWeapon[] = [
     ],
     traits: [
       "Bolt"
-    ]
+    ],
+    category: "Combi Weapons"
   },
   {
     name: "Combi-melta",
@@ -513,7 +518,8 @@ export const rangedWeapons: RangedWeapon[] = [
     ],
     traits: [
       "Bolt"
-    ]
+    ],
+    category: "Combi Weapons"
   },
   {
     name: "Combi-plasma",
@@ -527,7 +533,8 @@ export const rangedWeapons: RangedWeapon[] = [
     ],
     traits: [
       "Bolt"
-    ]
+    ],
+    category: "Combi Weapons"
   },
   {
     name: "Combi-volkite",
@@ -541,7 +548,8 @@ export const rangedWeapons: RangedWeapon[] = [
     ],
     traits: [
       "Bolt"
-    ]
+    ],
+    category: "Combi Weapons"
   },
   {
     name: "Concussive resonator",
@@ -1176,7 +1184,8 @@ export const rangedWeapons: RangedWeapon[] = [
     traits: [
       "Assault",
       "Flame"
-    ]
+    ],
+    category: "Flame Weapons"
   },
   {
     name: "Havoc launcher",
@@ -2332,7 +2341,8 @@ export const rangedWeapons: RangedWeapon[] = [
     traits: [
       "Assault",
       "Plasma"
-    ]
+    ],
+    category: "Plasma Weapons"
   },
   {
     name: "Plasma repeater",
@@ -3302,7 +3312,8 @@ export const rangedWeapons: RangedWeapon[] = [
     traits: [
       "Assault",
       "Volkite"
-    ]
+    ],
+    category: "Volkite Weapons"
   },
   {
     name: "Voltlock arquebus",
@@ -3482,7 +3493,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     specialRules: [],
     traits: [
       "Bayonet"
-    ]
+    ],
+    category: "Chain"
   },
   {
     name: "Blade of Perdition",
@@ -3512,7 +3524,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     ],
     traits: [
       "Sword of the Order"
-    ]
+    ],
+    category: "Charnabal"
   },
   {
     name: "Carsoran power axe",
@@ -3557,7 +3570,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     traits: [
       "Bayonet",
       "Chain"
-    ]
+    ],
+    category: "Chain"
   },
   {
     name: "Chainaxe",
@@ -3571,7 +3585,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     ],
     traits: [
       "Chain"
-    ]
+    ],
+    category: "Chain"
   },
   {
     name: "Chainfist",
@@ -3615,7 +3630,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     ],
     traits: [
       "Chain"
-    ]
+    ],
+    category: "Chain"
   },
   {
     name: "Charnabal sabre",
@@ -3630,7 +3646,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     ],
     traits: [
       "Charnabal"
-    ]
+    ],
+    category: "Charnabal"
   },
   {
     name: "Charnabal tabar",
@@ -4149,7 +4166,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     ],
     traits: [
       "Power"
-    ]
+    ],
+    category: "Exotic"
   },
   {
     name: "Maul of Perdition",
@@ -4398,7 +4416,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     ],
     traits: [
       "Power"
-    ]
+    ],
+    category: "Power"
   },
   {
     name: "Power dagger",
@@ -4424,7 +4443,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     specialRules: [],
     traits: [
       "Power"
-    ]
+    ],
+    category: "Power"
   },
   {
     name: "Power glaive",
@@ -4453,7 +4473,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     ],
     traits: [
       "Power"
-    ]
+    ],
+    category: "Power"
   },
   {
     name: "Power lash",
@@ -4481,7 +4502,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     ],
     traits: [
       "Power"
-    ]
+    ],
+    category: "Power"
   },
   {
     name: "Power scythe",
@@ -4510,7 +4532,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     ],
     traits: [
       "Power"
-    ]
+    ],
+    category: "Power"
   },
   {
     name: "Raven&apos;s Talons",
@@ -4685,7 +4708,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     specialRules: [],
     traits: [
       "Power"
-    ]
+    ],
+    category: "Exotic"
   },
   {
     name: "Voltlock arquebus",

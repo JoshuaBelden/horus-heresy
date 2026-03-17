@@ -1,4 +1,4 @@
-import { units } from '../data';
+import { units, weaponLists } from '../data';
 import type {
   ArmyList,
   ArmyDetachment,
@@ -65,11 +65,31 @@ export function calcSlottedUnitPoints(slottedUnit: SlottedUnit): number {
   const profile = units.find((u) => u.name === slottedUnit.unitName);
   if (!profile) return 0;
   let total = profile.points;
+
   for (const sc of slottedUnit.selectedChoices) {
     const opt = profile.options[sc.optionIndex];
-    const choice = opt?.choices?.[sc.choiceIndex];
-    if (choice?.points) total += choice.points;
+    if (!opt) continue;
+
+    if (opt.appliesTo === 'model-count') {
+      total += (sc.count ?? 0) * (opt.pointsPerModel ?? 0);
+    } else if (opt.weaponListNames) {
+      const allEntries = opt.weaponListNames.flatMap(
+        (name) => weaponLists.find((l) => l.name === name)?.entries ?? []
+      );
+      total += allEntries[sc.choiceIndex]?.points ?? 0;
+    } else {
+      const choice = opt.choices?.[sc.choiceIndex];
+      if (choice?.points) total += choice.points;
+    }
   }
+
+  for (const group of slottedUnit.modelGroups ?? []) {
+    if (group.choiceIndex === null) continue;
+    const opt = profile.options[group.optionIndex];
+    const choice = opt?.choices?.[group.choiceIndex];
+    if (choice?.pointsPerModel) total += group.count * choice.pointsPerModel;
+  }
+
   return total;
 }
 

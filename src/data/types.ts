@@ -1,5 +1,44 @@
 export type UnitCatalog = 'Legiones Astartes' | 'Dark Angels';
 
+export type RangedWeaponCategory =
+  | 'Artillery Cannon'
+  | 'Archaeotech Pistol'
+  | 'Auto Weapons'
+  | 'Bolt Weapons'
+  | 'Combi Weapons'
+  | 'Conversion Beam Weapons'
+  | 'Disintegrator Weapons'
+  | 'Graviton Weapons'
+  | 'Flame Weapons'
+  | 'Las Weapons'
+  | 'Melta Weapons'
+  | 'Missile Weapons'
+  | 'Particle Weapons'
+  | 'Phosphex Weapons'
+  | 'Plasma Weapons'
+  | 'Rad Weapons'
+  | 'Sonic Weapons'
+  | 'Volkite Weapons'
+  | 'Exotic Weapons';
+
+export type MeleeWeaponCategory =
+  | 'Chain'
+  | 'Charnabal'
+  | 'Force'
+  | 'Power'
+  | 'Paragon'
+  | 'Exotic';
+
+export interface WeaponListEntry {
+  weaponName: string;
+  points: number;
+}
+
+export interface WeaponList {
+  name: string;
+  entries: WeaponListEntry[];
+}
+
 export type BattlefieldRole =
   | 'Warlord'
   | 'High Command'
@@ -32,6 +71,7 @@ export type InvSaveValue = SaveValue | '-';
 
 export interface ModelProfile {
   name: string;
+  count?: number;
   type: UnitType;
   subtype?: string;
   M: number;
@@ -59,9 +99,19 @@ export interface UnitOptionChoice {
 
 export interface UnitOption {
   description: string;
+  appliesTo?: 'unit' | 'per-model' | 'model-count';
+  modelName?: string;
+  max?: number;
   pointsPerModel?: number;
   points?: number;
   choices?: UnitOptionChoice[];
+  weaponListNames?: string[];
+}
+
+export interface ModelGroup {
+  optionIndex: number;
+  count: number;
+  choiceIndex: number | null;
 }
 
 export interface SpecialRule {
@@ -79,6 +129,7 @@ export interface RangedWeapon {
   D: number | string;
   specialRules: string[];
   traits: string[];
+  category?: RangedWeaponCategory;
 }
 
 export interface MeleeWeapon {
@@ -90,6 +141,7 @@ export interface MeleeWeapon {
   D: number;
   specialRules: string[];
   traits: string[];
+  category?: MeleeWeaponCategory;
 }
 
 export interface WargearDetail {
@@ -151,11 +203,13 @@ export type DetachmentSlotType =
 export interface SelectedChoice {
   optionIndex: number;
   choiceIndex: number;
+  count?: number;
 }
 
 export interface SlottedUnit {
   unitName: string;
   selectedChoices: SelectedChoice[];
+  modelGroups?: ModelGroup[];
 }
 
 export interface DetachmentSlot {
