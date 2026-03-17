@@ -7,6 +7,11 @@ export const specialRules: SpecialRule[] = [
       'When a Model with this Special Rule makes a Shooting Attack with a bolter, the bolter gains the Heavy (FP) Special Rule until that Shooting Attack is fully resolved.',
   },
   {
+    name: 'Officer of the Line',
+    summary: 'Models with this Special Rule allow more Auxiliary Detachments to be included in an Army.',
+    description: 'If a Model with this Special Rule is selected to fill a Command Slot in any Detachment in the Crusade Force Organization Chart, then the Controlling Player may select a number of Auxiliary Detachments equal to the value of X in the specific variant of this Special Rule instead of just one.'
+  },
+  {
     name: 'Pistol',
     summary: 'A Model may attack with two Weapons that have the Pistol Special Rule.',
     description:

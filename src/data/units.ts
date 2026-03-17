@@ -51,7 +51,7 @@ export const tacticalSquad: UnitProfile = {
     },
   ],
   wargear: ['Bolter', 'Bolt pistol', 'Frag grenades', 'Krak grenades'],
-  specialRules: ['Fury of the Legion', 'Line (2)'],
+  specialRules: ['Fury of the Legion'],
   traits: ['Allegiance', 'Legiones Astartes'],
   options: [
     {
@@ -116,12 +116,70 @@ export const tacticalSquad: UnitProfile = {
     {
       description: 'The unit may take a Nuncio-vox.',
       appliesTo: 'unit',
-      choices: [{ description: 'Nuncio-vox', points: 10, wargearName: 'Nuncio-vox' }],
+      choices: [
+        { description: 'Nuncio-vox', points: 10, wargearName: 'Nuncio-vox' },
+      ],
     },
     {
       description: 'The unit may take an Augury scanner.',
       appliesTo: 'unit',
-      choices: [{ description: 'Augury scanner', points: 10, wargearName: 'Augury scanner' }],
+      choices: [
+        {
+          description: 'Augury scanner',
+          points: 10,
+          wargearName: 'Augury scanner',
+        },
+      ],
+    },
+  ],
+};
+
+const centurion: UnitProfile = {
+  name: 'Centurion',
+  catalog: 'Legiones Astartes',
+  role: 'Command',
+  points: 80,
+  description: '',
+  composition:
+    'This Model may be replaced with 1 Centurion with Jump Pack for +20 points.',
+  models: [
+    {
+      name: 'Centurion',
+      type: 'Infantry-Command',
+      M: 7,
+      WS: 5,
+      BS: 5,
+      S: 4,
+      T: 4,
+      W: 3,
+      I: 5,
+      A: 4,
+      LD: 9,
+      CL: 8,
+      WP: 8,
+      IN: 8,
+      SAV: '2+',
+      INV: '5+',
+    },
+  ],
+  wargear: ['Bolter', 'Bolt pistol', 'Frag grenades', 'Kark grenades'],
+  specialRules: ['Officer of the Line'],
+  traits: ['Legiones Astartes'],
+  options: [
+    {
+      description:
+        'This Model may replace their Bolter with one item from the Legion Sergeant Melee Weapons or Legion Combi-weapons lists.',
+      appliesTo: 'unit',
+      weaponListNames: [
+        'Legion Sergeant Melee Weapons',
+        'Legion Combi-weapons',
+      ],
+    },
+    {
+      description:
+        'This Model may replace their Bolt Pistol with one item from the Legion Pistols or Legion Sergeant Melee Weapons lists.',
+      appliesTo: 'unit',
+      weaponListNames: ['Legion Pistols', 'Legion Sergeant Melee Weapons'],
     },
   ],
 };
@@ -394,6 +452,7 @@ export const lionElJohnson: UnitProfile = {
 export const units: UnitProfile[] = [
   tacticalSquad,
   veteranTacticalSquad,
+  centurion,
   contemptorDreadnought,
   sicaranBattleTank,
   lionElJohnson,
@@ -461,45 +520,7 @@ export const units: UnitProfile[] = [
     traits: ['Legiones Astartes'],
     options: [],
   },
-  {
-    name: 'Centurion',
-    catalog: 'Legiones Astartes',
-    role: 'Command',
-    points: 80,
-    description: '',
-    composition: '',
-    models: [
-      {
-        name: 'Centurion',
-        type: 'Infantry',
-        M: 7,
-        WS: 5,
-        BS: 5,
-        S: 4,
-        T: 4,
-        W: 3,
-        I: 5,
-        A: 4,
-        LD: 9,
-        CL: 8,
-        WP: 8,
-        IN: 8,
-        SAV: '2+',
-        INV: '5+',
-      },
-    ],
-    wargear: [],
-    specialRules: [],
-    traits: ['Legiones Astartes'],
-    options: [
-      {
-        description: 'May take one of the following weapons',
-        choices: [
-          { description: 'Power sword', weaponName: 'Power sword', points: 10 },
-        ],
-      },
-    ],
-  },
+
   {
     name: 'Praetor in Saturnine Terminator Armour',
     catalog: 'Legiones Astartes',

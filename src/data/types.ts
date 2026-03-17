@@ -58,6 +58,7 @@ export type BattlefieldRole =
 
 export type UnitType =
   | 'Infantry'
+  | 'Infantry-Command'
   | 'Cavalry'
   | 'Walker'
   | 'Vehicle'
