@@ -36,3 +36,7 @@ coverage/
 
 # Windows files
 Thumbs.db
+
+.claude/
+.tldr/
+.tldrignore
