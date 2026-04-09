@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Faction } from '../data/types';
+  import type { Faction, ArmyList } from '../data/types';
   import { armiesStore, createCrusadeDetachment, calcArmyPoints } from '../stores/armies.svelte';
 
   const { onopen, onreport }: { onopen: (id: string) => void; onreport: (id: string) => void } = $props();
@@ -84,6 +84,50 @@
     if (e.key === 'Escape') cancelCreate();
   }
 
+  // ── Import / Export ──────────────────────────────────────────────────────────
+
+  function exportArmy(army: ArmyList) {
+    const { id: _, ...data } = army;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${army.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  let fileInput: HTMLInputElement = undefined!;
+
+  function triggerImport() {
+    fileInput.click();
+  }
+
+  function handleImportFile(e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result as string);
+        const army: ArmyList = {
+          id: crypto.randomUUID(),
+          name: data.name ?? 'Imported Army',
+          faction: data.faction ?? 'Ultramarines',
+          allegiance: data.allegiance ?? 'Loyalist',
+          detachments: data.detachments ?? [createCrusadeDetachment()],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        armiesStore.create(army);
+      } catch {
+        alert('Could not read army file. Make sure it is a valid JSON export.');
+      }
+    };
+    reader.readAsText(file);
+    (e.target as HTMLInputElement).value = '';
+  }
+
   function filledSlots(army: (typeof armiesStore.list)[number]): number {
     return army.detachments.reduce(
       (acc, det) => acc + det.slots.filter((s) => s.unit !== null).length,
@@ -102,8 +146,18 @@
       <h2 class="page-title">My Armies</h2>
       <span class="army-count">{armiesStore.list.length} roster{armiesStore.list.length !== 1 ? 's' : ''}</span>
     </div>
-    <button class="create-btn" onclick={openCreateForm}>+ New Army</button>
+    <div class="header-actions">
+      <button class="action-btn" onclick={triggerImport}>Import</button>
+      <button class="create-btn" onclick={openCreateForm}>+ New Army</button>
+    </div>
   </div>
+  <input
+    type="file"
+    accept=".json"
+    style="display:none"
+    bind:this={fileInput}
+    onchange={handleImportFile}
+  />
 
   {#if armiesStore.list.length === 0}
     <div class="empty-state">
@@ -158,9 +212,14 @@
             </button>
           </div>
 
-          <button class="report-btn" onclick={() => onreport(army.id)}>
-            ⚔ Battle Report
-          </button>
+          <div class="card-actions">
+            <button class="report-btn" onclick={() => onreport(army.id)}>
+              ⚔ Battle Report
+            </button>
+            <button class="export-btn" onclick={() => exportArmy(army)}>
+              Export
+            </button>
+          </div>
         </div>
       {/each}
     </div>
@@ -424,12 +483,43 @@
     color: var(--color-text-muted);
   }
 
-  /* ── Report Button ───────────────────────────── */
-  .report-btn {
-    width: 100%;
+  /* ── Header Actions ──────────────────────────── */
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    background: none;
+    padding: 0.5rem 1.1rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+
+  .action-btn:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent-dim);
+    background: rgba(0, 200, 255, 0.06);
+  }
+
+  /* ── Card Actions ───────────────────────────── */
+  .card-actions {
+    display: flex;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .report-btn,
+  .export-btn {
+    flex: 1;
     background: none;
     border: none;
-    border-top: 1px solid var(--color-border);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -445,9 +535,14 @@
     transition: color 0.15s, background 0.15s;
   }
 
-  .report-btn:hover {
+  .report-btn:hover,
+  .export-btn:hover {
     color: var(--color-accent);
     background: rgba(0, 200, 255, 0.06);
+  }
+
+  .export-btn {
+    border-left: 1px solid var(--color-border);
   }
 
   /* ── Delete Button ───────────────────────────── */
