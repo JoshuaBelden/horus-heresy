@@ -455,6 +455,9 @@
     {#if weapon.specialRules.length > 0}
       <span class="ws-rules">{weapon.specialRules.join(', ')}</span>
     {/if}
+    {#if weapon.traits.length > 0}
+      <span class="ws-traits">{weapon.traits.join(', ')}</span>
+    {/if}
   </div>
 {/snippet}
 
@@ -1297,6 +1300,14 @@
     font-size: 0.62rem;
     font-style: italic;
     border-top: 1px solid var(--color-border);
+  }
+
+  .ws-traits {
+    grid-column: 1 / -1;
+    padding: 0.2rem 0.35rem;
+    color: var(--color-accent-dim);
+    font-size: 0.62rem;
+    font-style: italic;
   }
 
   .choice-btn:hover {

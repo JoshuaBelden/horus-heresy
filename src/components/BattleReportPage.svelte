@@ -9,6 +9,7 @@
   import { lookupRule } from '../data/specialRules';
   import type {
     MeleeWeapon,
+    ModelProfile,
     RangedWeapon,
     UnitProfile,
     WargearDetail,
@@ -21,99 +22,6 @@
   const army = $derived(armiesStore.list.find((a) => a.id === armyId)!);
   const totalPoints = $derived(army ? calcArmyPoints(army) : 0);
 
-  const allFilledProfiles = $derived(
-    army
-      ? army.detachments
-          .flatMap((d) => d.slots)
-          .filter((s) => s.unit !== null)
-          .map((s) => units.find((u) => u.name === s.unit!.unitName))
-          .filter((u): u is UnitProfile => u !== undefined)
-      : [],
-  );
-
-  const uniqueProfiles = $derived([
-    ...new Map(allFilledProfiles.map((p) => [p.name, p])).values(),
-  ]);
-
-  // Collect all weapon names across all slotted units: defaults + chosen options
-  const allWargearNames = $derived(
-    army
-      ? [
-          ...new Set(
-            army.detachments
-              .flatMap((d) => d.slots)
-              .filter((s) => s.unit !== null)
-              .flatMap((s) => {
-                const profile = units.find((u) => u.name === s.unit!.unitName);
-                if (!profile) return [];
-                const names: string[] = [...profile.wargear];
-                for (const sc of s.unit!.selectedChoices) {
-                  const opt = profile.options[sc.optionIndex];
-                  if (!opt) continue;
-                  if (opt.weaponListNames) {
-                    const entries = opt.weaponListNames.flatMap(
-                      (n) =>
-                        weaponLists.find((l) => l.name === n)?.entries ?? [],
-                    );
-                    const entry = entries[sc.choiceIndex];
-                    if (entry) names.push(entry.weaponName);
-                  } else if (opt.choices) {
-                    const choice = opt.choices[sc.choiceIndex];
-                    if (choice?.weaponName) names.push(choice.weaponName);
-                  }
-                }
-                for (const group of s.unit!.modelGroups ?? []) {
-                  if (group.choiceIndex === null) continue;
-                  const opt = profile.options[group.optionIndex];
-                  const choice = opt?.choices?.[group.choiceIndex];
-                  if (choice?.weaponName) names.push(choice.weaponName);
-                }
-                return names;
-              }),
-          ),
-        ]
-      : [],
-  );
-
-  // Collect selected wargear items (non-weapon equipment like Vexilla, Nuncio-vox, etc.)
-  const selectedWargear = $derived(
-    army
-      ? [
-          ...new Map(
-            army.detachments
-              .flatMap((d) => d.slots)
-              .filter((s) => s.unit !== null)
-              .flatMap((s) => {
-                const profile = units.find((u) => u.name === s.unit!.unitName);
-                if (!profile) return [];
-                const names: string[] = [...profile.wargear];
-                for (const sc of s.unit!.selectedChoices) {
-                  const opt = profile.options[sc.optionIndex];
-                  const choice = opt?.choices?.[sc.choiceIndex];
-                  if (choice?.wargearName) names.push(choice.wargearName);
-                }
-                return names;
-              })
-              .map((n) => wargearCatalogue.find((g) => g.name === n))
-              .filter((g): g is WargearDetail => g !== undefined)
-              .map((g) => [g.name, g] as [string, WargearDetail]),
-          ).values(),
-        ]
-      : [],
-  );
-
-  const rangedWeapons = $derived(
-    allWargearNames
-      .map((n) => catalogueRanged.find((w) => w.name === n))
-      .filter((w): w is RangedWeapon => w !== undefined),
-  );
-
-  const meleeWeapons = $derived(
-    allWargearNames
-      .map((n) => catalogueMelee.find((w) => w.name === n))
-      .filter((w): w is MeleeWeapon => w !== undefined),
-  );
-
   const STAT_KEYS = ['M', 'WS', 'BS', 'S', 'T', 'W', 'I', 'A', 'LD', 'CL', 'WP', 'IN', 'SAV', 'INV'];
 
   // Rule references open the shared Library panel and jump to the rule.
@@ -121,97 +29,121 @@
     libraryStore.openRule(ruleName);
   }
 
-  // ── Per-unit loadout & rule references ───────────────────────────────────────
-  // Each unit profile lists the weapons / equipment / special rules it is using.
-  // The full stat lines live in the Wargear & Special Rules sections below, so
-  // these are rendered as clickable references that jump to the matching entry.
-  function slug(s: string): string {
-    return s
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
+  // Unit blocks are collapsed by default; track which slots are expanded.
+  let expanded = $state<Record<string, boolean>>({});
+  function toggleUnit(key: string) {
+    expanded[key] = !expanded[key];
   }
 
-  interface UnitRefs {
-    weapons: string[];
-    equipment: string[];
+  // ── Per-slot unit instances ──────────────────────────────────────────────────
+  // Every filled detachment slot is rendered as its own block — duplicates (e.g.
+  // two Tactical Squads) appear separately because each slot has its own loadout.
+  // Within a unit, weapons are grouped under the model that carries them so a
+  // Sergeant's loadout reads separately from the rank-and-file Legionaries.
+  interface ModelLoadout {
+    model: ModelProfile;
+    ranged: RangedWeapon[];
+    melee: MeleeWeapon[];
+  }
+  interface UnitInstance {
+    key: string;
+    profile: UnitProfile;
+    models: ModelLoadout[];
+    equipment: WargearDetail[];
     rules: string[];
   }
 
-  const profileRefs = $derived.by(() => {
-    const map = new Map<string, UnitRefs>();
-    if (!army) return map;
+  // Which model in the unit an option applies to, or null for unit-wide.
+  // `modelName` is authoritative; otherwise we match the option's prose against
+  // each model's name/subtype (stemmed, so "Legionaries" matches "Legionary").
+  function attributeModel(profile: UnitProfile, optionIndex: number): number | null {
+    const opt = profile.options[optionIndex];
+    if (!opt) return null;
+    if (opt.modelName) {
+      const i = profile.models.findIndex((m) => m.name === opt.modelName);
+      if (i >= 0) return i;
+    }
+    const desc = opt.description.toLowerCase();
+    for (let i = 0; i < profile.models.length; i++) {
+      const m = profile.models[i];
+      for (const token of [m.name, m.subtype]) {
+        if (!token) continue;
+        const stem = token.toLowerCase().replace(/(ies|s|y)$/, '');
+        if (stem.length >= 3 && desc.includes(stem)) return i;
+      }
+    }
+    return null;
+  }
+
+  const unitInstances = $derived.by(() => {
+    const result: UnitInstance[] = [];
+    if (!army) return result;
     for (const det of army.detachments) {
       for (const s of det.slots) {
         if (!s.unit) continue;
         const profile = units.find((u) => u.name === s.unit!.unitName);
         if (!profile) continue;
-        let entry = map.get(profile.name);
-        if (!entry) {
-          entry = { weapons: [], equipment: [], rules: [] };
-          map.set(profile.name, entry);
-        }
-        entry.weapons.push(...profile.wargear);
-        entry.rules.push(...profile.specialRules);
+
+        // Default wargear is the shared baseline carried by every model; selected
+        // options add weapons to a specific model (or all, when unit-wide).
+        const perModelWeapons: string[][] = profile.models.map(() => [
+          ...profile.wargear,
+        ]);
+        const equipmentNames: string[] = [...profile.wargear];
+        const ruleNames: string[] = [...profile.specialRules];
+
+        const addWeapon = (name: string, modelIndex: number | null) => {
+          if (modelIndex === null)
+            for (const arr of perModelWeapons) arr.push(name);
+          else perModelWeapons[modelIndex].push(name);
+        };
+
         for (const sc of s.unit.selectedChoices) {
           const opt = profile.options[sc.optionIndex];
           if (!opt) continue;
+          const modelIndex = attributeModel(profile, sc.optionIndex);
           if (opt.weaponListNames) {
             const entries = opt.weaponListNames.flatMap(
               (n) => weaponLists.find((l) => l.name === n)?.entries ?? [],
             );
             const e = entries[sc.choiceIndex];
-            if (e) entry.weapons.push(e.weaponName);
+            if (e) addWeapon(e.weaponName, modelIndex);
           } else if (opt.choices) {
             const choice = opt.choices[sc.choiceIndex];
-            if (choice?.weaponName) entry.weapons.push(choice.weaponName);
-            if (choice?.wargearName) entry.equipment.push(choice.wargearName);
+            if (choice?.weaponName) addWeapon(choice.weaponName, modelIndex);
+            if (choice?.wargearName) equipmentNames.push(choice.wargearName);
           }
         }
         for (const group of s.unit.modelGroups ?? []) {
           if (group.choiceIndex === null) continue;
           const opt = profile.options[group.optionIndex];
           const choice = opt?.choices?.[group.choiceIndex];
-          if (choice?.weaponName) entry.weapons.push(choice.weaponName);
+          if (choice?.weaponName)
+            addWeapon(choice.weaponName, attributeModel(profile, group.optionIndex));
         }
+
+        const models: ModelLoadout[] = profile.models.map((model, i) => {
+          const uniq = [...new Set(perModelWeapons[i])];
+          const ranged = uniq
+            .map((n) => catalogueRanged.find((w) => w.name === n))
+            .filter((w): w is RangedWeapon => w !== undefined);
+          const melee = uniq
+            .map((n) => catalogueMelee.find((w) => w.name === n))
+            .filter((w): w is MeleeWeapon => w !== undefined);
+          for (const w of [...ranged, ...melee]) ruleNames.push(...w.specialRules);
+          return { model, ranged, melee };
+        });
+
+        const equipment = [...new Set(equipmentNames)]
+          .map((n) => wargearCatalogue.find((g) => g.name === n))
+          .filter((g): g is WargearDetail => g !== undefined);
+        const rules = [...new Set(ruleNames)].sort();
+
+        result.push({ key: s.id, profile, models, equipment, rules });
       }
     }
-    for (const entry of map.values()) {
-      entry.weapons = [...new Set(entry.weapons)];
-      entry.equipment = [...new Set(entry.equipment)];
-      for (const name of entry.weapons) {
-        const w =
-          catalogueRanged.find((x) => x.name === name) ??
-          catalogueMelee.find((x) => x.name === name);
-        if (w) entry.rules.push(...w.specialRules);
-      }
-      entry.rules = [...new Set(entry.rules)].sort();
-    }
-    return map;
+    return result;
   });
-
-  // Anchor id for a loadout entry, or null when it has no matching row below.
-  function loadoutAnchor(name: string): string | null {
-    if (
-      catalogueRanged.some((w) => w.name === name) ||
-      catalogueMelee.some((w) => w.name === name)
-    )
-      return `wpn-${slug(name)}`;
-    if (selectedWargear.some((g) => g.name === name)) return `eq-${slug(name)}`;
-    return null;
-  }
-
-  let flashId = $state<string | null>(null);
-  let flashTimer: ReturnType<typeof setTimeout> | null = null;
-
-  function jumpTo(id: string) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    flashId = id;
-    if (flashTimer) clearTimeout(flashTimer);
-    flashTimer = setTimeout(() => (flashId = null), 1500);
-  }
 
   const FACTION_COLORS: Record<string, string> = {
     'Dark Angels': '#1a5c1a',
@@ -225,6 +157,80 @@
     'Raven Guard': '#404040',
   };
 </script>
+
+{#snippet rulesCell(items: string[])}
+  {#if items.length === 0}—{:else}{#each items as r, i}{#if lookupRule(r)}<button
+          class="rule-link"
+          onclick={() => openRule(r)}>{r}</button
+        >{:else}{r}{/if}{#if i < items.length - 1},
+      {/if}{/each}{/if}
+{/snippet}
+
+{#snippet rangedTable(weapons: RangedWeapon[])}
+  <div class="weapons-table-wrap">
+    <table class="weapons-table">
+      <thead>
+        <tr>
+          <th class="col-name">Name</th>
+          <th>R</th>
+          <th>FP</th>
+          <th>RS</th>
+          <th>AP</th>
+          <th>D</th>
+          <th class="col-rules">Special Rules</th>
+          <th class="col-traits">Traits</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each weapons as w (w.name)}
+          <tr>
+            <td class="col-name">{w.name}</td>
+            <td>{w.R ?? '—'}</td>
+            <td>{w.FP ?? '—'}</td>
+            <td>{w.RS ?? '—'}</td>
+            <td>{w.AP ?? '—'}</td>
+            <td>{w.D ?? '—'}</td>
+            <td class="col-rules">{@render rulesCell(w.specialRules ?? [])}</td>
+            <td class="col-traits">{@render rulesCell(w.traits ?? [])}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
+{/snippet}
+
+{#snippet meleeTable(weapons: MeleeWeapon[])}
+  <div class="weapons-table-wrap">
+    <table class="weapons-table">
+      <thead>
+        <tr>
+          <th class="col-name">Name</th>
+          <th>IM</th>
+          <th>AM</th>
+          <th>SM</th>
+          <th>AP</th>
+          <th>D</th>
+          <th class="col-rules">Special Rules</th>
+          <th class="col-traits">Traits</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each weapons as w (w.name)}
+          <tr>
+            <td class="col-name">{w.name}</td>
+            <td>{w.IM ?? '—'}</td>
+            <td>{w.AM ?? '—'}</td>
+            <td>{w.SM ?? '—'}</td>
+            <td>{w.AP ?? '—'}</td>
+            <td>{w.D ?? '—'}</td>
+            <td class="col-rules">{@render rulesCell(w.specialRules ?? [])}</td>
+            <td class="col-traits">{@render rulesCell(w.traits ?? [])}</td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
+{/snippet}
 
 {#if !army}
   <div class="error">Army not found.</div>
@@ -241,7 +247,6 @@
             '#5a7080'}; border-color: {FACTION_COLORS[army.faction] ??
             '#5a7080'}55">{army.faction}</span
         >
-        <span class="report-label">Battle Report</span>
       </div>
       <div class="points-display">
         <span class="points-value">{totalPoints}</span>
@@ -257,20 +262,30 @@
         <section class="report-section">
           <h3 class="section-title">Unit Profiles</h3>
 
-          {#if uniqueProfiles.length === 0}
+          {#if unitInstances.length === 0}
             <p class="empty-note">No units assigned yet.</p>
           {:else}
-            {#each uniqueProfiles as profile (profile.name)}
-              {@const refs = profileRefs.get(profile.name)}
-              <div class="unit-block">
-                <div class="unit-block-header">
+            {#each unitInstances as inst (inst.key)}
+              {@const profile = inst.profile}
+              {@const isOpen = expanded[inst.key] ?? false}
+              <div class="unit-block" class:is-open={isOpen}>
+                <button
+                  class="unit-block-header"
+                  aria-expanded={isOpen}
+                  onclick={() => toggleUnit(inst.key)}
+                >
+                  <span class="unit-toggle-icon">▸</span>
                   <span class="unit-block-name">{profile.name}</span>
                   <span class="unit-pts">{profile.points} pts</span>
-                </div>
+                </button>
 
-                {#each profile.models as model (model.name)}
+                {#if isOpen}
+                {#each inst.models as ml (ml.model.name)}
                   <div class="model-block">
-                    <div class="model-name">{model.name}</div>
+                    <div class="model-name">
+                      {ml.model.name}{#if ml.model.subtype && ml.model.subtype !== ml.model.name}
+                        ({ml.model.subtype}){/if}
+                    </div>
                     <div class="stats-table-wrap">
                       <table class="stats-table">
                         <thead>
@@ -284,42 +299,53 @@
                           <tr>
                             {#each STAT_KEYS as stat}
                               <td
-                                >{(model as unknown as Record<string, unknown>)[
-                                  stat
-                                ] ?? '—'}</td
+                                >{(ml.model as unknown as Record<
+                                  string,
+                                  unknown
+                                >)[stat] ?? '—'}</td
                               >
                             {/each}
                           </tr>
                         </tbody>
                       </table>
                     </div>
+
+                    {#if ml.ranged.length > 0}
+                      <div class="ref-group">
+                        <span class="ref-label">Ranged Weapons</span>
+                        {@render rangedTable(ml.ranged)}
+                      </div>
+                    {/if}
+
+                    {#if ml.melee.length > 0}
+                      <div class="ref-group">
+                        <span class="ref-label">Melee Weapons</span>
+                        {@render meleeTable(ml.melee)}
+                      </div>
+                    {/if}
                   </div>
                 {/each}
 
-                {#if refs && (refs.weapons.length > 0 || refs.equipment.length > 0)}
+                {#if inst.equipment.length > 0}
                   <div class="ref-group">
-                    <span class="ref-label">Loadout</span>
-                    <div class="ref-chips">
-                      {#each [...refs.weapons, ...refs.equipment] as name (name)}
-                        {@const anchor = loadoutAnchor(name)}
-                        {#if anchor}
-                          <button
-                            class="ref-chip ref-chip-link"
-                            onclick={() => jumpTo(anchor)}>{name}</button
-                          >
-                        {:else}
-                          <span class="ref-chip">{name}</span>
-                        {/if}
+                    <span class="ref-label">Equipment</span>
+                    <ul class="wargear-list">
+                      {#each inst.equipment as item (item.name)}
+                        <li class="wargear-item">
+                          <span class="wargear-name">{item.name}</span>
+                          <span class="wargear-summary">{item.summary}</span>
+                          <p class="wargear-desc">{item.description}</p>
+                        </li>
                       {/each}
-                    </div>
+                    </ul>
                   </div>
                 {/if}
 
-                {#if refs && refs.rules.length > 0}
+                {#if inst.rules.length > 0}
                   <div class="ref-group">
                     <span class="ref-label">Special Rules</span>
                     <div class="ref-chips">
-                      {#each refs.rules as rule (rule)}
+                      {#each inst.rules as rule (rule)}
                         {#if lookupRule(rule)}
                           <button
                             class="ref-chip ref-chip-link"
@@ -332,117 +358,11 @@
                     </div>
                   </div>
                 {/if}
+                {/if}
               </div>
             {/each}
           {/if}
         </section>
-
-        <!-- Wargear -->
-        <section class="report-section">
-          <h3 class="section-title">Wargear</h3>
-
-          {#if rangedWeapons.length > 0}
-            <h4 class="subsection-title">Ranged Weapons</h4>
-            <div class="weapons-table-wrap">
-              <table class="weapons-table">
-                <thead>
-                  <tr>
-                    <th class="col-name">Name</th>
-                    <th>R</th>
-                    <th>FP</th>
-                    <th>RS</th>
-                    <th>AP</th>
-                    <th>D</th>
-                    <th class="col-rules">Special Rules</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {#each rangedWeapons as w (w.name)}
-                    <tr
-                      id="wpn-{slug(w.name)}"
-                      class:ref-flash={flashId === `wpn-${slug(w.name)}`}
-                    >
-                      <td class="col-name">{w.name}</td>
-                      <td>{w.R ?? '—'}</td>
-                      <td>{w.FP ?? '—'}</td>
-                      <td>{w.RS ?? '—'}</td>
-                      <td>{w.AP ?? '—'}</td>
-                      <td>{w.D ?? '—'}</td>
-                      <td class="col-rules"
-                        >{[...(w.specialRules ?? []), ...(w.traits ?? [])].join(
-                          ', ',
-                        ) || '—'}</td
-                      >
-                    </tr>
-                  {/each}
-                </tbody>
-              </table>
-            </div>
-          {/if}
-
-          {#if meleeWeapons.length > 0}
-            <h4 class="subsection-title">Melee Weapons</h4>
-            <div class="weapons-table-wrap">
-              <table class="weapons-table">
-                <thead>
-                  <tr>
-                    <th class="col-name">Name</th>
-                    <th>IM</th>
-                    <th>AM</th>
-                    <th>SM</th>
-                    <th>AP</th>
-                    <th>D</th>
-                    <th class="col-rules">Special Rules</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {#each meleeWeapons as w (w.name)}
-                    <tr
-                      id="wpn-{slug(w.name)}"
-                      class:ref-flash={flashId === `wpn-${slug(w.name)}`}
-                    >
-                      <td class="col-name">{w.name}</td>
-                      <td>{w.IM ?? '—'}</td>
-                      <td>{w.AM ?? '—'}</td>
-                      <td>{w.SM ?? '—'}</td>
-                      <td>{w.AP ?? '—'}</td>
-                      <td>{w.D ?? '—'}</td>
-                      <td class="col-rules"
-                        >{[...(w.specialRules ?? []), ...(w.traits ?? [])].join(
-                          ', ',
-                        ) || '—'}</td
-                      >
-                    </tr>
-                  {/each}
-                </tbody>
-              </table>
-            </div>
-          {/if}
-
-          {#if selectedWargear.length > 0}
-            <h4 class="subsection-title">Equipment</h4>
-            <ul class="wargear-list">
-              {#each selectedWargear as item (item.name)}
-                <li
-                  class="wargear-item"
-                  id="eq-{slug(item.name)}"
-                  class:ref-flash={flashId === `eq-${slug(item.name)}`}
-                >
-                  <span class="wargear-name">{item.name}</span>
-                  <span class="wargear-summary">{item.summary}</span>
-                  <p class="wargear-desc">{item.description}</p>
-                </li>
-              {/each}
-            </ul>
-          {/if}
-
-          {#if rangedWeapons.length === 0 && meleeWeapons.length === 0 && selectedWargear.length === 0}
-            <p class="empty-note">
-              No detailed wargear data available for assigned units.
-            </p>
-          {/if}
-        </section>
-
       </div>
     </div>
   </div>
@@ -529,17 +449,6 @@
     flex-shrink: 0;
   }
 
-  .report-label {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-    border: 1px solid var(--color-border);
-    padding: 0.15em 0.5em;
-    flex-shrink: 0;
-  }
 
   .points-display {
     display: flex;
@@ -598,16 +507,6 @@
     color: var(--color-accent);
     padding-bottom: 0.6rem;
     border-bottom: 1px solid var(--color-border);
-    margin: 0;
-  }
-
-  .subsection-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
     margin: 0;
   }
 
@@ -671,12 +570,31 @@
 
   .unit-block-header {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
+    align-items: center;
     gap: 0.75rem;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+  }
+
+  .unit-toggle-icon {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .unit-block.is-open .unit-toggle-icon {
+    transform: rotate(90deg);
   }
 
   .unit-block-name {
+    margin-right: auto;
     font-family: 'Orbitron', monospace;
     font-size: 0.78rem;
     font-weight: 700;
@@ -740,21 +658,6 @@
   .ref-chip-link:hover {
     background: rgba(0, 200, 255, 0.12);
     border-color: var(--color-accent);
-  }
-
-  /* Flash highlight applied to a jump target after it is scrolled into view */
-  .ref-flash {
-    animation: ref-flash-anim 1.5s ease-out;
-  }
-
-  @keyframes ref-flash-anim {
-    0%,
-    35% {
-      background: rgba(0, 200, 255, 0.28);
-    }
-    100% {
-      background: transparent;
-    }
   }
 
   /* ── Model Stats ─────────────────────────────── */
@@ -844,6 +747,36 @@
     max-width: 220px;
     color: var(--color-text-muted);
     font-size: 0.72rem;
+  }
+
+  .weapons-table .col-traits {
+    text-align: left;
+    white-space: normal;
+    max-width: 140px;
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+  }
+
+  /* Weapon special rules link into the shared Library panel. */
+  .rule-link {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-accent);
+    font-size: inherit;
+    font-family: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgba(0, 200, 255, 0.35);
+    text-underline-offset: 2px;
+    transition:
+      color 0.15s,
+      text-decoration-color 0.15s;
+  }
+
+  .rule-link:hover {
+    color: #fff;
+    text-decoration-color: rgba(0, 200, 255, 0.7);
   }
 
 </style>

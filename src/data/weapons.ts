@@ -2403,8 +2403,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     SM: '+2',
     AP: 2,
     D: 3,
-    specialRules: [],
-    traits: ['Power', 'Sword of the Order'],
+    specialRules: ['Sword of the Order'],
+    traits: ['Power'],
   },
   {
     name: 'The Wolf Blade',
@@ -2505,8 +2505,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     SM: '+1',
     AP: 3,
     D: 1,
-    specialRules: ['Breaching (5+)'],
-    traits: ['Sword of the Order'],
+    specialRules: ['Breaching (5+)', 'Sword of the Order'],
+    traits: [],
     category: 'Charnabal',
   },
   {
@@ -3356,8 +3356,8 @@ export const meleeWeapons: MeleeWeapon[] = [
     SM: '+2',
     AP: 3,
     D: 2,
-    specialRules: ['Breaching (5+)'],
-    traits: ['Sword of the Order'],
+    specialRules: ['Breaching (5+)', 'Sword of the Order'],
+    traits: [],
   },
   {
     name: 'Thunder hammer',
