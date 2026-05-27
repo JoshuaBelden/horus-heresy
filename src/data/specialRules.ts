@@ -216,6 +216,62 @@ export const specialRules: SpecialRule[] = [
     description:
       'A Unit that includes a majority of Models with the Vanguard (X) Special Rule may only ever score 1 Victory Point for Controlling an Objective, regardless of that Objective\'s value (see Core Missions in the Warhammer: The Horus Heresy - Age of Darkness Rulebook). However, the Player that controls a Unit that includes a majority of Models with the Vanguard (X) Special Rule gains Victory Points equal to the value of the X in the Vanguard (X) Special Rule, in addition to any Victory Points scored for controlling an Objective, whenever either of the following two statuses are fulfilled:\n\nIf an attack made for a Unit that includes a majority of Models with the Vanguard (X) Special Rule causes the last Model in an enemy Unit that is Controlling or Contesting an Objective to be Removed as a Casualty.\n\nIf a Unit that includes a majority of Models with the Vanguard (X) Special Rule has at least one attack made for it in a Combat that results in one or more enemy Units that had at least one Model within 3" of an Objective at the start of that Assault Phase either Falling Back from Combat or being Massacred.\n\nNote that the Vanguard (X) Special Rule may only be used to score Victory Points once per Objective per Player Turn - no matter how many enemy Units were Controlling or Locked in Combat near that Objective.',
   },
+  {
+    name: 'Infantry Type',
+    summary:
+      'Infantry is the most basic Type, applied to most Models in the game.',
+    description:
+      'Infantry is the most basic Type, and is applied to most Models in the game. A Model with the Infantry Type uses the Core Rules without modification, gaining neither benefit nor penalty. Models with the Infantry Type may Embark and Disembark upon Models with the Transport Sub-Type.',
+  },
+  {
+    name: 'Walker',
+    summary:
+      'Walkers are powerful, individually-resilient war machines that fight as Models with their own Characteristics profile.',
+    description:
+      'The following Rules apply to all Models with the Walker Type:\n\nWhen targeting a Unit that includes any Models with the Walker Type, the effects of the Poisoned (X) Special Rule only trigger a Wound Test with a result of a \'6\' before modifiers are applied, regardless of the value of X for that variant of the Special Rule.\n\nA Model with the Walker Type may attack with all Weapons they have in each Shooting Attack they make, including as part of a Reaction. Note that this does not allow Weapons that do not have the Assault Trait to be used to attack as part of a Volley Attack.\n\nIn Step 1 of the Resolution Sub-Phase, when deciding how many Models a Player controls in a Combat, a Model with the Walker Type counts as a number of Models equal to that Model\'s Base Wounds Value.',
+  },
+  {
+    name: 'Transport Sub-Type',
+    summary:
+      'Models with the Transport Sub-Type can carry other Models, governed by their Transport Capacity.',
+    description:
+      'All Models with the Transport Sub-Type are bound by a set of Rules regarding how they operate:\n\nAll Models with the Transport Sub-Type have a Transport Capacity Characteristic, which determines the maximum number of Models that can Embark upon it - one Model per point of Transport Capacity, unless another Rule states otherwise.\n\nOnly Models with the Infantry or Paragon Type may Embark or Disembark upon a Model with the Transport Sub-Type.\n\nA Unit may only Embark on a Model with the Transport Sub-Type if all Models in the Embarking Unit have the same Faction as the Model with the Transport Sub-Type.\n\nA Model with the Transport Sub-Type may only have a single Unit Embarked upon it at any one time (Models with the Specialist Sub-Type, Command Sub-Type, or Paragon Type that have joined a Unit are considered part of that Unit and may Embark alongside it).\n\nA Unit may not be partially Embarked on a Model with the Transport Sub-Type - either all Models or no Models in a Unit may be Embarked on a given Model.\n\nIf a Model with the Transport Sub-Type has a Unit Embarked upon it, the Embarked Unit is not considered part of the same Unit. The two remain separate Units for all purposes.',
+  },
+  {
+    name: 'Command Sub-Type',
+    summary:
+      'Models with the Command Sub-Type may join Units, issue Challenges, and lend their Characteristics to Checks.',
+    description:
+      'The following Rules apply to all Models with the Command Sub-Type:\n\nA Model with the Command Sub-Type may join and leave Units.\n\nA Model with the Command Sub-Type may Issue and Accept Challenges.\n\nThe Controlling Player of a Unit that includes one or more Models with the Command Sub-Type may use the Characteristics of one of those Models to resolve any Characteristics Checks made for that Unit.',
+  },
+  {
+    name: 'Sergeant Sub-Type',
+    summary:
+      'A Unit may use the Characteristics of a Model with the Sergeant Sub-Type to resolve its Checks.',
+    description:
+      'The following Rules apply to all Models with the Sergeant Sub-Type:\n\nThe Controlling Player of a Unit that includes one or more Models with the Sergeant Sub-Type may use the Characteristics of one of those Models to resolve any Characteristic Check made for that Unit.',
+  },
+  {
+    name: 'Heavy Sub-Type',
+    summary:
+      'Models with the Heavy Sub-Type are steadier but slower, and may not Rush.',
+    description:
+      'The following Rules apply to all Models with the Heavy Sub-Type:\n\nA Unit that includes only Models with the Heavy Sub-Type gains a bonus of +1 to its Cool Characteristics for Checks to avoid gaining Tactical Statuses.\n\nA Unit that includes any Models with the Heavy Sub-Type may not Rush.\n\nA Unit that includes any Models with the Heavy Sub-Type only uses its Movement Characteristic to determine how far it moves as part of a Set-up Move, not Movement and Initiative totalled.',
+  },
+  {
+    name: 'Auto-Repair',
+    summary:
+      'A Model with this Special Rule has a bonus to Repair Tests to remove Statuses.',
+    description:
+      'If the Active Player makes a Repair Test in the Statuses Sub-Phase of the End Phase for a Model with the Vehicle Type with this Special Rule, they ignore the usual Target Number of 6. Instead, the value of X attached to the variant of this Special Rule is used as the Target Number for that Repair Test. For example, a Model with the Auto-Repair (4+) Special Rule would pass any Repair Tests made for it on the result of a 4 or higher.',
+  },
+  {
+    name: 'Assault Vehicle',
+    summary:
+      'A Vehicle with this Special Rule allows Models to Disembark and Charge without penalty.',
+    description:
+      'A Unit that is Disembarked from another Model that has the Assault Vehicle Special Rule may have a Charge declared for it in the Charge Sub-Phase of the same Player Turn without being forced to make a Disordered Charge.',
+  },
 ];
 
 export const specialRuleMap: Record<string, SpecialRule> = Object.fromEntries(

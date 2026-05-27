@@ -27,12 +27,38 @@
     'SAV',
     'INV',
   ] as const;
-  type StatKey = (typeof statKeys)[number];
 
-  function getStat(model: ModelProfile, stat: StatKey): string | number {
-    return (model as unknown as Record<string, unknown>)[stat] as
-      | string
-      | number;
+  // Vehicles use armour facings, Hull Points and Transport Capacity instead
+  // of the infantry/walker combat profile.
+  const vehicleStatKeys = [
+    'M',
+    'BS',
+    'armourFront',
+    'armourSide',
+    'armourRear',
+    'HP',
+    'transportCapacity',
+  ] as const;
+  const vehicleStatLabels: Record<string, string> = {
+    M: 'M',
+    BS: 'BS',
+    armourFront: 'Front',
+    armourSide: 'Side',
+    armourRear: 'Rear',
+    HP: 'HP',
+    transportCapacity: 'Transport',
+  };
+
+  function isVehicleType(type: string): boolean {
+    return type === 'Vehicle' || type === 'Flying Vehicle';
+  }
+  const unitIsVehicle = $derived(
+    unit.models.length > 0 && isVehicleType(unit.models[0].type),
+  );
+
+  function getStat(model: ModelProfile, stat: string): string | number {
+    const v = (model as unknown as Record<string, unknown>)[stat];
+    return v === undefined || v === null ? '—' : (v as string | number);
   }
 
   function pct(n: number): string {
@@ -173,15 +199,21 @@
               <tr>
                 <th class="col-name">Name</th>
                 <th class="col-type">Type</th>
-                {#each statKeys as stat}
-                  <th
-                    class:col-morale={stat === 'LD' ||
-                      stat === 'CL' ||
-                      stat === 'WP' ||
-                      stat === 'IN'}
-                    class:col-morale-start={stat === 'LD'}>{stat}</th
-                  >
-                {/each}
+                {#if unitIsVehicle}
+                  {#each vehicleStatKeys as stat}
+                    <th>{vehicleStatLabels[stat]}</th>
+                  {/each}
+                {:else}
+                  {#each statKeys as stat}
+                    <th
+                      class:col-morale={stat === 'LD' ||
+                        stat === 'CL' ||
+                        stat === 'WP' ||
+                        stat === 'IN'}
+                      class:col-morale-start={stat === 'LD'}>{stat}</th
+                    >
+                  {/each}
+                {/if}
               </tr>
             </thead>
             <tbody>
@@ -189,19 +221,25 @@
                 {@const typeRule = getTypeRuleName(model.type)}
                 <tr>
                   <td class="col-name"
-                    >{model.name}{#if model.subtype}{@const subtypeRule = getSubtypeRuleName(model.subtype)}&nbsp;({#if subtypeRule}<button class="rule-link" onclick={(e) => openRule(e, subtypeRule)}>{model.subtype}</button>{:else}{model.subtype}{/if}){/if}</td
+                    >{model.name}{#if model.subtypes && model.subtypes.length}&nbsp;({#each model.subtypes as st, i}{#if i > 0}, {/if}{@const subtypeRule = getSubtypeRuleName(st)}{#if subtypeRule}<button class="rule-link" onclick={(e) => openRule(e, subtypeRule)}>{st}</button>{:else}{st}{/if}{/each}){/if}</td
                   >
                   <td class="col-type">{#if typeRule}<button class="rule-link type-link" onclick={(e) => openRule(e, typeRule)}>{model.type}</button>{:else}{model.type}{/if}</td>
-                  {#each statKeys as stat}
-                    <td
-                      class:col-morale={stat === 'LD' ||
-                        stat === 'CL' ||
-                        stat === 'WP' ||
-                        stat === 'IN'}
-                      class:col-morale-start={stat === 'LD'}
-                      >{getStat(model, stat)}</td
-                    >
-                  {/each}
+                  {#if unitIsVehicle}
+                    {#each vehicleStatKeys as stat}
+                      <td>{getStat(model, stat)}</td>
+                    {/each}
+                  {:else}
+                    {#each statKeys as stat}
+                      <td
+                        class:col-morale={stat === 'LD' ||
+                          stat === 'CL' ||
+                          stat === 'WP' ||
+                          stat === 'IN'}
+                        class:col-morale-start={stat === 'LD'}
+                        >{getStat(model, stat)}</td
+                      >
+                    {/each}
+                  {/if}
                 </tr>
               {/each}
             </tbody>
@@ -359,8 +397,8 @@
                 {@const snap = hitProbability(model.BS, 'snapshot')}
                 <tr>
                   <td class="col-model"
-                    >{model.name}{model.subtype
-                      ? ` (${model.subtype})`
+                    >{model.name}{model.subtypes && model.subtypes.length
+                      ? ` (${model.subtypes.join(', ')})`
                       : ''}</td
                   >
                   <td class="col-bs">{model.BS}</td>
@@ -388,6 +426,7 @@
         </div>
       </section>
 
+      {#if !unitIsVehicle}
       <section class="section">
         <h3 class="section-label">Wound Probability (vs Toughness)</h3>
         <div class="table-scroll">
@@ -405,13 +444,13 @@
               {#each unit.models as model}
                 <tr>
                   <td class="col-model"
-                    >{model.name}{model.subtype
-                      ? ` (${model.subtype})`
+                    >{model.name}{model.subtypes && model.subtypes.length
+                      ? ` (${model.subtypes.join(', ')})`
                       : ''}</td
                   >
-                  <td class="col-bs">{model.S}</td>
+                  <td class="col-bs">{model.S ?? 0}</td>
                   {#each woundToughnesses as t}
-                    {@const result = woundProbability(model.S, t)}
+                    {@const result = woundProbability(model.S ?? 0, t)}
                     <td
                       class="col-wound"
                       class:wound-impossible={result.target.kind ===
@@ -419,7 +458,7 @@
                     >
                       <div class="wound-cell">
                         <span class="wound-target"
-                          >{woundTargetLabel(model.S, t)}</span
+                          >{woundTargetLabel(model.S ?? 0, t)}</span
                         >
                         {#if result.target.kind !== 'impossible'}
                           <span class="wound-pct"
@@ -435,6 +474,7 @@
           </table>
         </div>
       </section>
+      {/if}
 
       <div class="three-col">
         <section class="section">

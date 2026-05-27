@@ -23,6 +23,13 @@
   const totalPoints = $derived(army ? calcArmyPoints(army) : 0);
 
   const STAT_KEYS = ['M', 'WS', 'BS', 'S', 'T', 'W', 'I', 'A', 'LD', 'CL', 'WP', 'IN', 'SAV', 'INV'];
+  // Vehicles use armour facings, Hull Points and Transport Capacity.
+  const VEHICLE_STAT_KEYS = ['M', 'BS', 'armourFront', 'armourSide', 'armourRear', 'HP', 'transportCapacity'];
+  const VEHICLE_STAT_LABELS: Record<string, string> = {
+    M: 'M', BS: 'BS', armourFront: 'Front', armourSide: 'Side',
+    armourRear: 'Rear', HP: 'HP', transportCapacity: 'Transport',
+  };
+  const isVehicleModel = (type: string) => type === 'Vehicle' || type === 'Flying Vehicle';
 
   // Rule references open the shared Library panel and jump to the rule.
   function openRule(ruleName: string) {
@@ -66,7 +73,7 @@
     const desc = opt.description.toLowerCase();
     for (let i = 0; i < profile.models.length; i++) {
       const m = profile.models[i];
-      for (const token of [m.name, m.subtype]) {
+      for (const token of [m.name, ...(m.subtypes ?? [])]) {
         if (!token) continue;
         const stem = token.toLowerCase().replace(/(ies|s|y)$/, '');
         if (stem.length >= 3 && desc.includes(stem)) return i;
@@ -281,23 +288,24 @@
 
                 {#if isOpen}
                 {#each inst.models as ml (ml.model.name)}
+                  {@const statCols = isVehicleModel(ml.model.type) ? VEHICLE_STAT_KEYS : STAT_KEYS}
                   <div class="model-block">
                     <div class="model-name">
-                      {ml.model.name}{#if ml.model.subtype && ml.model.subtype !== ml.model.name}
-                        ({ml.model.subtype}){/if}
+                      {ml.model.name}{#if ml.model.subtypes && ml.model.subtypes.length}
+                        ({ml.model.subtypes.join(', ')}){/if}
                     </div>
                     <div class="stats-table-wrap">
                       <table class="stats-table">
                         <thead>
                           <tr>
-                            {#each STAT_KEYS as stat}
-                              <th>{stat}</th>
+                            {#each statCols as stat}
+                              <th>{VEHICLE_STAT_LABELS[stat] ?? stat}</th>
                             {/each}
                           </tr>
                         </thead>
                         <tbody>
                           <tr>
-                            {#each STAT_KEYS as stat}
+                            {#each statCols as stat}
                               <td
                                 >{(ml.model as unknown as Record<
                                   string,

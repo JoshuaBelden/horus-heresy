@@ -58,7 +58,6 @@ export type BattlefieldRole =
 
 export type UnitType =
   | 'Infantry'
-  | 'Infantry-Command'
   | 'Cavalry'
   | 'Walker'
   | 'Vehicle'
@@ -74,21 +73,29 @@ export interface ModelProfile {
   name: string;
   count?: number;
   type: UnitType;
-  subtype?: string;
+  subtypes?: string[];
+  // Movement and Ballistic Skill are shared by infantry and vehicles.
   M: number;
-  WS: number;
   BS: number;
-  S: number;
-  T: number;
-  W: number;
-  I: number;
-  A: number;
-  LD: number;
-  CL: number;
-  WP: number;
-  IN: number;
-  SAV: SaveValue;
-  INV: InvSaveValue;
+  // Infantry / Walker combat stats (omitted by vehicles).
+  WS?: number;
+  S?: number;
+  T?: number;
+  W?: number;
+  I?: number;
+  A?: number;
+  LD?: number;
+  CL?: number;
+  WP?: number;
+  IN?: number;
+  SAV?: SaveValue;
+  INV?: InvSaveValue;
+  // Vehicle stats (omitted by infantry / walkers).
+  armourFront?: number;
+  armourSide?: number;
+  armourRear?: number;
+  HP?: number;
+  transportCapacity?: number;
 }
 
 export interface UnitOptionChoice {

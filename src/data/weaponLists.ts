@@ -38,4 +38,18 @@ export const weaponLists: WeaponList[] = [
       { weaponName: 'Volkite serpenta', points: 5 },
     ],
   },
+  {
+    name: 'Legion Pintle Weapons',
+    entries: [
+      { weaponName: 'Combi-bolter',   points: 5 },
+      { weaponName: 'Combi-flamer',   points: 10 },
+      { weaponName: 'Combi-plasma',   points: 10 },
+      { weaponName: 'Combi-melta',    points: 10 },
+      { weaponName: 'Combi-volkite',  points: 10 },
+      { weaponName: 'Havoc launcher', points: 5 },
+      { weaponName: 'Heavy bolter',   points: 10 },
+      { weaponName: 'Heavy flamer',   points: 10 },
+      { weaponName: 'Multi-melta',    points: 25 },
+    ],
+  },
 ];
