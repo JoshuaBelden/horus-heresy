@@ -19,4 +19,10 @@ export const wargear: WargearDetail[] = [
     description:
       'When a Shooting Attack made by a Unit that includes any Models with an augury scanner inflicts any Hits (excluding Hits from attacks made as Snap Shots), Shrouded Damage Mitigation Rolls cannot be made against those Hits.',
   },
+  {
+    name: 'Stasis grenades',
+    summary: 'Stasis grenades reduce the Combat Initiative of enemies.',
+    description:
+      'Once per Battle, the first time a Model with stasis grenades and any Unit it has joined is successfully Charged, the Combat Initiative of all Models in the Charging Unit is modified by -2 for the duration of the current Assault Phase. This modifier does not affect Models in the Charging Unit that are engaged in a Challenge.',
+  },
 ];

@@ -484,7 +484,7 @@ export const lionElJohnson: UnitProfile = {
     'Frag grenades',
     'Stasis grenades',
     'The Fusil Actinaeus',
-    'The Lion Sword or The Wolf Blade',
+    'The Lion Sword',
   ],
   gambits: [
     {
@@ -516,7 +516,9 @@ export const lionElJohnson: UnitProfile = {
   options: [
     {
       description: 'May replace The Lion Sword with:',
-      choices: [{ description: 'The Wolf Blade', points: 0 }],
+      choices: [
+        { description: 'The Wolf Blade', points: 0, weaponName: 'The Wolf Blade' },
+      ],
     },
   ],
 };

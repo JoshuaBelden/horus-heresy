@@ -86,7 +86,7 @@
               .flatMap((s) => {
                 const profile = units.find((u) => u.name === s.unit!.unitName);
                 if (!profile) return [];
-                const names: string[] = [];
+                const names: string[] = [...profile.wargear];
                 for (const sc of s.unit!.selectedChoices) {
                   const opt = profile.options[sc.optionIndex];
                   const choice = opt?.choices?.[sc.choiceIndex];
@@ -131,7 +131,7 @@
     ].sort(),
   );
 
-  const STAT_KEYS = ['M', 'WS', 'BS', 'S', 'T', 'W', 'I', 'A', 'LD', 'SAV'];
+  const STAT_KEYS = ['M', 'WS', 'BS', 'S', 'T', 'W', 'I', 'A', 'LD', 'CL', 'WP', 'IN', 'SAV', 'INV'];
 
   let activeRule = $state<SpecialRule | null>(null);
 
