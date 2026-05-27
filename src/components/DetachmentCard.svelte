@@ -20,6 +20,7 @@
   let pickerSlotType = $state<DetachmentSlotType | null>(null);
   let pickerCurrentUnit = $state<SlottedUnit | null>(null);
   let expandedSlotId = $state<string | null>(null);
+  let collapsed = $state(false);
 
   const detachmentPoints = $derived(
     detachment.slots.reduce(
@@ -131,16 +132,24 @@
 </script>
 
 <div class="det-card">
-  <div class="det-header">
-    <span class="det-type">{detachment.type} Detachment</span>
+  <button
+    class="det-header"
+    onclick={() => (collapsed = !collapsed)}
+    aria-expanded={!collapsed}
+  >
+    <span class="det-type">
+      <span class="det-chevron">{collapsed ? '▸' : '▾'}</span>
+      {detachment.type} Detachment
+    </span>
     <div class="det-header-right">
       <span class="det-slot-count">
         {detachment.slots.filter((s) => s.unit !== null).length}/{detachment.slots.length} filled
       </span>
       <span class="det-pts">{detachmentPoints} pts</span>
     </div>
-  </div>
+  </button>
 
+  {#if !collapsed}
   <div class="slot-list">
     {#each detachment.slots as slot (slot.id)}
       {@const color = getSlotColor(slot.slotType)}
@@ -211,6 +220,7 @@
       {/if}
     {/each}
   </div>
+  {/if}
 </div>
 
 {#if pickerSlotId !== null && pickerSlotType !== null}
@@ -233,18 +243,37 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 0.9rem;
+    width: 100%;
     padding: 0.9rem 1.5rem;
     background: var(--color-bg-surface);
+    border: none;
     border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.1s;
+  }
+
+  .det-header:hover {
+    background: rgba(0, 200, 255, 0.05);
   }
 
   .det-type {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-family: 'Orbitron', monospace;
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--color-accent);
+  }
+
+  .det-chevron {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
   }
 
   .det-header-right {

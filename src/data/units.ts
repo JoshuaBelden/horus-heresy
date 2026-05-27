@@ -1,4 +1,4 @@
-import type { UnitProfile } from './types';
+import type { UnitProfile, UnitOptionChoice } from './types';
 
 export const tacticalSquad: UnitProfile = {
   name: 'Tactical Squad',
@@ -263,11 +263,60 @@ export const veteranTacticalSquad: UnitProfile = {
   ],
 };
 
+const contemptorWeaponChoices: UnitOptionChoice[] = [
+  {
+    description: 'Gravis bolt cannon',
+    points: 0,
+    weaponName: 'Gravis bolt cannon',
+  },
+  {
+    description: 'Conversion beam cannon',
+    points: 20,
+    weaponName: 'Conversion beam cannon',
+  },
+  {
+    description: 'Gravis autocannon',
+    points: 10,
+    weaponName: 'Gravis autocannon',
+  },
+  {
+    description: 'Gravis chainfist with in-built ranged weapon',
+    points: 5,
+    weaponName: 'Gravis chainfist',
+  },
+  {
+    description: 'Gravis melta cannon',
+    points: 15,
+    weaponName: 'Gravis melta cannon',
+  },
+  {
+    description: 'Gravis plasma cannon',
+    points: 10,
+    weaponName: 'Gravis plasma cannon',
+  },
+  {
+    description: 'Gravis power fist with in-built ranged weapon',
+    points: 5,
+    weaponName: 'Gravis power fist',
+  },
+  {
+    description: 'Kheres assault cannon',
+    points: 15,
+    weaponName: 'Kheres assault cannon',
+  },
+  { description: 'Twin lascannon', points: 15, weaponName: 'Twin lascannon' },
+  {
+    description: 'Twin volkite culverin',
+    points: 15,
+    weaponName: 'Twin volkite culverin',
+  },
+];
+
 export const contemptorDreadnought: UnitProfile = {
   name: 'Contemptor Dreadnought',
   catalog: 'Legiones Astartes',
   role: 'War-Engine',
-  points: 150,
+  points: 180,
   description:
     'The Contemptor Pattern Dreadnought is an ancient and venerated war machine, its design predating many of the more common patterns in use by the Legiones Astartes at the time of the Horus Heresy.',
   composition: '1 Contemptor Dreadnought.',
@@ -275,47 +324,70 @@ export const contemptorDreadnought: UnitProfile = {
     {
       name: 'Contemptor Dreadnought',
       type: 'Walker',
-      M: 7,
-      WS: 5,
-      BS: 5,
+      M: 8,
+      WS: 4,
+      BS: 4,
       S: 7,
       T: 7,
-      W: 4,
-      I: 5,
-      A: 3,
-      LD: 10,
-      CL: 9,
-      WP: 9,
-      IN: 9,
-      SAV: '3+',
+      W: 6,
+      I: 4,
+      A: 4,
+      LD: 12,
+      CL: 10,
+      WP: 7,
+      IN: 5,
+      SAV: '2+',
       INV: '5+',
     },
   ],
-  wargear: [
-    'Contemptor dreadnought chainfist',
-    'Combi-bolter (built-in)',
-    'Dreadnought close combat weapon',
-  ],
-  specialRules: [
-    'Atomantic Shielding',
-    'Bulky (3)',
-    'Crushing Blow',
-    'Fleet',
-    'Rampage (1)',
-  ],
+  wargear: ['Dreadnought close combat weapon'],
+  specialRules: ['Bulky (6)', 'Explodes (5+)', 'Implacable Advance'],
   traits: ['Legiones Astartes'],
   options: [
     {
+      title: 'Weapon Option 1',
+      description: 'Equip the first weapon arm with one of the following:',
+      required: true,
+      conflictsWith: [2],
+      choices: contemptorWeaponChoices,
+    },
+    {
+      title: 'Weapon Option 2',
+      description: 'Equip the second weapon arm with one of the following:',
+      required: true,
+      conflictsWith: [2],
+      choices: contemptorWeaponChoices,
+    },
+    {
+      title: 'Paired Weapons',
       description:
-        'May replace one close combat weapon arm with one of the following:',
+        'Replace both weapon arms with a paired weapon (includes two combi-bolters):',
+      required: true,
+      conflictsWith: [0, 1],
       choices: [
-        { description: 'Kheres pattern assault cannon', points: 20 },
-        { description: 'Multi-melta', points: 15 },
-        { description: 'Plasma cannon', points: 20 },
+        {
+          description: 'Paired Gravis chainfists (with two combi-bolters)',
+          points: 5,
+          weaponName: 'Paired Gravis chainfists',
+        },
+        {
+          description: 'Paired Gravis power fists (with two combi-bolters)',
+          points: 5,
+          weaponName: 'Paired Gravis power fists',
+        },
       ],
     },
     {
-      description: 'May take a Dreadnought drop pod as a dedicated transport.',
+      title: 'Havoc launcher',
+      description: 'May take a Havoc launcher.',
+      choices: [
+        { description: 'Havoc launcher', points: 5, weaponName: 'Havoc launcher' },
+      ],
+    },
+    {
+      title: 'Prime Unit',
+      description: 'May be upgraded to a Prime Unit.',
+      choices: [{ description: 'Prime Unit', points: 0 }],
     },
   ],
 };

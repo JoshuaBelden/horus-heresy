@@ -108,6 +108,9 @@ export interface UnitOption {
   points?: number;
   choices?: UnitOptionChoice[];
   weaponListNames?: string[];
+  title?: string; // group label, e.g. "Weapon Option 1", "Paired Weapons"
+  required?: boolean; // must have a selection when active; renders "(n/1)" and gates Assign
+  conflictsWith?: number[]; // option indices that are mutually exclusive with this one
 }
 
 export interface ModelGroup {

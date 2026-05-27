@@ -273,10 +273,33 @@
 
   function toggleUnitChoice(optionIndex: number, choiceIndex: number) {
     const next = { ...unitChoices };
-    if (next[optionIndex] === choiceIndex) delete next[optionIndex];
-    else next[optionIndex] = choiceIndex;
+    if (next[optionIndex] === choiceIndex) {
+      delete next[optionIndex];
+    } else {
+      next[optionIndex] = choiceIndex;
+      // Clear any mutually-exclusive options when making a selection.
+      for (const conflict of selectedProfile?.options[optionIndex]?.conflictsWith ?? []) {
+        delete next[conflict];
+      }
+    }
     unitChoices = next;
   }
+
+  // An option is inactive when one of its conflicting options is selected.
+  function isOptionActive(optionIndex: number): boolean {
+    const opt = selectedProfile?.options[optionIndex];
+    if (!opt) return false;
+    return !(opt.conflictsWith ?? []).some((i) => unitChoices[i] !== undefined);
+  }
+
+  // Loadout is valid when every active + required option has a selection.
+  const loadoutValid = $derived(
+    !selectedProfile ||
+      selectedProfile.options.every(
+        (opt, i) =>
+          !opt.required || !isOptionActive(i) || unitChoices[i] !== undefined,
+      ),
+  );
 
   function setModelCount(optionIndex: number, delta: number) {
     if (!selectedProfile) return;
@@ -623,7 +646,16 @@
                 <div class="section-body">
                   {#each unitOptIdxs as optIdx}
                     {@const opt = selectedProfile.options[optIdx]}
-                    <div class="option-block">
+                    {@const active = isOptionActive(optIdx)}
+                    <div class="option-block" class:inactive={!active}>
+                      {#if opt.title}
+                        <div class="option-title-row">
+                          <span class="option-title">{opt.title}</span>
+                          {#if opt.required}
+                            <span class="option-counter">({unitChoices[optIdx] !== undefined ? 1 : 0}/1)</span>
+                          {/if}
+                        </div>
+                      {/if}
                       <p class="option-desc">{opt.description}</p>
                       <div class="choice-list">
                         {#if opt.weaponListNames}
@@ -686,7 +718,9 @@
           <span class="total-label">Total</span>
           <span class="total-pts">{totalPoints} pts</span>
         </div>
-        <button class="assign-btn" onclick={confirm}>Assign Unit</button>
+        <button class="assign-btn" onclick={confirm} disabled={!loadoutValid}>
+          {loadoutValid ? 'Assign Unit' : 'Select required options'}
+        </button>
       </div>
     {/if}
   </div>
@@ -1022,6 +1056,32 @@
     gap: 0.6rem;
   }
 
+  .option-block.inactive {
+    opacity: 0.4;
+  }
+
+  .option-title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .option-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .option-counter {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+  }
+
   .option-desc {
     font-family: 'Rajdhani', sans-serif;
     font-size: 0.82rem;
@@ -1329,8 +1389,16 @@
     transition: background 0.12s, border-color 0.12s;
   }
 
-  .assign-btn:hover {
+  .assign-btn:hover:not(:disabled) {
     background: rgba(0, 200, 255, 0.18);
     border-color: var(--color-accent);
+  }
+
+  .assign-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+    color: var(--color-text-muted);
+    border-color: var(--color-border);
+    background: none;
   }
 </style>
