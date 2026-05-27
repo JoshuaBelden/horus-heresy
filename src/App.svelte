@@ -1,16 +1,19 @@
 <script lang="ts">
   import ArmyManager from './components/ArmyManager.svelte';
   import CombatTest from './components/CombatTest.svelte';
-  import SpecialRulesList from './components/SpecialRulesList.svelte';
   import UnitList from './components/UnitList.svelte';
   import WargearList from './components/WargearList.svelte';
+  import LibraryPanel from './components/library/LibraryPanel.svelte';
+  import { libraryStore } from './stores/library.svelte';
 
-  let section = $state<'roster' | 'wargear' | 'combat' | 'army' | 'rules'>(
-    'army',
-  );
+  let section = $state<'roster' | 'wargear' | 'combat' | 'army'>('army');
 </script>
 
-<div class="layout">
+<div
+  class="layout"
+  class:pinned={libraryStore.pinned}
+  style="--lib-width: {libraryStore.width}px"
+>
   <header class="site-header">
     <div class="header-inner">
       <div class="header-rule top-rule"></div>
@@ -47,11 +50,6 @@
       class:active={section === 'combat'}
       onclick={() => (section = 'combat')}>Combat Simulator</button
     >
-    <button
-      class="nav-btn"
-      class:active={section === 'rules'}
-      onclick={() => (section = 'rules')}>Special Rules</button
-    >
   </nav>
 
   <main class="main-content">
@@ -61,8 +59,6 @@
       <UnitList />
     {:else if section === 'wargear'}
       <WargearList />
-    {:else if section === 'rules'}
-      <SpecialRulesList />
     {:else}
       <CombatTest />
     {/if}
@@ -73,6 +69,8 @@
       >The Emperor Protects &mdash; Build your forces wisely.</span
     >
   </footer>
+
+  <LibraryPanel />
 </div>
 
 <style>
@@ -81,6 +79,12 @@
     flex-direction: column;
     min-height: 100vh;
     width: 100%;
+    transition: padding-right 0.25s ease;
+  }
+
+  /* When the Library is pinned, push all content over so it is never covered. */
+  .layout.pinned {
+    padding-right: var(--lib-width);
   }
 
   /* ── Header ─────────────────────────────────── */

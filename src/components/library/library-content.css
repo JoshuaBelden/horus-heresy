@@ -1,0 +1,381 @@
+/* Shared styling for the Library's rules content (Turns / Tables / Mechanics).
+   Moved from BattleReportPage. All selectors are scoped under `.lib-content`
+   so they never leak into the rest of the app's global styles. */
+
+/* ── details / summary base ──────────────────── */
+.lib-content details {
+  display: block;
+}
+
+.lib-content summary {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.lib-content summary::-webkit-details-marker {
+  display: none;
+}
+
+/* ── Top-level group (Turn Sequence / Tables / Game Mechanics) ── */
+.lib-content .ts-group {
+  border: 1px solid var(--color-border);
+}
+
+.lib-content .ts-group + .ts-group {
+  margin-top: 0.75rem;
+}
+
+.lib-content .ts-group > summary.section-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  transition: background 0.12s;
+}
+
+.lib-content .ts-group[open] > summary.section-title {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.lib-content .ts-group > summary.section-title::after {
+  content: '▶';
+  font-size: 0.5rem;
+  color: var(--color-text-muted);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+
+.lib-content .ts-group[open] > summary.section-title::after {
+  transform: rotate(90deg);
+}
+
+.lib-content .ts-group > summary.section-title:hover {
+  background: rgba(0, 200, 255, 0.04);
+}
+
+/* inner phase blocks inside ts-group */
+.lib-content .ts-group > details.phase-block,
+.lib-content .ts-group details.phase-block {
+  margin: 0;
+}
+
+/* ── Phase blocks ────────────────────────────── */
+.lib-content .phase-block {
+  border-left: 2px solid var(--color-border);
+  margin: 0.35rem 0.75rem;
+}
+
+.lib-content .phase-block > summary.phase-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  transition: background 0.12s;
+}
+
+.lib-content .phase-block > summary.phase-title::after {
+  content: '▶';
+  font-size: 0.45rem;
+  color: var(--color-text-muted);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+
+.lib-content .phase-block[open] > summary.phase-title::after {
+  transform: rotate(90deg);
+}
+
+.lib-content .phase-block > summary.phase-title:hover {
+  background: rgba(201, 147, 58, 0.06);
+}
+
+/* content padding inside open phase blocks */
+.lib-content .phase-block > *:not(summary) {
+  margin: 0.35rem 0.6rem 0.5rem;
+}
+
+.lib-content .phase-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin: 0;
+}
+
+/* ── Sub-sections ────────────────────────────── */
+.lib-content .sub-section {
+  border-left: 1px solid var(--color-border);
+  margin: 0.25rem 0;
+}
+
+.lib-content .sub-section > summary.sub-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding: 0.25rem 0.5rem;
+  transition: background 0.12s;
+}
+
+.lib-content .sub-section > summary.sub-title::after {
+  content: '▶';
+  font-size: 0.4rem;
+  color: var(--color-text-muted);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+
+.lib-content .sub-section[open] > summary.sub-title::after {
+  transform: rotate(90deg);
+}
+
+.lib-content .sub-section > summary.sub-title:hover {
+  background: rgba(0, 200, 255, 0.04);
+}
+
+/* content padding inside open sub-sections */
+.lib-content .sub-section > *:not(summary) {
+  margin: 0.25rem 0.5rem 0.4rem;
+}
+
+.lib-content .sub-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.lib-content .phase-note {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.lib-content .page-ref {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  opacity: 0.7;
+  margin-left: 0.3em;
+  text-transform: none;
+}
+
+.lib-content .phase-list {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.78rem;
+  color: var(--color-text);
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  line-height: 1.4;
+}
+
+.lib-content .phase-list li {
+  list-style: disc;
+}
+
+.lib-content .phase-steps {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.78rem;
+  color: var(--color-text);
+  margin: 0;
+  padding-left: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  line-height: 1.4;
+}
+
+.lib-content .phase-steps-inner {
+  font-size: 0.73rem;
+  margin-top: 0.2rem;
+  color: var(--color-text-muted);
+}
+
+/* ── Cheat Sheet Tables ───────────────────────── */
+.lib-content .cs-table {
+  border-collapse: collapse;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.72rem;
+  width: 100%;
+}
+
+.lib-content .cs-table th,
+.lib-content .cs-table td {
+  padding: 0.2rem 0.45rem;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.lib-content .cs-table th {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  background: rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+
+.lib-content .cs-table td {
+  color: var(--color-text);
+}
+
+.lib-content .cs-table-sm th,
+.lib-content .cs-table-sm td {
+  padding: 0.18rem 0.3rem;
+  font-size: 0.66rem;
+  text-align: center;
+}
+
+.lib-content .table-scroll {
+  overflow-x: auto;
+}
+
+/* ── Reactions ───────────────────────────────── */
+.lib-content .reaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lib-content .reaction-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--color-border);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.lib-content .reaction-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.lib-content .reaction-cost {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--color-gold);
+  margin-left: 0.4rem;
+}
+
+.lib-content .reaction-trigger {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.74rem;
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Status Grid ──────────────────────────────── */
+.lib-content .status-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.lib-content .status-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.lib-content .status-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 5.5rem;
+}
+
+.lib-content .status-desc {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.74rem;
+  color: var(--color-text-muted);
+  line-height: 1.35;
+}
+
+/* ── Aftermath Grid ───────────────────────────── */
+.lib-content .aftermath-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.lib-content .aftermath-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.lib-content .aftermath-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.57rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 5.5rem;
+}
+
+.lib-content .aftermath-desc {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.74rem;
+  color: var(--color-text-muted);
+  line-height: 1.35;
+}
+
+/* ── Gambits ──────────────────────────────────── */
+.lib-content .gambit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.lib-content .gambit-item {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+  line-height: 1.35;
+}
+
+.lib-content .gambit-name {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.57rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text);
+}

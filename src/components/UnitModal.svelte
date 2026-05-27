@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getHitTarget, hitProbability, woundProbability } from '../combat';
   import { lookupRule } from '../data/specialRules';
+  import { libraryStore } from '../stores/library.svelte';
   import type { Gambit, ModelProfile, SpecialRule, UnitProfile } from '../data/types';
 
   interface Props {
@@ -75,23 +76,20 @@
     if (e.target === e.currentTarget) onclose();
   }
 
-  // ── Rule popover ──────────────────────────────────────────────────────────
+  // ── Rule links / gambit popover ───────────────────────────────────────────
+  // Special rules, traits and unit types open the shared Library panel.
+  function openRule(e: MouseEvent, ruleName: string) {
+    e.stopPropagation();
+    libraryStore.openRule(ruleName);
+  }
+
+  // Gambits are unit-specific (not Library rules), so they keep their popover.
   interface Popover {
-    rule: SpecialRule;
+    rule: SpecialRule | Gambit;
     x: number;
     y: number;
   }
   let popover = $state<Popover | null>(null);
-
-  function openRule(e: MouseEvent, ruleName: string) {
-    const rule = lookupRule(ruleName);
-    if (!rule) return;
-    e.stopPropagation();
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = Math.min(rect.left, window.innerWidth - 340);
-    const y = Math.min(rect.bottom + 6, window.innerHeight - 220);
-    popover = { rule, x, y };
-  }
 
   function closePopover() {
     popover = null;
