@@ -181,6 +181,41 @@ export const specialRules: SpecialRule[] = [
     description:
       "When making a Hit Test for a Weapon with this Special Rule against a Target Unit that includes any Models with the Vehicle Type or Walker Type, if any Hit Test results in a '5' or '6' before any modifiers are applied, then all Models with the Vehicle Type or Walker Type in the Target Unit gain a Status at the end of Step 11 of the Shooting Attack process or Step 10 of the Initiative Step process. The Status gained is indicated by the value of X attached to that variant of the Shock (X) Special Rule. If the Model already has the stated Status or the attack would apply the Status multiple times there is no additional effect; this Special Rule never causes a Model to lose Wounds or Hull Points. Hits inflicted by a Weapon with this Special Rule must still have Wound Tests or Armour Penetration Tests made for them.",
   },
+  {
+    name: 'Explodes',
+    summary:
+      'A Model with this Special Rule can explode and cause Hits to nearby Models and Units.',
+    description:
+      "Before a Model with the Explodes (X) Special Rule is Removed as a Casualty, the Controlling Player must roll a Dice. If the result of that roll equals or exceeds the value of X attached to this variant of the Explodes (X) Special Rule, the Model Explodes. Every Unit with one or more models within 6\" of an exploding Model suffers a number of Hits equal to the Base Wounds Characteristic of Base Hull Points Characteristic of the exploding Model. Each such Hit has a Strength of 8, an AP of '-', and a Damage of 1. Once all Hits caused by this Special Rule have been resolved, the Model with the Explodes (X) Special Rule is Removed as a Casualty as normal.",
+  },
+  {
+    name: 'Heavy',
+    summary:
+      'Weapons with the Heavy (X) Special Rule gain +1 to a Characteristic when Stationary.',
+    description:
+      'When making a Shooting Attack with a Weapon that has the Heavy (X) Special Rule, a modifier of +1 is added to a Characteristic if the Model with that Weapon is part of a Unit that remained Stationary in the Controlling Player’s previous Movement Phase. If the Characteristic listed is AP, then instead it improves the AP by one Step. The value of X in the specific variant of the Heavy (X) Special Rule determines which Characteristic gains the +1 modifier.',
+  },
+  {
+    name: 'Implacable Advance',
+    summary:
+      'Models with this Special Rule can make Volley Attacks with other Weapons.',
+    description:
+      'The Controlling Player of a Model with this Special Rule treats all Ranged Weapons such a Model has that do not have any variant of the Heavy (X) Special Rule or Ordnance (X) Special Rule as having the Assault Trait.',
+  },
+  {
+    name: 'Slow and Purposeful',
+    summary:
+      'Models with this Special Rule cannot Pursue fleeing enemy Units.',
+    description:
+      'In Step 4 of the Resolution Sub-Phase, a Player that has won Combat cannot choose for a Unit that includes any Models with this Special Rule to Pursue, and must instead select another eligible option for that Unit.',
+  },
+  {
+    name: 'Vanguard',
+    summary:
+      'A Unit that includes Models with this Special Rule scores fewer Victory Points for controlling Objectives, but can score Victory Points destroying enemy Units that hold Objectives.',
+    description:
+      'A Unit that includes a majority of Models with the Vanguard (X) Special Rule may only ever score 1 Victory Point for Controlling an Objective, regardless of that Objective\'s value (see Core Missions in the Warhammer: The Horus Heresy - Age of Darkness Rulebook). However, the Player that controls a Unit that includes a majority of Models with the Vanguard (X) Special Rule gains Victory Points equal to the value of the X in the Vanguard (X) Special Rule, in addition to any Victory Points scored for controlling an Objective, whenever either of the following two statuses are fulfilled:\n\nIf an attack made for a Unit that includes a majority of Models with the Vanguard (X) Special Rule causes the last Model in an enemy Unit that is Controlling or Contesting an Objective to be Removed as a Casualty.\n\nIf a Unit that includes a majority of Models with the Vanguard (X) Special Rule has at least one attack made for it in a Combat that results in one or more enemy Units that had at least one Model within 3" of an Objective at the start of that Assault Phase either Falling Back from Combat or being Massacred.\n\nNote that the Vanguard (X) Special Rule may only be used to score Victory Points once per Objective per Player Turn - no matter how many enemy Units were Controlling or Locked in Combat near that Objective.',
+  },
 ];
 
 export const specialRuleMap: Record<string, SpecialRule> = Object.fromEntries(

@@ -162,7 +162,7 @@ const centurion: UnitProfile = {
       INV: '5+',
     },
   ],
-  wargear: ['Bolter', 'Bolt pistol', 'Frag grenades', 'Kark grenades'],
+  wargear: ['Bolter', 'Bolt pistol', 'Frag grenades', 'Krak grenades'],
   specialRules: ['Officer of the Line'],
   traits: ['Legiones Astartes'],
   options: [
@@ -340,7 +340,7 @@ export const contemptorDreadnought: UnitProfile = {
       INV: '5+',
     },
   ],
-  wargear: ['Dreadnought close combat weapon'],
+  wargear: [],
   specialRules: ['Bulky (6)', 'Explodes (5+)', 'Implacable Advance'],
   traits: ['Legiones Astartes'],
   options: [

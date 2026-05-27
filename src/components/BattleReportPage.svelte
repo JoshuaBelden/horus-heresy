@@ -154,6 +154,98 @@
     activeRule = null;
   }
 
+  // ── Per-unit loadout & rule references ───────────────────────────────────────
+  // Each unit profile lists the weapons / equipment / special rules it is using.
+  // The full stat lines live in the Wargear & Special Rules sections below, so
+  // these are rendered as clickable references that jump to the matching entry.
+  function slug(s: string): string {
+    return s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  interface UnitRefs {
+    weapons: string[];
+    equipment: string[];
+    rules: string[];
+  }
+
+  const profileRefs = $derived.by(() => {
+    const map = new Map<string, UnitRefs>();
+    if (!army) return map;
+    for (const det of army.detachments) {
+      for (const s of det.slots) {
+        if (!s.unit) continue;
+        const profile = units.find((u) => u.name === s.unit!.unitName);
+        if (!profile) continue;
+        let entry = map.get(profile.name);
+        if (!entry) {
+          entry = { weapons: [], equipment: [], rules: [] };
+          map.set(profile.name, entry);
+        }
+        entry.weapons.push(...profile.wargear);
+        entry.rules.push(...profile.specialRules);
+        for (const sc of s.unit.selectedChoices) {
+          const opt = profile.options[sc.optionIndex];
+          if (!opt) continue;
+          if (opt.weaponListNames) {
+            const entries = opt.weaponListNames.flatMap(
+              (n) => weaponLists.find((l) => l.name === n)?.entries ?? [],
+            );
+            const e = entries[sc.choiceIndex];
+            if (e) entry.weapons.push(e.weaponName);
+          } else if (opt.choices) {
+            const choice = opt.choices[sc.choiceIndex];
+            if (choice?.weaponName) entry.weapons.push(choice.weaponName);
+            if (choice?.wargearName) entry.equipment.push(choice.wargearName);
+          }
+        }
+        for (const group of s.unit.modelGroups ?? []) {
+          if (group.choiceIndex === null) continue;
+          const opt = profile.options[group.optionIndex];
+          const choice = opt?.choices?.[group.choiceIndex];
+          if (choice?.weaponName) entry.weapons.push(choice.weaponName);
+        }
+      }
+    }
+    for (const entry of map.values()) {
+      entry.weapons = [...new Set(entry.weapons)];
+      entry.equipment = [...new Set(entry.equipment)];
+      for (const name of entry.weapons) {
+        const w =
+          catalogueRanged.find((x) => x.name === name) ??
+          catalogueMelee.find((x) => x.name === name);
+        if (w) entry.rules.push(...w.specialRules);
+      }
+      entry.rules = [...new Set(entry.rules)].sort();
+    }
+    return map;
+  });
+
+  // Anchor id for a loadout entry, or null when it has no matching row below.
+  function loadoutAnchor(name: string): string | null {
+    if (
+      catalogueRanged.some((w) => w.name === name) ||
+      catalogueMelee.some((w) => w.name === name)
+    )
+      return `wpn-${slug(name)}`;
+    if (selectedWargear.some((g) => g.name === name)) return `eq-${slug(name)}`;
+    return null;
+  }
+
+  let flashId = $state<string | null>(null);
+  let flashTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function jumpTo(id: string) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    flashId = id;
+    if (flashTimer) clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => (flashId = null), 1500);
+  }
+
   const FACTION_COLORS: Record<string, string> = {
     'Dark Angels': '#1a5c1a',
     'White Scars': '#c8d8e8',
@@ -202,12 +294,12 @@
             <p class="empty-note">No units assigned yet.</p>
           {:else}
             {#each uniqueProfiles as profile (profile.name)}
+              {@const refs = profileRefs.get(profile.name)}
               <div class="unit-block">
                 <div class="unit-block-header">
                   <span class="unit-block-name">{profile.name}</span>
                   <span class="unit-pts">{profile.points} pts</span>
                 </div>
-                <p class="unit-composition">{profile.composition}</p>
 
                 {#each profile.models as model (model.name)}
                   <div class="model-block">
@@ -236,6 +328,43 @@
                     </div>
                   </div>
                 {/each}
+
+                {#if refs && (refs.weapons.length > 0 || refs.equipment.length > 0)}
+                  <div class="ref-group">
+                    <span class="ref-label">Loadout</span>
+                    <div class="ref-chips">
+                      {#each [...refs.weapons, ...refs.equipment] as name (name)}
+                        {@const anchor = loadoutAnchor(name)}
+                        {#if anchor}
+                          <button
+                            class="ref-chip ref-chip-link"
+                            onclick={() => jumpTo(anchor)}>{name}</button
+                          >
+                        {:else}
+                          <span class="ref-chip">{name}</span>
+                        {/if}
+                      {/each}
+                    </div>
+                  </div>
+                {/if}
+
+                {#if refs && refs.rules.length > 0}
+                  <div class="ref-group">
+                    <span class="ref-label">Special Rules</span>
+                    <div class="ref-chips">
+                      {#each refs.rules as rule (rule)}
+                        {#if lookupRule(rule)}
+                          <button
+                            class="ref-chip ref-chip-link"
+                            onclick={() => openRule(rule)}>{rule}</button
+                          >
+                        {:else}
+                          <span class="ref-chip">{rule}</span>
+                        {/if}
+                      {/each}
+                    </div>
+                  </div>
+                {/if}
               </div>
             {/each}
           {/if}
@@ -262,7 +391,10 @@
                 </thead>
                 <tbody>
                   {#each rangedWeapons as w (w.name)}
-                    <tr>
+                    <tr
+                      id="wpn-{slug(w.name)}"
+                      class:ref-flash={flashId === `wpn-${slug(w.name)}`}
+                    >
                       <td class="col-name">{w.name}</td>
                       <td>{w.R ?? '—'}</td>
                       <td>{w.FP ?? '—'}</td>
@@ -298,7 +430,10 @@
                 </thead>
                 <tbody>
                   {#each meleeWeapons as w (w.name)}
-                    <tr>
+                    <tr
+                      id="wpn-{slug(w.name)}"
+                      class:ref-flash={flashId === `wpn-${slug(w.name)}`}
+                    >
                       <td class="col-name">{w.name}</td>
                       <td>{w.IM ?? '—'}</td>
                       <td>{w.AM ?? '—'}</td>
@@ -321,7 +456,11 @@
             <h4 class="subsection-title">Equipment</h4>
             <ul class="wargear-list">
               {#each selectedWargear as item (item.name)}
-                <li class="wargear-item">
+                <li
+                  class="wargear-item"
+                  id="eq-{slug(item.name)}"
+                  class:ref-flash={flashId === `eq-${slug(item.name)}`}
+                >
                   <span class="wargear-name">{item.name}</span>
                   <span class="wargear-summary">{item.summary}</span>
                   <p class="wargear-desc">{item.description}</p>
@@ -1468,12 +1607,68 @@
     white-space: nowrap;
   }
 
-  .unit-composition {
+  /* ── Loadout / Rule References ───────────────── */
+  .ref-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .ref-label {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 0.8rem;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
     color: var(--color-text-muted);
-    font-style: italic;
-    margin: 0;
+  }
+
+  .ref-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.4rem;
+  }
+
+  .ref-chip {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    background: rgba(0, 0, 0, 0.15);
+    padding: 0.12em 0.5em;
+    line-height: 1.3;
+  }
+
+  .ref-chip-link {
+    color: var(--color-accent);
+    border-color: var(--color-accent-dim);
+    background: rgba(0, 200, 255, 0.04);
+    cursor: pointer;
+    transition:
+      background 0.12s,
+      border-color 0.12s;
+  }
+
+  .ref-chip-link:hover {
+    background: rgba(0, 200, 255, 0.12);
+    border-color: var(--color-accent);
+  }
+
+  /* Flash highlight applied to a jump target after it is scrolled into view */
+  .ref-flash {
+    animation: ref-flash-anim 1.5s ease-out;
+  }
+
+  @keyframes ref-flash-anim {
+    0%,
+    35% {
+      background: rgba(0, 200, 255, 0.28);
+    }
+    100% {
+      background: transparent;
+    }
   }
 
   /* ── Model Stats ─────────────────────────────── */
