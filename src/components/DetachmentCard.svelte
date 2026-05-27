@@ -21,6 +21,13 @@
   let pickerCurrentUnit = $state<SlottedUnit | null>(null);
   let expandedSlotId = $state<string | null>(null);
 
+  const detachmentPoints = $derived(
+    detachment.slots.reduce(
+      (sum, s) => sum + (s.unit ? calcSlottedUnitPoints(s.unit) : 0),
+      0,
+    ),
+  );
+
   function openPicker(slotId: string, slotType: DetachmentSlotType, currentUnit: SlottedUnit | null) {
     pickerSlotId = slotId;
     pickerSlotType = slotType;
@@ -126,9 +133,12 @@
 <div class="det-card">
   <div class="det-header">
     <span class="det-type">{detachment.type} Detachment</span>
-    <span class="det-slot-count">
-      {detachment.slots.filter((s) => s.unit !== null).length}/{detachment.slots.length} filled
-    </span>
+    <div class="det-header-right">
+      <span class="det-slot-count">
+        {detachment.slots.filter((s) => s.unit !== null).length}/{detachment.slots.length} filled
+      </span>
+      <span class="det-pts">{detachmentPoints} pts</span>
+    </div>
   </div>
 
   <div class="slot-list">
@@ -237,11 +247,25 @@
     color: var(--color-accent);
   }
 
+  .det-header-right {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+  }
+
   .det-slot-count {
     font-family: 'Rajdhani', sans-serif;
     font-size: 0.72rem;
     letter-spacing: 0.1em;
     color: var(--color-text-muted);
+  }
+
+  .det-pts {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--color-gold);
   }
 
   /* ── Slot Rows ───────────────────────────────── */

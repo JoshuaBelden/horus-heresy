@@ -46,15 +46,22 @@
     }
   });
 
-  // Unit-level choices (existing): optionIndex → choiceIndex
-  let selectedChoices = $state<Record<number, number>>({});
+  // ── Picker state ────────────────────────────────────────────────────────
+  const UNIT_SECTION = '__unit__';
 
-  // Model-count options: optionIndex → count
+  // Unit-level option choices: optionIndex → choiceIndex
+  let unitChoices = $state<Record<number, number>>({});
+
+  // Model-count options: optionIndex → number of *added* models
   let modelCounts = $state<Record<number, number>>({});
 
-  // Per-model group states: optionIndex → array of {count, choiceIndex | null}
-  type GroupState = { count: number; choiceIndex: number | null };
-  let modelGroupStates = $state<Record<number, GroupState[]>>({});
+  // Per-model loadout subgroups, keyed by model name. Each subgroup has a count
+  // and one choice per applicable per-model option (null = no upgrade).
+  type Subgroup = { count: number; choices: Record<number, number | null> };
+  let subgroups = $state<Record<string, Subgroup[]>>({});
+
+  // Which collapsible sections are expanded (collapsed by default).
+  let expanded = $state<Record<string, boolean>>({});
 
   const filteredUnits = $derived(
     eligibleUnits.filter((u) => {
@@ -63,48 +70,84 @@
     }),
   );
 
-  // Total model count for a given per-model option (base + additional)
-  function totalModelCount(perModelOptIdx: number): number {
-    if (!selectedProfile) return 0;
-    const perModelOpt = selectedProfile.options[perModelOptIdx];
-    const modelName = perModelOpt?.modelName;
-    if (!modelName) return 0;
-    const baseCount = selectedProfile.models.find((m) => m.name === modelName)?.count ?? 0;
-    // Find corresponding model-count option
-    const countOptIdx = selectedProfile.options.findIndex(
-      (o) => o.appliesTo === 'model-count' && o.modelName === modelName
-    );
-    const additional = countOptIdx >= 0 ? (modelCounts[countOptIdx] ?? 0) : 0;
-    return baseCount + additional;
+  // ── Section model derived from the profile ──────────────────────────────
+  type ModelSection = {
+    modelName: string;
+    baseCount: number;
+    countOptIdx: number | null;
+    perModelOptIdxs: number[];
+  };
+
+  function perModelOptionsFor(profile: UnitProfile, modelName: string): number[] {
+    return profile.options
+      .map((o, i) => ({ o, i }))
+      .filter(({ o }) => o.appliesTo === 'per-model' && o.modelName === modelName)
+      .map(({ i }) => i);
+  }
+
+  const modelSections = $derived<ModelSection[]>(
+    selectedProfile
+      ? selectedProfile.models
+          .map((m) => {
+            const countOptIdx = selectedProfile!.options.findIndex(
+              (o) => o.appliesTo === 'model-count' && o.modelName === m.name
+            );
+            return {
+              modelName: m.name,
+              baseCount: m.count ?? 1,
+              countOptIdx: countOptIdx >= 0 ? countOptIdx : null,
+              perModelOptIdxs: perModelOptionsFor(selectedProfile!, m.name),
+            };
+          })
+          .filter((s) => s.countOptIdx !== null || s.perModelOptIdxs.length > 0)
+      : []
+  );
+
+  // Unit-wide options (not tied to a model): Vexilla, Nuncio-vox, etc.
+  const unitOptIdxs = $derived<number[]>(
+    selectedProfile
+      ? selectedProfile.options
+          .map((o, i) => ({ o, i }))
+          .filter(({ o }) => o.appliesTo !== 'model-count' && o.appliesTo !== 'per-model')
+          .map(({ i }) => i)
+      : []
+  );
+
+  function totalCount(modelName: string): number {
+    const section = modelSections.find((s) => s.modelName === modelName);
+    if (!section) return 0;
+    const added = section.countOptIdx !== null ? (modelCounts[section.countOptIdx] ?? 0) : 0;
+    return section.baseCount + added;
   }
 
   const extraPoints = $derived(() => {
     if (!selectedProfile) return 0;
     let total = 0;
 
-    // Unit-level choices
-    for (const [i, c] of Object.entries(selectedChoices)) {
+    // Unit-level option choices
+    for (const [i, c] of Object.entries(unitChoices)) {
       const opt = selectedProfile.options[+i];
       if (!opt) continue;
       if (opt.weaponListNames) {
-        const entries = resolveListEntries(opt);
-        total += entries[c]?.points ?? 0;
+        total += resolveListEntries(opt)[c]?.points ?? 0;
       } else {
         total += opt.choices?.[c]?.points ?? 0;
       }
     }
 
-    // Model-count
+    // Added models
     for (const [i, count] of Object.entries(modelCounts)) {
       total += count * (selectedProfile.options[+i]?.pointsPerModel ?? 0);
     }
 
-    // Per-model groups
-    for (const [i, groups] of Object.entries(modelGroupStates)) {
-      for (const g of groups) {
-        if (g.choiceIndex === null) continue;
-        const choice = selectedProfile.options[+i]?.choices?.[g.choiceIndex];
-        total += g.count * (choice?.pointsPerModel ?? 0);
+    // Per-model subgroup loadouts
+    for (const sgs of Object.values(subgroups)) {
+      for (const sg of sgs) {
+        for (const [optIdx, ci] of Object.entries(sg.choices)) {
+          if (ci === null) continue;
+          const choice = selectedProfile.options[+optIdx]?.choices?.[ci];
+          total += sg.count * (choice?.pointsPerModel ?? 0);
+        }
       }
     }
 
@@ -115,52 +158,71 @@
     selectedProfile ? selectedProfile.points + extraPoints() : 0,
   );
 
-  function initModelGroups(profile: UnitProfile) {
-    const gs: Record<number, GroupState[]> = {};
-    profile.options.forEach((opt, idx) => {
-      if (opt.appliesTo === 'per-model' && opt.modelName) {
-        const baseCount = profile.models.find((m) => m.name === opt.modelName)?.count ?? 0;
-        gs[idx] = [{ count: baseCount, choiceIndex: null }];
+  function initSubgroups(profile: UnitProfile): Record<string, Subgroup[]> {
+    const result: Record<string, Subgroup[]> = {};
+    for (const m of profile.models) {
+      const optIdxs = perModelOptionsFor(profile, m.name);
+      if (optIdxs.length === 0) continue;
+      const choices: Record<number, number | null> = {};
+      for (const idx of optIdxs) choices[idx] = null;
+      result[m.name] = [{ count: m.count ?? 1, choices }];
+    }
+    return result;
+  }
+
+  // Reconstruct subgroups from a flat ModelGroup[] (the saved shape). The picker
+  // always writes parallel groups per model, so the i-th group of each option
+  // belongs to the i-th subgroup.
+  function restoreSubgroups(profile: UnitProfile, groups: ModelGroup[]): Record<string, Subgroup[]> {
+    const fresh = initSubgroups(profile);
+    const result: Record<string, Subgroup[]> = {};
+    for (const m of profile.models) {
+      const optIdxs = perModelOptionsFor(profile, m.name);
+      if (optIdxs.length === 0) continue;
+
+      const byOpt: Record<number, ModelGroup[]> = {};
+      for (const idx of optIdxs) byOpt[idx] = groups.filter((g) => g.optionIndex === idx);
+      const subCount = Math.max(0, ...optIdxs.map((idx) => byOpt[idx].length));
+      if (subCount === 0) {
+        result[m.name] = fresh[m.name];
+        continue;
       }
-    });
-    return gs;
+
+      const subs: Subgroup[] = [];
+      for (let i = 0; i < subCount; i++) {
+        const choices: Record<number, number | null> = {};
+        let count = m.count ?? 1;
+        for (const idx of optIdxs) {
+          const g = byOpt[idx][i];
+          choices[idx] = g ? g.choiceIndex : null;
+          if (g) count = g.count;
+        }
+        subs.push({ count, choices });
+      }
+      result[m.name] = subs;
+    }
+    return result;
   }
 
   function selectUnit(profile: UnitProfile) {
     selectedProfile = profile;
+    expanded = {};
 
     if (currentUnit && currentUnit.unitName === profile.name) {
-      // Restore unit-level choices
       const choicesMap: Record<number, number> = {};
       const countsMap: Record<number, number> = {};
       for (const sc of currentUnit.selectedChoices) {
         const opt = profile.options[sc.optionIndex];
-        if (opt?.appliesTo === 'model-count') {
-          countsMap[sc.optionIndex] = sc.count ?? 0;
-        } else {
-          choicesMap[sc.optionIndex] = sc.choiceIndex;
-        }
+        if (opt?.appliesTo === 'model-count') countsMap[sc.optionIndex] = sc.count ?? 0;
+        else choicesMap[sc.optionIndex] = sc.choiceIndex;
       }
-      selectedChoices = choicesMap;
+      unitChoices = choicesMap;
       modelCounts = countsMap;
-
-      // Restore model groups
-      const gs: Record<number, GroupState[]> = initModelGroups(profile);
-      for (const group of currentUnit.modelGroups ?? []) {
-        const opt = profile.options[group.optionIndex];
-        if (opt?.appliesTo === 'per-model') {
-          // Replace initialized defaults with saved groups
-          if (!gs[group.optionIndex] || gs[group.optionIndex].length === 1 && gs[group.optionIndex][0].choiceIndex === null) {
-            gs[group.optionIndex] = [];
-          }
-          gs[group.optionIndex].push({ count: group.count, choiceIndex: group.choiceIndex });
-        }
-      }
-      modelGroupStates = gs;
+      subgroups = restoreSubgroups(profile, currentUnit.modelGroups ?? []);
     } else {
-      selectedChoices = {};
+      unitChoices = {};
       modelCounts = {};
-      modelGroupStates = initModelGroups(profile);
+      subgroups = initSubgroups(profile);
     }
 
     step = 'options';
@@ -169,16 +231,17 @@
   function goBack() {
     step = 'pick';
     selectedProfile = null;
-    selectedChoices = {};
+    unitChoices = {};
     modelCounts = {};
-    modelGroupStates = {};
+    subgroups = {};
+    expanded = {};
   }
 
   function confirm() {
     if (!selectedProfile) return;
 
     const choices = [
-      ...Object.entries(selectedChoices).map(([i, c]) => ({
+      ...Object.entries(unitChoices).map(([i, c]) => ({
         optionIndex: +i,
         choiceIndex: c,
       })),
@@ -191,22 +254,28 @@
         })),
     ];
 
-    const groups: ModelGroup[] = Object.entries(modelGroupStates).flatMap(([optIdx, gs]) =>
-      gs.map((g) => ({ optionIndex: +optIdx, count: g.count, choiceIndex: g.choiceIndex }))
-    );
+    const groups: ModelGroup[] = [];
+    for (const sgs of Object.values(subgroups)) {
+      for (const sg of sgs) {
+        for (const [optIdx, ci] of Object.entries(sg.choices)) {
+          groups.push({ optionIndex: +optIdx, count: sg.count, choiceIndex: ci });
+        }
+      }
+    }
 
     onassign({ unitName: selectedProfile.name, selectedChoices: choices, modelGroups: groups });
   }
 
-  function toggleChoice(optionIndex: number, choiceIndex: number) {
-    const current = selectedChoices[optionIndex];
-    if (current === choiceIndex) {
-      const next = { ...selectedChoices };
-      delete next[optionIndex];
-      selectedChoices = next;
-    } else {
-      selectedChoices = { ...selectedChoices, [optionIndex]: choiceIndex };
-    }
+  // ── Interactions ────────────────────────────────────────────────────────
+  function toggleSection(key: string) {
+    expanded = { ...expanded, [key]: !expanded[key] };
+  }
+
+  function toggleUnitChoice(optionIndex: number, choiceIndex: number) {
+    const next = { ...unitChoices };
+    if (next[optionIndex] === choiceIndex) delete next[optionIndex];
+    else next[optionIndex] = choiceIndex;
+    unitChoices = next;
   }
 
   function setModelCount(optionIndex: number, delta: number) {
@@ -217,66 +286,96 @@
     const next = Math.max(0, Math.min(max, current + delta));
     modelCounts = { ...modelCounts, [optionIndex]: next };
 
-    // Update size of per-model groups for same modelName
+    // Absorb the change into the last subgroup for the same model.
     const modelName = opt?.modelName;
     if (!modelName) return;
-    const perModelOptIdx = selectedProfile.options.findIndex(
-      (o) => o.appliesTo === 'per-model' && o.modelName === modelName
-    );
-    if (perModelOptIdx < 0) return;
-
-    // Recalculate total and adjust last group count
-    const total = totalModelCount(perModelOptIdx);
-    const groups = modelGroupStates[perModelOptIdx];
-    if (!groups || groups.length === 0) return;
-    const sumExceptLast = groups.slice(0, -1).reduce((s, g) => s + g.count, 0);
-    const lastCount = Math.max(0, total - sumExceptLast);
-    modelGroupStates = {
-      ...modelGroupStates,
-      [perModelOptIdx]: [...groups.slice(0, -1), { ...groups[groups.length - 1], count: lastCount }],
+    const sgs = subgroups[modelName];
+    if (!sgs || sgs.length === 0) return;
+    const total = totalCount(modelName);
+    const sumExceptLast = sgs.slice(0, -1).reduce((s, g) => s + g.count, 0);
+    const lastCount = Math.max(1, total - sumExceptLast);
+    subgroups = {
+      ...subgroups,
+      [modelName]: [...sgs.slice(0, -1), { ...sgs[sgs.length - 1], count: lastCount }],
     };
   }
 
-  function setGroupChoice(optionIndex: number, groupIdx: number, choiceIndex: number | null) {
-    const groups = [...(modelGroupStates[optionIndex] ?? [])];
-    groups[groupIdx] = { ...groups[groupIdx], choiceIndex };
-    modelGroupStates = { ...modelGroupStates, [optionIndex]: groups };
+  function setSubgroupChoice(modelName: string, i: number, optionIndex: number, choiceIndex: number | null) {
+    const sgs = [...(subgroups[modelName] ?? [])];
+    sgs[i] = { ...sgs[i], choices: { ...sgs[i].choices, [optionIndex]: choiceIndex } };
+    subgroups = { ...subgroups, [modelName]: sgs };
   }
 
-  function splitGroup(optionIndex: number, groupIdx: number) {
-    const groups = [...(modelGroupStates[optionIndex] ?? [])];
-    const g = groups[groupIdx];
+  function splitSubgroup(modelName: string, i: number) {
+    const sgs = [...(subgroups[modelName] ?? [])];
+    const g = sgs[i];
     if (g.count < 2) return;
     const half = Math.floor(g.count / 2);
-    groups.splice(groupIdx, 1,
-      { count: half, choiceIndex: g.choiceIndex },
-      { count: g.count - half, choiceIndex: null },
+    sgs.splice(i, 1,
+      { count: half, choices: { ...g.choices } },
+      { count: g.count - half, choices: { ...g.choices } },
     );
-    modelGroupStates = { ...modelGroupStates, [optionIndex]: groups };
+    subgroups = { ...subgroups, [modelName]: sgs };
   }
 
-  function removeGroup(optionIndex: number, groupIdx: number) {
-    const groups = [...(modelGroupStates[optionIndex] ?? [])];
-    if (groups.length <= 1) return;
-    const removed = groups.splice(groupIdx, 1)[0];
-    // Add removed count to last remaining group
-    groups[groups.length - 1] = { ...groups[groups.length - 1], count: groups[groups.length - 1].count + removed.count };
-    modelGroupStates = { ...modelGroupStates, [optionIndex]: groups };
+  function removeSubgroup(modelName: string, i: number) {
+    const sgs = [...(subgroups[modelName] ?? [])];
+    if (sgs.length <= 1) return;
+    const removed = sgs.splice(i, 1)[0];
+    const target = sgs.length - 1;
+    sgs[target] = { ...sgs[target], count: sgs[target].count + removed.count };
+    subgroups = { ...subgroups, [modelName]: sgs };
   }
 
-  function setGroupCount(optionIndex: number, groupIdx: number, newCount: number) {
-    const groups = [...(modelGroupStates[optionIndex] ?? [])];
-    if (groups.length <= 1) return; // single group count is fixed to totalModelCount
-    const total = totalModelCount(optionIndex);
-    const clamped = Math.max(1, Math.min(newCount, total - groups.length + 1));
-    const delta = clamped - groups[groupIdx].count;
-    // Apply delta to adjacent group
-    const otherIdx = groupIdx === groups.length - 1 ? groupIdx - 1 : groupIdx + 1;
-    const otherNew = groups[otherIdx].count - delta;
+  function setSubgroupCount(modelName: string, i: number, newCount: number) {
+    const sgs = [...(subgroups[modelName] ?? [])];
+    if (sgs.length <= 1) return;
+    const total = totalCount(modelName);
+    const clamped = Math.max(1, Math.min(newCount, total - sgs.length + 1));
+    const delta = clamped - sgs[i].count;
+    const otherIdx = i === sgs.length - 1 ? i - 1 : i + 1;
+    const otherNew = sgs[otherIdx].count - delta;
     if (otherNew < 1) return;
-    groups[groupIdx] = { ...groups[groupIdx], count: clamped };
-    groups[otherIdx] = { ...groups[otherIdx], count: otherNew };
-    modelGroupStates = { ...modelGroupStates, [optionIndex]: groups };
+    sgs[i] = { ...sgs[i], count: clamped };
+    sgs[otherIdx] = { ...sgs[otherIdx], count: otherNew };
+    subgroups = { ...subgroups, [modelName]: sgs };
+  }
+
+  // ── Summaries (comma-delimited, shown on collapsed section headers) ───────
+  function sectionSummary(section: ModelSection): string {
+    const sgs = subgroups[section.modelName] ?? [];
+    const parts: string[] = [];
+    if (section.countOptIdx !== null && (modelCounts[section.countOptIdx] ?? 0) > 0) {
+      parts.push(`+${modelCounts[section.countOptIdx]}`);
+    }
+    for (const sg of sgs) {
+      for (const optIdx of section.perModelOptIdxs) {
+        const ci = sg.choices[optIdx];
+        if (ci === null || ci === undefined) continue;
+        const choice = selectedProfile?.options[optIdx]?.choices?.[ci];
+        if (!choice) continue;
+        parts.push(sg.count === 1 ? choice.description : `${sg.count}× ${choice.description}`);
+      }
+    }
+    return parts.join(', ');
+  }
+
+  function unitSummary(): string {
+    const parts: string[] = [];
+    for (const optIdx of unitOptIdxs) {
+      const ci = unitChoices[optIdx];
+      if (ci === undefined) continue;
+      const opt = selectedProfile?.options[optIdx];
+      if (!opt) continue;
+      if (opt.weaponListNames) {
+        const e = resolveListEntries(opt)[ci];
+        if (e) parts.push(e.weaponName);
+      } else {
+        const c = opt.choices?.[ci];
+        if (c) parts.push(c.description);
+      }
+    }
+    return parts.join(', ');
   }
 
   function handleKeydown(e: KeyboardEvent) {
@@ -304,6 +403,37 @@
     return map[role] ?? '#5a7080';
   }
 </script>
+
+{#snippet weaponStats(weapon: MeleeWeapon | RangedWeapon)}
+  <div class="weapon-stats">
+    {#if isMelee(weapon)}
+      <span class="ws-cell ws-header">IM</span>
+      <span class="ws-cell ws-header">AM</span>
+      <span class="ws-cell ws-header">SM</span>
+      <span class="ws-cell ws-header">AP</span>
+      <span class="ws-cell ws-header">D</span>
+      <span class="ws-cell">{weapon.IM}</span>
+      <span class="ws-cell">{weapon.AM}</span>
+      <span class="ws-cell">{weapon.SM}</span>
+      <span class="ws-cell">{weapon.AP}</span>
+      <span class="ws-cell">{weapon.D}</span>
+    {:else}
+      <span class="ws-cell ws-header">R</span>
+      <span class="ws-cell ws-header">FP</span>
+      <span class="ws-cell ws-header">RS</span>
+      <span class="ws-cell ws-header">AP</span>
+      <span class="ws-cell ws-header">D</span>
+      <span class="ws-cell">{weapon.R}</span>
+      <span class="ws-cell">{weapon.FP}</span>
+      <span class="ws-cell">{(weapon as RangedWeapon).RS}</span>
+      <span class="ws-cell">{weapon.AP}</span>
+      <span class="ws-cell">{weapon.D}</span>
+    {/if}
+    {#if weapon.specialRules.length > 0}
+      <span class="ws-rules">{weapon.specialRules.join(', ')}</span>
+    {/if}
+  </div>
+{/snippet}
 
 <svelte:window onkeydown={handleKeydown} />
 
@@ -374,241 +504,178 @@
           <span class="base-pts">{selectedProfile.points} pts</span>
         </div>
 
-        {#if selectedProfile.options.length > 0}
-          <div class="options-section">
-            <span class="options-heading">Options</span>
+        {#if modelSections.length > 0 || unitOptIdxs.length > 0}
+          <!-- Per-model sections -->
+          {#each modelSections as section (section.modelName)}
+            {@const total = totalCount(section.modelName)}
+            {@const sgs = subgroups[section.modelName] ?? []}
+            {@const summary = sectionSummary(section)}
+            <div class="section-block">
+              <button class="section-header" onclick={() => toggleSection(section.modelName)}>
+                <span class="section-chevron">{expanded[section.modelName] ? '▾' : '▸'}</span>
+                <span class="section-title">{total} × {section.modelName}</span>
+                {#if summary}<span class="section-summary">{summary}</span>{/if}
+              </button>
 
-            {#each selectedProfile.options as option, optIdx}
-              <div class="option-block">
-                <p class="option-desc">{option.description}</p>
+              {#if expanded[section.modelName]}
+                <div class="section-body">
+                  {#if section.countOptIdx !== null}
+                    {@const cIdx = section.countOptIdx}
+                    {@const cOpt = selectedProfile.options[cIdx]}
+                    {@const added = modelCounts[cIdx] ?? 0}
+                    <div class="model-count-row">
+                      <span class="add-label">Add models</span>
+                      <button class="stepper-btn" onclick={() => setModelCount(cIdx, -1)} disabled={added <= 0}>−</button>
+                      <span class="stepper-val">{added}</span>
+                      <button class="stepper-btn" onclick={() => setModelCount(cIdx, 1)} disabled={added >= (cOpt.max ?? 0)}>+</button>
+                      <span class="stepper-pts">
+                        {added > 0 ? `+${added * (cOpt.pointsPerModel ?? 0)} pts` : `+${cOpt.pointsPerModel ?? 0}/model`}
+                      </span>
+                    </div>
+                  {/if}
 
-                <!-- MODEL-COUNT: stepper -->
-                {#if option.appliesTo === 'model-count'}
-                  {@const count = modelCounts[optIdx] ?? 0}
-                  {@const pts = count * (option.pointsPerModel ?? 0)}
-                  <div class="model-count-row">
-                    <button class="stepper-btn" onclick={() => setModelCount(optIdx, -1)} disabled={count <= 0}>−</button>
-                    <span class="stepper-val">{count}</span>
-                    <button class="stepper-btn" onclick={() => setModelCount(optIdx, 1)} disabled={count >= (option.max ?? 0)}>+</button>
-                    <span class="stepper-pts">{pts > 0 ? `+${pts} pts` : 'Free'}</span>
-                  </div>
-
-                <!-- PER-MODEL: model groups -->
-                {:else if option.appliesTo === 'per-model' && option.choices}
-                  {@const groups = modelGroupStates[optIdx] ?? []}
-                  {@const total = totalModelCount(optIdx)}
-                  <div class="group-list">
-                    {#each groups as group, gIdx}
-                      <div class="group-row">
-                        <div class="group-header">
-                          {#if groups.length > 1}
-                            <input
-                              class="group-count-input"
-                              type="number"
-                              min="1"
-                              max={total - groups.length + 1}
-                              value={group.count}
-                              oninput={(e) => setGroupCount(optIdx, gIdx, +(e.target as HTMLInputElement).value)}
-                            />
-                          {:else}
-                            <span class="group-count">{total}</span>
+                  {#each sgs as sg, gIdx}
+                    <div class="group-row">
+                      <div class="group-header">
+                        {#if sgs.length > 1}
+                          <input
+                            class="group-count-input"
+                            type="number"
+                            min="1"
+                            max={total - sgs.length + 1}
+                            value={sg.count}
+                            oninput={(e) => setSubgroupCount(section.modelName, gIdx, +(e.target as HTMLInputElement).value)}
+                          />
+                        {:else}
+                          <span class="group-count">{total}</span>
+                        {/if}
+                        <span class="group-model-name">× {section.modelName}</span>
+                        <div class="group-actions">
+                          {#if sg.count >= 2}
+                            <button class="split-btn" onclick={() => splitSubgroup(section.modelName, gIdx)}>Split</button>
                           {/if}
-                          <span class="group-model-name">× {option.modelName}</span>
-                          <div class="group-actions">
-                            {#if group.count >= 2}
-                              <button class="split-btn" onclick={() => splitGroup(optIdx, gIdx)}>Split</button>
-                            {/if}
-                            {#if groups.length > 1}
-                              <button class="remove-btn" onclick={() => removeGroup(optIdx, gIdx)}>×</button>
-                            {/if}
-                          </div>
+                          {#if sgs.length > 1}
+                            <button class="remove-btn" onclick={() => removeSubgroup(section.modelName, gIdx)}>×</button>
+                          {/if}
                         </div>
-                        <div class="choice-list">
-                          <button
-                            class="choice-btn"
-                            class:selected={group.choiceIndex === null}
-                            onclick={() => setGroupChoice(optIdx, gIdx, null)}
-                          >
-                            <div class="choice-main">
-                              <span class="choice-radio">{group.choiceIndex === null ? '◉' : '○'}</span>
-                              <span class="choice-desc">No upgrade</span>
-                              <span class="choice-cost">Free</span>
-                            </div>
-                          </button>
-                          {#each option.choices as choice, choiceIdx}
-                            {@const isSelected = group.choiceIndex === choiceIdx}
+                      </div>
+
+                      <div class="subgroup-body">
+                        {#each section.perModelOptIdxs as optIdx}
+                          {@const opt = selectedProfile.options[optIdx]}
+                          {@const sel = sg.choices[optIdx] ?? null}
+                          <p class="option-desc">{opt.description}</p>
+                          <div class="choice-list">
+                            <button
+                              class="choice-btn"
+                              class:selected={sel === null}
+                              onclick={() => setSubgroupChoice(section.modelName, gIdx, optIdx, null)}
+                            >
+                              <div class="choice-main">
+                                <span class="choice-radio">{sel === null ? '◉' : '○'}</span>
+                                <span class="choice-desc">No upgrade</span>
+                                <span class="choice-cost">Free</span>
+                              </div>
+                            </button>
+                            {#each opt.choices ?? [] as choice, choiceIdx}
+                              {@const isSelected = sel === choiceIdx}
+                              {@const weapon = choice.weaponName ? findWeapon(choice.weaponName) : undefined}
+                              <button
+                                class="choice-btn"
+                                class:selected={isSelected}
+                                onclick={() => setSubgroupChoice(section.modelName, gIdx, optIdx, choiceIdx)}
+                              >
+                                <div class="choice-main">
+                                  <span class="choice-radio">{isSelected ? '◉' : '○'}</span>
+                                  <span class="choice-desc">{choice.description}</span>
+                                  <span class="choice-cost">
+                                    {#if choice.pointsPerModel !== undefined && choice.pointsPerModel !== 0}
+                                      +{choice.pointsPerModel} pts/model
+                                    {:else}
+                                      Free
+                                    {/if}
+                                  </span>
+                                </div>
+                                {#if weapon}{@render weaponStats(weapon)}{/if}
+                              </button>
+                            {/each}
+                          </div>
+                        {/each}
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          {/each}
+
+          <!-- Unit-wide upgrades -->
+          {#if unitOptIdxs.length > 0}
+            {@const usummary = unitSummary()}
+            <div class="section-block">
+              <button class="section-header" onclick={() => toggleSection(UNIT_SECTION)}>
+                <span class="section-chevron">{expanded[UNIT_SECTION] ? '▾' : '▸'}</span>
+                <span class="section-title">Unit upgrades</span>
+                {#if usummary}<span class="section-summary">{usummary}</span>{/if}
+              </button>
+
+              {#if expanded[UNIT_SECTION]}
+                <div class="section-body">
+                  {#each unitOptIdxs as optIdx}
+                    {@const opt = selectedProfile.options[optIdx]}
+                    <div class="option-block">
+                      <p class="option-desc">{opt.description}</p>
+                      <div class="choice-list">
+                        {#if opt.weaponListNames}
+                          {#each resolveListEntries(opt) as entry, entryIdx}
+                            {@const isSelected = unitChoices[optIdx] === entryIdx}
+                            {@const weapon = findWeapon(entry.weaponName)}
+                            <button
+                              class="choice-btn"
+                              class:selected={isSelected}
+                              onclick={() => toggleUnitChoice(optIdx, entryIdx)}
+                            >
+                              <div class="choice-main">
+                                <span class="choice-radio">{isSelected ? '◉' : '○'}</span>
+                                <span class="choice-desc">{entry.weaponName}</span>
+                                <span class="choice-cost">{entry.points !== 0 ? `+${entry.points} pts` : 'Free'}</span>
+                              </div>
+                              {#if weapon}{@render weaponStats(weapon)}{/if}
+                            </button>
+                          {/each}
+                        {:else if opt.choices}
+                          {#each opt.choices as choice, choiceIdx}
+                            {@const isSelected = unitChoices[optIdx] === choiceIdx}
                             {@const weapon = choice.weaponName ? findWeapon(choice.weaponName) : undefined}
                             <button
                               class="choice-btn"
                               class:selected={isSelected}
-                              onclick={() => setGroupChoice(optIdx, gIdx, choiceIdx)}
+                              onclick={() => toggleUnitChoice(optIdx, choiceIdx)}
                             >
                               <div class="choice-main">
                                 <span class="choice-radio">{isSelected ? '◉' : '○'}</span>
                                 <span class="choice-desc">{choice.description}</span>
                                 <span class="choice-cost">
-                                  {#if choice.pointsPerModel !== undefined && choice.pointsPerModel !== 0}
+                                  {#if choice.points !== undefined && choice.points !== 0}
+                                    +{choice.points} pts
+                                  {:else if choice.pointsPerModel !== undefined && choice.pointsPerModel !== 0}
                                     +{choice.pointsPerModel} pts/model
                                   {:else}
                                     Free
                                   {/if}
                                 </span>
                               </div>
-                              {#if weapon}
-                                <div class="weapon-stats">
-                                  {#if isMelee(weapon)}
-                                    <span class="ws-cell ws-header">IM</span>
-                                    <span class="ws-cell ws-header">AM</span>
-                                    <span class="ws-cell ws-header">SM</span>
-                                    <span class="ws-cell ws-header">AP</span>
-                                    <span class="ws-cell ws-header">D</span>
-                                    <span class="ws-cell">{weapon.IM}</span>
-                                    <span class="ws-cell">{weapon.AM}</span>
-                                    <span class="ws-cell">{weapon.SM}</span>
-                                    <span class="ws-cell">{weapon.AP}</span>
-                                    <span class="ws-cell">{weapon.D}</span>
-                                  {:else}
-                                    <span class="ws-cell ws-header">R</span>
-                                    <span class="ws-cell ws-header">FP</span>
-                                    <span class="ws-cell ws-header">RS</span>
-                                    <span class="ws-cell ws-header">AP</span>
-                                    <span class="ws-cell ws-header">D</span>
-                                    <span class="ws-cell">{weapon.R}</span>
-                                    <span class="ws-cell">{weapon.FP}</span>
-                                    <span class="ws-cell">{(weapon as import('../data/types').RangedWeapon).RS}</span>
-                                    <span class="ws-cell">{weapon.AP}</span>
-                                    <span class="ws-cell">{weapon.D}</span>
-                                  {/if}
-                                  {#if weapon.specialRules.length > 0}
-                                    <span class="ws-rules">{weapon.specialRules.join(', ')}</span>
-                                  {/if}
-                                </div>
-                              {/if}
+                              {#if weapon}{@render weaponStats(weapon)}{/if}
                             </button>
                           {/each}
-                        </div>
+                        {/if}
                       </div>
-                    {/each}
-                  </div>
-
-                <!-- WEAPON LIST choices -->
-                {:else if option.weaponListNames}
-                  {@const entries = resolveListEntries(option)}
-                  <div class="choice-list">
-                    {#each entries as entry, entryIdx}
-                      {@const isSelected = selectedChoices[optIdx] === entryIdx}
-                      {@const weapon = findWeapon(entry.weaponName)}
-                      <button
-                        class="choice-btn"
-                        class:selected={isSelected}
-                        onclick={() => toggleChoice(optIdx, entryIdx)}
-                      >
-                        <div class="choice-main">
-                          <span class="choice-radio">{isSelected ? '◉' : '○'}</span>
-                          <span class="choice-desc">{entry.weaponName}</span>
-                          <span class="choice-cost">
-                            {#if entry.points !== 0}
-                              +{entry.points} pts
-                            {:else}
-                              Free
-                            {/if}
-                          </span>
-                        </div>
-                        {#if weapon}
-                          <div class="weapon-stats">
-                            {#if isMelee(weapon)}
-                              <span class="ws-cell ws-header">IM</span>
-                              <span class="ws-cell ws-header">AM</span>
-                              <span class="ws-cell ws-header">SM</span>
-                              <span class="ws-cell ws-header">AP</span>
-                              <span class="ws-cell ws-header">D</span>
-                              <span class="ws-cell">{weapon.IM}</span>
-                              <span class="ws-cell">{weapon.AM}</span>
-                              <span class="ws-cell">{weapon.SM}</span>
-                              <span class="ws-cell">{weapon.AP}</span>
-                              <span class="ws-cell">{weapon.D}</span>
-                            {:else}
-                              <span class="ws-cell ws-header">R</span>
-                              <span class="ws-cell ws-header">FP</span>
-                              <span class="ws-cell ws-header">RS</span>
-                              <span class="ws-cell ws-header">AP</span>
-                              <span class="ws-cell ws-header">D</span>
-                              <span class="ws-cell">{weapon.R}</span>
-                              <span class="ws-cell">{weapon.FP}</span>
-                              <span class="ws-cell">{(weapon as import('../data/types').RangedWeapon).RS}</span>
-                              <span class="ws-cell">{weapon.AP}</span>
-                              <span class="ws-cell">{weapon.D}</span>
-                            {/if}
-                            {#if weapon.specialRules.length > 0}
-                              <span class="ws-rules">{weapon.specialRules.join(', ')}</span>
-                            {/if}
-                          </div>
-                        {/if}
-                      </button>
-                    {/each}
-                  </div>
-
-                <!-- EXPLICIT choices (existing) -->
-                {:else if option.choices && option.choices.length > 0}
-                  <div class="choice-list">
-                    {#each option.choices as choice, choiceIdx}
-                      {@const isSelected = selectedChoices[optIdx] === choiceIdx}
-                      {@const weapon = choice.weaponName ? findWeapon(choice.weaponName) : undefined}
-                      <button
-                        class="choice-btn"
-                        class:selected={isSelected}
-                        onclick={() => toggleChoice(optIdx, choiceIdx)}
-                      >
-                        <div class="choice-main">
-                          <span class="choice-radio">{isSelected ? '◉' : '○'}</span>
-                          <span class="choice-desc">{choice.description}</span>
-                          <span class="choice-cost">
-                            {#if choice.points !== undefined && choice.points !== 0}
-                              +{choice.points} pts
-                            {:else if choice.pointsPerModel !== undefined && choice.pointsPerModel !== 0}
-                              +{choice.pointsPerModel} pts/model
-                            {:else}
-                              Free
-                            {/if}
-                          </span>
-                        </div>
-                        {#if weapon}
-                          <div class="weapon-stats">
-                            {#if isMelee(weapon)}
-                              <span class="ws-cell ws-header">IM</span>
-                              <span class="ws-cell ws-header">AM</span>
-                              <span class="ws-cell ws-header">SM</span>
-                              <span class="ws-cell ws-header">AP</span>
-                              <span class="ws-cell ws-header">D</span>
-                              <span class="ws-cell">{weapon.IM}</span>
-                              <span class="ws-cell">{weapon.AM}</span>
-                              <span class="ws-cell">{weapon.SM}</span>
-                              <span class="ws-cell">{weapon.AP}</span>
-                              <span class="ws-cell">{weapon.D}</span>
-                            {:else}
-                              <span class="ws-cell ws-header">R</span>
-                              <span class="ws-cell ws-header">FP</span>
-                              <span class="ws-cell ws-header">RS</span>
-                              <span class="ws-cell ws-header">AP</span>
-                              <span class="ws-cell ws-header">D</span>
-                              <span class="ws-cell">{weapon.R}</span>
-                              <span class="ws-cell">{weapon.FP}</span>
-                              <span class="ws-cell">{(weapon as import('../data/types').RangedWeapon).RS}</span>
-                              <span class="ws-cell">{weapon.AP}</span>
-                              <span class="ws-cell">{weapon.D}</span>
-                            {/if}
-                            {#if weapon.specialRules.length > 0}
-                              <span class="ws-rules">{weapon.specialRules.join(', ')}</span>
-                            {/if}
-                          </div>
-                        {/if}
-                      </button>
-                    {/each}
-                  </div>
-                {/if}
-              </div>
-            {/each}
-          </div>
+                    </div>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          {/if}
         {:else}
           <p class="no-options">No configurable options for this unit.</p>
         {/if}
@@ -876,34 +943,83 @@
     color: var(--color-gold);
   }
 
-  .options-section {
+  /* ── Collapsible sections ────────────────────── */
+  .section-block {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .section-block:last-child {
+    border-bottom: none;
+  }
+
+  .section-header {
     display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .options-heading {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-    padding: 0.6rem 1.25rem 0.4rem;
-    border-bottom: 1px solid var(--color-border);
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem 1.25rem;
     background: var(--color-bg-surface);
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.1s;
   }
 
-  .option-block {
-    padding: 0.9rem 1.25rem;
-    border-bottom: 1px solid var(--color-border);
+  .section-header:hover {
+    background: rgba(0, 200, 255, 0.05);
+  }
+
+  .section-chevron {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    width: 0.9rem;
+  }
+
+  .section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--color-accent);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .section-summary {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.02em;
+    flex: 1;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .section-body {
+    padding: 0.75rem 1.25rem;
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
+    background: var(--color-bg);
   }
 
-  .option-block:last-child {
-    border-bottom: none;
+  .add-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-right: auto;
+  }
+
+  .option-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
   }
 
   .option-desc {
@@ -919,7 +1035,7 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    padding: 0.4rem 0;
+    padding: 0.2rem 0 0.4rem;
   }
 
   .stepper-btn {
@@ -965,12 +1081,6 @@
   }
 
   /* ── Per-model Groups ────────────────────────── */
-  .group-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
   .group-row {
     border: 1px solid var(--color-border);
     background: var(--color-bg);
@@ -1054,6 +1164,13 @@
   .remove-btn:hover {
     color: var(--color-danger);
     border-color: var(--color-danger);
+  }
+
+  .subgroup-body {
+    padding: 0.5rem 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   /* ── Choice list ─────────────────────────────── */
