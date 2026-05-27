@@ -4,6 +4,7 @@ import type {
   ArmyDetachment,
   DetachmentSlot,
   DetachmentSlotType,
+  DetachmentType,
   SlottedUnit,
 } from '../data/types';
 
@@ -19,44 +20,83 @@ function makeSlot(slotType: DetachmentSlotType, idx: number): DetachmentSlot {
   };
 }
 
-export function createCrusadeDetachment(): ArmyDetachment {
-  return {
-    type: 'Crusade Primary',
-    slots: [
-      makeSlot('High Command', 1),
-      makeSlot('Command', 1),
-      makeSlot('Command', 2),
-      makeSlot('Command', 3),
-      makeSlot('Troops', 1),
-      makeSlot('Troops', 2),
-      makeSlot('Troops', 3),
-      makeSlot('Troops', 4),
-      makeSlot('Transport', 1),
-      makeSlot('Transport', 2),
-      makeSlot('Transport', 3),
-      makeSlot('Transport', 4),
-    ],
-  };
+export interface SlotSpec {
+  slotType: DetachmentSlotType;
+  count: number;
 }
 
-export function createWarlordDetachment(): ArmyDetachment {
-  return {
+export interface DetachmentDefinition {
+  type: DetachmentType;
+  primary?: boolean;
+  slots: SlotSpec[];
+}
+
+// Data-driven registry of every detachment and its battlefield-role slots.
+export const DETACHMENT_DEFINITIONS: DetachmentDefinition[] = [
+  {
+    type: 'Crusade Primary',
+    primary: true,
+    slots: [
+      { slotType: 'High Command', count: 1 },
+      { slotType: 'Command', count: 3 },
+      { slotType: 'Troops', count: 4 },
+      { slotType: 'Transport', count: 4 },
+    ],
+  },
+  {
     type: 'Warlord',
     slots: [
-      makeSlot('Warlord', 1),
-      makeSlot('Retinue', 1),
-      makeSlot('Heavy Transport', 1),
+      { slotType: 'Warlord', count: 1 },
+      { slotType: 'Retinue', count: 1 },
+      { slotType: 'Heavy Transport', count: 1 },
     ],
-  };
+  },
+  { type: 'Heavy Support', slots: [{ slotType: 'War-Engine', count: 1 }] },
+  { type: 'Lord of War', slots: [{ slotType: 'Lord of War', count: 2 }] },
+  {
+    type: 'Allied Detachment',
+    slots: [
+      { slotType: 'Command', count: 2 },
+      { slotType: 'Troops', count: 4 },
+    ],
+  },
+  {
+    type: 'Armoured Fist',
+    slots: [
+      { slotType: 'Transport', count: 4 },
+      { slotType: 'Armour', count: 4 },
+    ],
+  },
+  {
+    type: 'Tactical Support',
+    slots: [
+      { slotType: 'Troops', count: 2 },
+      { slotType: 'Support', count: 2 },
+    ],
+  },
+  { type: 'Armoured Support', slots: [{ slotType: 'Armour', count: 4 }] },
+  { type: 'Combat Pioneer', slots: [{ slotType: 'Recon', count: 2 }] },
+  { type: 'Shock Assault', slots: [{ slotType: 'Heavy Assault', count: 2 }] },
+  { type: 'First Strike', slots: [{ slotType: 'Fast Attack', count: 2 }] },
+  { type: 'Combat Retinue', slots: [{ slotType: 'Retinue', count: 3 }] },
+  { type: 'Officer Cadre', slots: [{ slotType: 'Command', count: 2 }] },
+  { type: 'Army Vanguard', slots: [{ slotType: 'Elites', count: 3 }] },
+];
+
+export function createDetachment(type: DetachmentType): ArmyDetachment {
+  const def = DETACHMENT_DEFINITIONS.find((d) => d.type === type);
+  if (!def) throw new Error(`Unknown detachment type: ${type}`);
+  const slots: DetachmentSlot[] = [];
+  for (const spec of def.slots) {
+    for (let i = 1; i <= spec.count; i++) {
+      slots.push(makeSlot(spec.slotType, i));
+    }
+  }
+  return { type, slots };
 }
 
-export function createHeavySupportDetachment(): ArmyDetachment {
-  return {
-    type: 'Heavy Support',
-    slots: [
-      makeSlot('War-Engine', 1),
-    ],
-  };
+export function createCrusadeDetachment(): ArmyDetachment {
+  return createDetachment('Crusade Primary');
 }
 
 // ── Points calculation ────────────────────────────────────────────────────────

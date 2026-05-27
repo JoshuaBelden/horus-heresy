@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type { DetachmentSlotType, SlottedUnit } from '../data/types';
+  import type { DetachmentSlotType, DetachmentType, SlottedUnit } from '../data/types';
   import {
     armiesStore,
-    createWarlordDetachment,
-    createHeavySupportDetachment,
+    DETACHMENT_DEFINITIONS,
+    createDetachment,
     calcArmyPoints,
     calcSlottedUnitPoints,
+    type DetachmentDefinition,
   } from '../stores/armies.svelte';
   import DetachmentCard from './DetachmentCard.svelte';
 
@@ -13,34 +14,17 @@
 
   const army = $derived(armiesStore.list.find((a) => a.id === armyId)!);
   const totalPoints = $derived(army ? calcArmyPoints(army) : 0);
-  const hasWarlord = $derived(army?.detachments.some((d) => d.type === 'Warlord') ?? false);
-  const canAddAuxiliary = $derived(() => {
-    const primary = army?.detachments.find((d) => d.type === 'Crusade Primary');
-    if (!primary) return false;
-    return primary.slots.some(
-      (s) => (s.slotType === 'High Command' || s.slotType === 'Command') && s.unit !== null,
-    );
-  });
 
-  function addWarlordDetachment() {
-    const clone = JSON.parse(JSON.stringify(army));
-    clone.detachments.push(createWarlordDetachment());
-    clone.updatedAt = Date.now();
-    armiesStore.update(clone);
+  // Every non-primary detachment can be added any number of times (no FO rules enforced).
+  const addableDetachments = DETACHMENT_DEFINITIONS.filter((d) => !d.primary);
+
+  function slotSummary(def: DetachmentDefinition): string {
+    return def.slots.map((s) => `${s.slotType} ×${s.count}`).join(' · ');
   }
 
-  function removeWarlordDetachment() {
+  function addDetachment(type: DetachmentType) {
     const clone = JSON.parse(JSON.stringify(army));
-    clone.detachments = clone.detachments.filter(
-      (d: { type: string }) => d.type !== 'Warlord',
-    );
-    clone.updatedAt = Date.now();
-    armiesStore.update(clone);
-  }
-
-  function addHeavySupportDetachment() {
-    const clone = JSON.parse(JSON.stringify(army));
-    clone.detachments.push(createHeavySupportDetachment());
+    clone.detachments.push(createDetachment(type));
     clone.updatedAt = Date.now();
     armiesStore.update(clone);
   }
@@ -114,29 +98,22 @@
             onassign={(slotId, unit) => assignUnit(detIndex, slotId, unit)}
             onclear={(slotId) => clearSlot(detIndex, slotId)}
           />
-          {#if detachment.type === 'Warlord'}
-            <button class="remove-det-btn" onclick={removeWarlordDetachment}>
-              − Remove Warlord Detachment
-            </button>
-          {/if}
-          {#if detachment.type === 'Heavy Support'}
+          {#if detachment.type !== 'Crusade Primary'}
             <button class="remove-det-btn" onclick={() => removeDetachment(detIndex)}>
-              − Remove Heavy Support Detachment
+              − Remove {detachment.type} Detachment
             </button>
           {/if}
         </div>
       {/each}
 
-      {#if !hasWarlord}
-        <button class="add-det-btn" onclick={addWarlordDetachment}>
-          + Add Warlord Detachment
-        </button>
-      {/if}
-      {#if canAddAuxiliary()}
-        <button class="add-det-btn" onclick={addHeavySupportDetachment}>
-          + Add Auxiliary Detachment (Heavy Support)
-        </button>
-      {/if}
+      <div class="add-det-list">
+        {#each addableDetachments as def (def.type)}
+          <button class="add-det-btn" onclick={() => addDetachment(def.type)}>
+            <span class="add-det-label">+ Add {def.type} Detachment</span>
+            <span class="add-det-roles">{slotSummary(def)}</span>
+          </button>
+        {/each}
+      </div>
     </div>
   </div>
 {/if}
@@ -278,12 +255,18 @@
     gap: 0.5rem;
   }
 
+  .add-det-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
   .add-det-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
     font-family: 'Rajdhani', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
     background: none;
     border: 1px dashed var(--color-border);
     color: var(--color-text-muted);
@@ -297,6 +280,21 @@
   .add-det-btn:hover {
     border-color: var(--color-accent-dim);
     color: var(--color-accent);
+  }
+
+  .add-det-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .add-det-roles {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    opacity: 0.7;
   }
 
   .remove-det-btn {

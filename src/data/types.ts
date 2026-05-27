@@ -197,7 +197,30 @@ export type DetachmentSlotType =
   | 'Warlord'
   | 'Retinue'
   | 'Heavy Transport'
-  | 'War-Engine';
+  | 'War-Engine'
+  | 'Lord of War'
+  | 'Support'
+  | 'Armour'
+  | 'Recon'
+  | 'Heavy Assault'
+  | 'Fast Attack'
+  | 'Elites';
+
+export type DetachmentType =
+  | 'Crusade Primary'
+  | 'Warlord'
+  | 'Heavy Support'
+  | 'Lord of War'
+  | 'Allied Detachment'
+  | 'Armoured Fist'
+  | 'Tactical Support'
+  | 'Armoured Support'
+  | 'Combat Pioneer'
+  | 'Shock Assault'
+  | 'First Strike'
+  | 'Combat Retinue'
+  | 'Officer Cadre'
+  | 'Army Vanguard';
 
 export interface SelectedChoice {
   optionIndex: number;
@@ -218,7 +241,7 @@ export interface DetachmentSlot {
 }
 
 export interface ArmyDetachment {
-  type: 'Crusade Primary' | 'Warlord' | 'Heavy Support';
+  type: DetachmentType;
   slots: DetachmentSlot[];
 }
 

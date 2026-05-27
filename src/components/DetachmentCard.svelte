@@ -56,6 +56,13 @@
       Retinue: '#cc88ff',
       'Heavy Transport': '#888888',
       'War-Engine': '#cc4400',
+      'Lord of War': '#c9933a',
+      Support: '#00b8a0',
+      Armour: '#7a8aa0',
+      Recon: '#a0c060',
+      'Heavy Assault': '#e0703a',
+      'Fast Attack': '#ffb020',
+      Elites: '#b060d0',
     };
     return map[slotType] ?? '#5a7080';
   }
