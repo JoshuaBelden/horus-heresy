@@ -240,6 +240,8 @@ export interface SelectedChoice {
 
 export interface SlottedUnit {
   unitName: string;
+  // Player-given label to distinguish duplicate squads; falls back to unitName.
+  nickname?: string;
   selectedChoices: SelectedChoice[];
   modelGroups?: ModelGroup[];
 }
@@ -261,6 +263,9 @@ export interface ArmyList {
   faction: Faction;
   allegiance: Allegiance;
   detachments: ArmyDetachment[];
+  // Battle Report squad display order, by detachment-slot id. Squads not listed
+  // (e.g. newly added) fall back to natural detachment/slot order.
+  reportOrder?: string[];
   createdAt: number;
   updatedAt: number;
 }

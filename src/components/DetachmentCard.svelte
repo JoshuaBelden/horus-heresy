@@ -9,11 +9,13 @@
     detIndex,
     onassign,
     onclear,
+    onrename,
   }: {
     detachment: ArmyDetachment;
     detIndex: number;
     onassign: (slotId: string, unit: SlottedUnit) => void;
     onclear: (slotId: string) => void;
+    onrename: (slotId: string, nickname: string | undefined) => void;
   } = $props();
 
   let pickerSlotId = $state<string | null>(null);
@@ -21,6 +23,32 @@
   let pickerCurrentUnit = $state<SlottedUnit | null>(null);
   let expandedSlotId = $state<string | null>(null);
   let collapsed = $state(false);
+
+  // Double-click a filled slot's name to rename it; blank reverts to unit name.
+  let editingSlotId = $state<string | null>(null);
+  let editValue = $state('');
+
+  function startEdit(slot: { id: string; unit: SlottedUnit | null }) {
+    if (!slot.unit) return;
+    editingSlotId = slot.id;
+    editValue = slot.unit.nickname ?? '';
+  }
+
+  function commitEdit() {
+    if (editingSlotId === null) return;
+    const trimmed = editValue.trim();
+    onrename(editingSlotId, trimmed === '' ? undefined : trimmed);
+    editingSlotId = null;
+  }
+
+  function cancelEdit() {
+    editingSlotId = null;
+  }
+
+  function focusSelect(node: HTMLInputElement) {
+    node.focus();
+    node.select();
+  }
 
   const detachmentPoints = $derived(
     detachment.slots.reduce(
@@ -159,14 +187,35 @@
         </span>
 
         {#if slot.unit}
-          <button
-            class="slot-unit-btn"
-            onclick={() => toggleExpand(slot.id)}
-            aria-expanded={expandedSlotId === slot.id}
-          >
-            <span class="chevron">{expandedSlotId === slot.id ? '▾' : '▸'}</span>
-            {slot.unit.unitName}
-          </button>
+          {#if editingSlotId === slot.id}
+            <input
+              class="slot-name-input"
+              bind:value={editValue}
+              placeholder={slot.unit.unitName}
+              use:focusSelect
+              onblur={commitEdit}
+              onkeydown={(e) => {
+                if (e.key === 'Enter') { e.preventDefault(); commitEdit(); }
+                else if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
+              }}
+            />
+          {:else}
+            <button
+              class="slot-unit-btn"
+              onclick={() => toggleExpand(slot.id)}
+              ondblclick={() => startEdit(slot)}
+              aria-expanded={expandedSlotId === slot.id}
+              title="Double-click to rename"
+            >
+              <span class="chevron">{expandedSlotId === slot.id ? '▾' : '▸'}</span>
+              {#if slot.unit.nickname}
+                <span class="slot-nickname">{slot.unit.nickname}</span>
+                <span class="slot-unit-sub">{slot.unit.unitName}</span>
+              {:else}
+                {slot.unit.unitName}
+              {/if}
+            </button>
+          {/if}
           <span class="slot-pts">{getUnitPoints(slot.unit)} pts</span>
           <button
             class="slot-edit-btn"
@@ -400,6 +449,36 @@
 
   .slot-unit-btn:hover {
     color: var(--color-accent);
+  }
+
+  .slot-nickname {
+    color: var(--color-text);
+  }
+
+  .slot-unit-sub {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    opacity: 0.75;
+  }
+
+  .slot-name-input {
+    flex: 1;
+    min-width: 0;
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-accent-dim);
+    color: var(--color-text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 0.3rem 0.5rem;
+    outline: none;
+  }
+
+  .slot-name-input:focus {
+    border-color: var(--color-accent);
   }
 
   .chevron {

@@ -54,6 +54,16 @@
     armiesStore.update(clone);
   }
 
+  function renameUnit(detIndex: number, slotId: string, nickname: string | undefined) {
+    const clone = JSON.parse(JSON.stringify(army));
+    clone.detachments[detIndex].slots = clone.detachments[detIndex].slots.map(
+      (s: { id: string; unit: SlottedUnit | null }) =>
+        s.id === slotId && s.unit ? { ...s, unit: { ...s.unit, nickname } } : s,
+    );
+    clone.updatedAt = Date.now();
+    armiesStore.update(clone);
+  }
+
   const FACTION_COLORS: Record<string, string> = {
     'Dark Angels': '#1a5c1a',
     'White Scars': '#c8d8e8',
@@ -97,6 +107,7 @@
             {detIndex}
             onassign={(slotId, unit) => assignUnit(detIndex, slotId, unit)}
             onclear={(slotId) => clearSlot(detIndex, slotId)}
+            onrename={(slotId, nickname) => renameUnit(detIndex, slotId, nickname)}
           />
           {#if detachment.type !== 'Crusade Primary'}
             <button class="remove-det-btn" onclick={() => removeDetachment(detIndex)}>

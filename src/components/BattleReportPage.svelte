@@ -69,6 +69,7 @@
   interface UnitInstance {
     key: string;
     profile: UnitProfile;
+    nickname?: string;
     models: ModelLoadout[];
     equipment: WargearDetail[];
     rules: string[];
@@ -161,8 +162,22 @@
           .filter((g): g is WargearDetail => g !== undefined);
         const rules = [...new Set(ruleNames)].sort();
 
-        result.push({ key: s.id, profile, models, equipment, rules });
+        result.push({ key: s.id, profile, nickname: s.unit.nickname, models, equipment, rules });
       }
+    }
+
+    // Apply the player's saved Battle Report ordering; squads not listed keep
+    // their natural detachment/slot order (stable sort) after the ordered ones.
+    const order = army.reportOrder ?? [];
+    if (order.length) {
+      result.sort((a, b) => {
+        const ia = order.indexOf(a.key);
+        const ib = order.indexOf(b.key);
+        if (ia === -1 && ib === -1) return 0;
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
     }
     return result;
   });
@@ -173,7 +188,7 @@
   const trackerSquads = $derived.by<TrackerSquad[]>(() =>
     unitInstances.map((inst) => ({
       id: inst.key,
-      name: inst.profile.name,
+      name: inst.nickname || inst.profile.name,
       rules: inst.rules,
       ranged: inst.models.flatMap((m) =>
         m.ranged.map((w) => ({
@@ -228,6 +243,51 @@
     return false; // no requirement matched (or none configured) ⇒ hidden
   }
   const visibleInstances = $derived(unitInstances.filter(unitVisible));
+
+  // ── Drag-to-reorder squads ───────────────────────────────────────────────────
+  // Dragging is initiated from a per-block handle (draggable). Reordering acts on
+  // the full unit-instance order (by slot id) so it stays correct even when the
+  // list is phase-filtered while tracking, then persists onto army.reportOrder.
+  let draggingKey = $state<string | null>(null);
+  let dragOverKey = $state<string | null>(null);
+
+  function onDragStart(e: DragEvent, key: string) {
+    draggingKey = key;
+    e.dataTransfer?.setData('text/plain', key);
+    if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
+    const block = (e.currentTarget as HTMLElement).closest('.unit-block');
+    if (block) e.dataTransfer?.setDragImage(block, 16, 16);
+  }
+
+  function onDragOver(e: DragEvent, key: string) {
+    if (draggingKey === null || draggingKey === key) return;
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    dragOverKey = key;
+  }
+
+  function onDrop(e: DragEvent, targetKey: string) {
+    e.preventDefault();
+    if (draggingKey !== null && draggingKey !== targetKey) {
+      const keys = unitInstances.map((i) => i.key);
+      const from = keys.indexOf(draggingKey);
+      const to = keys.indexOf(targetKey);
+      if (from !== -1 && to !== -1) {
+        keys.splice(from, 1);
+        keys.splice(to, 0, draggingKey);
+        const clone = JSON.parse(JSON.stringify(army));
+        clone.reportOrder = keys;
+        clone.updatedAt = Date.now();
+        armiesStore.update(clone);
+      }
+    }
+    resetDrag();
+  }
+
+  function resetDrag() {
+    draggingKey = null;
+    dragOverKey = null;
+  }
 
   const FACTION_COLORS: Record<string, string> = {
     'Dark Angels': '#1a5c1a',
@@ -374,7 +434,21 @@
                 class:is-open={isOpen}
                 class:is-gone={gone}
                 class:is-targeted={targeted}
+                class:is-dragging={draggingKey === inst.key}
+                class:drag-over={dragOverKey === inst.key}
+                ondragover={(e) => onDragOver(e, inst.key)}
+                ondragleave={() => { if (dragOverKey === inst.key) dragOverKey = null; }}
+                ondrop={(e) => onDrop(e, inst.key)}
+                role="listitem"
               >
+                <button
+                  class="drag-handle"
+                  draggable="true"
+                  ondragstart={(e) => onDragStart(e, inst.key)}
+                  ondragend={resetDrag}
+                  aria-label="Drag to reorder squad"
+                  title="Drag to reorder"
+                >⋮⋮</button>
                 <div class="unit-block-head-row">
                   <button
                     class="unit-block-header"
@@ -382,7 +456,12 @@
                     onclick={() => toggleUnit(inst.key)}
                   >
                     <span class="unit-toggle-icon">▸</span>
-                    <span class="unit-block-name">{profile.name}</span>
+                    {#if inst.nickname}
+                      <span class="unit-block-name">{inst.nickname}</span>
+                      <span class="unit-block-sub">{profile.name}</span>
+                    {:else}
+                      <span class="unit-block-name">{profile.name}</span>
+                    {/if}
                     <span class="unit-pts">{profile.points} pts</span>
                   </button>
                   {#if offensive}
@@ -721,11 +800,55 @@
 
   /* ── Unit Blocks ─────────────────────────────── */
   .unit-block {
+    position: relative;
     border: 1px solid var(--color-border);
-    padding: 0.85rem 1rem;
+    padding: 0.85rem 1rem 0.85rem 1.6rem;
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
+  }
+
+  /* Drag handle: hidden until the block is hovered, sits in the left gutter. */
+  .drag-handle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    line-height: 1;
+    letter-spacing: -2px;
+    cursor: grab;
+    opacity: 0;
+    transition: opacity 0.12s, color 0.12s;
+  }
+
+  .unit-block:hover .drag-handle {
+    opacity: 0.55;
+  }
+
+  .drag-handle:hover {
+    opacity: 1;
+    color: var(--color-accent);
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
+  }
+
+  .unit-block.is-dragging {
+    opacity: 0.4;
+  }
+
+  .unit-block.drag-over {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 8px rgba(0, 200, 255, 0.25);
   }
 
   /* When tracking, a squad marked "gone" dims to read as already-acted. */
@@ -803,7 +926,6 @@
   }
 
   .unit-block-name {
-    margin-right: auto;
     font-family: 'Orbitron', monospace;
     font-size: 0.78rem;
     font-weight: 700;
@@ -812,7 +934,18 @@
     color: var(--color-accent);
   }
 
+  .unit-block-sub {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    opacity: 0.8;
+  }
+
   .unit-pts {
+    margin-left: auto;
     font-family: 'Orbitron', monospace;
     font-size: 0.75rem;
     font-weight: 700;
