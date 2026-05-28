@@ -20,10 +20,15 @@
     activeArmyId = null;
     activeView = 'builder';
   }
+
+  // From the Battle Report, return to the same army's roster (the builder).
+  function backToRoster() {
+    activeView = 'builder';
+  }
 </script>
 
 {#if activeArmyId !== null && activeView === 'report'}
-  <BattleReportPage armyId={activeArmyId} onback={goBack} />
+  <BattleReportPage armyId={activeArmyId} onback={backToRoster} />
 {:else if activeArmyId !== null}
   <ArmyBuilderPage armyId={activeArmyId} onback={goBack} onreport={() => openReport(activeArmyId!)} />
 {:else}

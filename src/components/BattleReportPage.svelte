@@ -16,6 +16,9 @@
   } from '../data/types';
   import { armiesStore, calcArmyPoints } from '../stores/armies.svelte';
   import { libraryStore } from '../stores/library.svelte';
+  import { turnTrackerStore as tt } from '../stores/turnTracker.svelte';
+  import TurnTracker from './TurnTracker.svelte';
+  import { turnSequence, type TrackerSquad } from '../data/turnSequence';
 
   const { armyId, onback }: { armyId: string; onback: () => void } = $props();
 
@@ -40,6 +43,17 @@
   let expanded = $state<Record<string, boolean>>({});
   function toggleUnit(key: string) {
     expanded[key] = !expanded[key];
+  }
+
+  // Your turn is the offensive context: phase display rules + "Mark Gone".
+  const offensive = $derived(tt.active && tt.turnOwner === 'player');
+  // The opponent's turn is the defensive context: tag squads under attack.
+  const canTarget = $derived(tt.active && tt.turnOwner === 'opponent');
+
+  // Marking a squad as gone collapses its block to declutter the acted list.
+  function markGone(key: string) {
+    tt.toggleGone(key);
+    if (tt.hasGone(key)) expanded[key] = false;
   }
 
   // ── Per-slot unit instances ──────────────────────────────────────────────────
@@ -137,7 +151,8 @@
           const melee = uniq
             .map((n) => catalogueMelee.find((w) => w.name === n))
             .filter((w): w is MeleeWeapon => w !== undefined);
-          for (const w of [...ranged, ...melee]) ruleNames.push(...w.specialRules);
+          // Weapon special rules are shown inline in the weapon tables, so they
+          // are deliberately not merged into the unit's Special Rules list.
           return { model, ranged, melee };
         });
 
@@ -151,6 +166,68 @@
     }
     return result;
   });
+
+  // Lightweight squad view models for the Turn Tracker, derived from the unit
+  // instances above so the tracker doesn't re-parse army data. The slot id
+  // (inst.key) is the stable squad identifier used for per-squad tracking.
+  const trackerSquads = $derived.by<TrackerSquad[]>(() =>
+    unitInstances.map((inst) => ({
+      id: inst.key,
+      name: inst.profile.name,
+      rules: inst.rules,
+      ranged: inst.models.flatMap((m) =>
+        m.ranged.map((w) => ({
+          name: w.name,
+          specialRules: w.specialRules ?? [],
+          traits: w.traits ?? [],
+        })),
+      ),
+      melee: inst.models.flatMap((m) =>
+        m.melee.map((w) => ({
+          name: w.name,
+          specialRules: w.specialRules ?? [],
+          traits: w.traits ?? [],
+        })),
+      ),
+      subtypes: [
+        ...new Set(inst.models.flatMap((m) => m.model.subtypes ?? [])),
+      ],
+    })),
+  );
+
+  // Per-phase display rules drive the Unit Profiles list while tracking: which
+  // units are shown and which model stats are highlighted. When not tracking,
+  // every unit is shown with no highlighting.
+  const currentPhase = $derived(
+    turnSequence.find((p) => p.id === tt.currentPhaseId) ?? turnSequence[0],
+  );
+  const highlightStats = $derived(
+    offensive ? (currentPhase.display.highlightStats ?? []) : [],
+  );
+  const highlightWeapons = $derived(
+    offensive ? (currentPhase.display.highlightWeapons ?? null) : null,
+  );
+  function hasStat(model: ModelProfile, stat: string): boolean {
+    return (model as unknown as Record<string, unknown>)[stat] != null;
+  }
+  function unitVisible(inst: UnitInstance): boolean {
+    if (!offensive) return true;
+    const { requireStats, requireWeapons } = currentPhase.display;
+    if (
+      requireStats?.length &&
+      inst.models.some((ml) => requireStats.some((s) => hasStat(ml.model, s)))
+    )
+      return true;
+    if (
+      requireWeapons &&
+      inst.models.some(
+        (ml) => (requireWeapons === 'ranged' ? ml.ranged : ml.melee).length > 0,
+      )
+    )
+      return true;
+    return false; // no requirement matched (or none configured) ⇒ hidden
+  }
+  const visibleInstances = $derived(unitInstances.filter(unitVisible));
 
   const FACTION_COLORS: Record<string, string> = {
     'Dark Angels': '#1a5c1a',
@@ -261,6 +338,17 @@
       </div>
     </div>
 
+    <!-- Turn Tracker: full-width bar below the header -->
+    {#if tt.active}
+      <TurnTracker squads={trackerSquads} onstop={() => tt.stop()} />
+    {:else}
+      <div class="track-start">
+        <button class="track-start-btn" onclick={() => tt.start()}>
+          Start Tracking Turns
+        </button>
+      </div>
+    {/if}
+
     <!-- Body: 2/3 Army Info + 1/3 Turn Sequence -->
     <div class="report-body">
       <!-- Left: Army Info -->
@@ -271,20 +359,50 @@
 
           {#if unitInstances.length === 0}
             <p class="empty-note">No units assigned yet.</p>
+          {:else if visibleInstances.length === 0}
+            <p class="empty-note">
+              No units to show for the {currentPhase.name} phase.
+            </p>
           {:else}
-            {#each unitInstances as inst (inst.key)}
+            {#each visibleInstances as inst (inst.key)}
               {@const profile = inst.profile}
               {@const isOpen = expanded[inst.key] ?? false}
-              <div class="unit-block" class:is-open={isOpen}>
-                <button
-                  class="unit-block-header"
-                  aria-expanded={isOpen}
-                  onclick={() => toggleUnit(inst.key)}
-                >
-                  <span class="unit-toggle-icon">▸</span>
-                  <span class="unit-block-name">{profile.name}</span>
-                  <span class="unit-pts">{profile.points} pts</span>
-                </button>
+              {@const gone = offensive && tt.hasGone(inst.key)}
+              {@const targeted = canTarget && tt.isTargeted(inst.key)}
+              <div
+                class="unit-block"
+                class:is-open={isOpen}
+                class:is-gone={gone}
+                class:is-targeted={targeted}
+              >
+                <div class="unit-block-head-row">
+                  <button
+                    class="unit-block-header"
+                    aria-expanded={isOpen}
+                    onclick={() => toggleUnit(inst.key)}
+                  >
+                    <span class="unit-toggle-icon">▸</span>
+                    <span class="unit-block-name">{profile.name}</span>
+                    <span class="unit-pts">{profile.points} pts</span>
+                  </button>
+                  {#if offensive}
+                    <button
+                      class="unit-mark-btn"
+                      class:is-gone={gone}
+                      onclick={() => markGone(inst.key)}
+                    >
+                      {gone ? '✓ Gone' : 'Mark Gone'}
+                    </button>
+                  {:else if canTarget}
+                    <button
+                      class="unit-mark-btn"
+                      class:is-targeted={targeted}
+                      onclick={() => tt.toggleTargeted(inst.key)}
+                    >
+                      {targeted ? '✓ Targeted' : 'Target'}
+                    </button>
+                  {/if}
+                </div>
 
                 {#if isOpen}
                 {#each inst.models as ml (ml.model.name)}
@@ -299,14 +417,16 @@
                         <thead>
                           <tr>
                             {#each statCols as stat}
-                              <th>{VEHICLE_STAT_LABELS[stat] ?? stat}</th>
+                              <th class:stat-highlight={highlightStats.includes(stat)}
+                                >{VEHICLE_STAT_LABELS[stat] ?? stat}</th
+                              >
                             {/each}
                           </tr>
                         </thead>
                         <tbody>
                           <tr>
                             {#each statCols as stat}
-                              <td
+                              <td class:stat-highlight={highlightStats.includes(stat)}
                                 >{(ml.model as unknown as Record<
                                   string,
                                   unknown
@@ -318,15 +438,21 @@
                       </table>
                     </div>
 
-                    {#if ml.ranged.length > 0}
-                      <div class="ref-group">
+                    {#if ml.ranged.length > 0 && (!offensive || highlightWeapons === 'ranged')}
+                      <div
+                        class="ref-group"
+                        class:weapons-highlight={highlightWeapons === 'ranged'}
+                      >
                         <span class="ref-label">Ranged Weapons</span>
                         {@render rangedTable(ml.ranged)}
                       </div>
                     {/if}
 
-                    {#if ml.melee.length > 0}
-                      <div class="ref-group">
+                    {#if ml.melee.length > 0 && (!offensive || highlightWeapons === 'melee')}
+                      <div
+                        class="ref-group"
+                        class:weapons-highlight={highlightWeapons === 'melee'}
+                      >
                         <span class="ref-label">Melee Weapons</span>
                         {@render meleeTable(ml.melee)}
                       </div>
@@ -482,6 +608,32 @@
     color: var(--color-text-muted);
   }
 
+  /* ── Start Tracking ──────────────────────────── */
+  .track-start {
+    display: flex;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-raised);
+  }
+
+  .track-start-btn {
+    flex: 1;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    color: var(--color-accent);
+    padding: 0.85rem 1.5rem;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+
+  .track-start-btn:hover {
+    background: rgba(0, 200, 255, 0.08);
+  }
+
   /* ── Body Layout ─────────────────────────────── */
   .report-body {
     display: flex;
@@ -576,11 +728,29 @@
     gap: 0.6rem;
   }
 
+  /* When tracking, a squad marked "gone" dims to read as already-acted. */
+  .unit-block.is-gone {
+    opacity: 0.45;
+  }
+
+  /* A squad flagged as under attack on the opponent's turn. */
+  .unit-block.is-targeted {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 8px rgba(0, 200, 255, 0.25);
+  }
+
+  .unit-block-head-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
   .unit-block-header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     background: none;
     border: none;
     padding: 0;
@@ -588,6 +758,37 @@
     text-align: left;
     font: inherit;
     color: inherit;
+  }
+
+  .unit-mark-btn {
+    flex-shrink: 0;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: none;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      border-color 0.12s,
+      color 0.12s,
+      background 0.12s;
+  }
+
+  .unit-mark-btn:hover {
+    border-color: var(--color-accent-dim);
+    color: var(--color-accent);
+  }
+
+  .unit-mark-btn.is-gone,
+  .unit-mark-btn.is-targeted {
+    color: var(--color-accent);
+    border-color: var(--color-accent-dim);
+    background: rgba(0, 200, 255, 0.08);
   }
 
   .unit-toggle-icon {
@@ -624,6 +825,16 @@
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
+  }
+
+  /* Weapon table for the current phase, highlighted by the Turn Tracker. */
+  .ref-group.weapons-highlight .ref-label {
+    color: var(--color-accent);
+  }
+
+  .ref-group.weapons-highlight :global(.weapons-table-wrap) {
+    box-shadow: inset 0 0 0 1px var(--color-accent-dim);
+    background: rgba(0, 200, 255, 0.06);
   }
 
   .ref-label {
@@ -712,6 +923,19 @@
 
   .stats-table td {
     color: var(--color-text);
+  }
+
+  /* Phase-relevant characteristic highlighted by the Turn Tracker. */
+  .stats-table th.stat-highlight {
+    color: var(--color-accent);
+    background: rgba(0, 200, 255, 0.18);
+  }
+
+  .stats-table td.stat-highlight {
+    color: var(--color-accent);
+    font-weight: 700;
+    background: rgba(0, 200, 255, 0.12);
+    box-shadow: inset 0 0 0 1px var(--color-accent-dim);
   }
 
   /* ── Weapons Tables ──────────────────────────── */

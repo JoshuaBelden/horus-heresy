@@ -37,26 +37,6 @@
       </ul>
     </details>
 
-    <!-- Vehicle Damage Table -->
-    <details class="phase-block">
-      <summary class="phase-title"
-        >Vehicle Damage <span class="page-ref">p.221</span></summary
-      >
-      <p class="phase-note">
-        Vehicles suffering Glancing hits roll on this table:
-      </p>
-      <table class="cs-table">
-        <tbody>
-          <tr><td>1–2</td><td>Impaired Sensors → Stunned</td></tr>
-          <tr><td>3–4</td><td>Impaired Motors → Pinned</td></tr>
-          <tr><td>5–6</td><td>Weapons Damaged → Suppressed</td></tr>
-        </tbody>
-      </table>
-      <p class="phase-note">
-        Already has that status → lose a Hull Point instead (no saves).
-      </p>
-    </details>
-
     <!-- Combat Hit Test Table -->
     <details class="phase-block">
       <summary class="phase-title">Combat Hit Test</summary>
@@ -178,6 +158,26 @@
           </tbody>
         </table>
       </div>
+    </details>
+
+    <!-- Vehicle Damage Table -->
+    <details class="phase-block">
+      <summary class="phase-title"
+        >Vehicle Damage <span class="page-ref">p.221</span></summary
+      >
+      <p class="phase-note">
+        Vehicles suffering Glancing hits roll on this table:
+      </p>
+      <table class="cs-table">
+        <tbody>
+          <tr><td>1–2</td><td>Impaired Sensors → Stunned</td></tr>
+          <tr><td>3–4</td><td>Impaired Motors → Pinned</td></tr>
+          <tr><td>5–6</td><td>Weapons Damaged → Suppressed</td></tr>
+        </tbody>
+      </table>
+      <p class="phase-note">
+        Already has that status → lose a Hull Point instead (no saves).
+      </p>
     </details>
   </details>
 </div>
