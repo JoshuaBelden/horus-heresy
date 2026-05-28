@@ -65,6 +65,18 @@
   }
 </script>
 
+{#snippet rulesCell(rules: string[])}
+  {#if rules.length === 0}—{/if}
+  {#each rules as rule, i}
+    {#if i > 0}<span class="rule-sep">, </span>{/if}
+    {#if lookupRule(rule)}
+      <button class="rule-link" onclick={(e) => openRule(e, rule)}>{rule}</button>
+    {:else}
+      <span>{rule}</span>
+    {/if}
+  {/each}
+{/snippet}
+
 <div class="wargear-container">
   <!-- ── Tabs + Search row ─────────────────────────── -->
   <div class="top-bar">
@@ -180,29 +192,41 @@
             </thead>
             <tbody>
               {#each filteredRanged as w, i (w.name + i)}
-                <tr class="weapon-row">
-                  <td class="col-name weapon-name">{w.name}</td>
-                  <td class="col-stat stat-cell">{w.R}</td>
-                  <td class="col-stat stat-cell">{w.FP}</td>
-                  <td class="col-stat stat-cell">{w.RS}</td>
-                  <td class="col-stat stat-cell">{w.AP}</td>
-                  <td class="col-stat stat-cell">{w.D}</td>
-                  <td class="col-rules rules-cell">
-                    {#if w.specialRules.length === 0}—{/if}
-                    {#each w.specialRules as rule, i}
-                      {#if i > 0}<span class="rule-sep">, </span>{/if}
-                      {#if lookupRule(rule)}
-                        <button
-                          class="rule-link"
-                          onclick={(e) => openRule(e, rule)}>{rule}</button
-                        >
-                      {:else}
-                        <span>{rule}</span>
-                      {/if}
-                    {/each}
-                  </td>
-                  <td class="col-traits traits-cell">{fmtList(w.traits)}</td>
-                </tr>
+                {#if w.modes && w.modes.length}
+                  <tr class="weapon-row mode-parent">
+                    <td class="col-name weapon-name">{w.name}</td>
+                    <td class="col-stat stat-cell">{w.R}</td>
+                    <td class="col-stat stat-cell">{w.FP}</td>
+                    <td class="col-stat stat-cell">—</td>
+                    <td class="col-stat stat-cell">—</td>
+                    <td class="col-stat stat-cell">—</td>
+                    <td class="col-rules rules-cell"></td>
+                    <td class="col-traits traits-cell">{fmtList(w.traits)}</td>
+                  </tr>
+                  {#each w.modes as mode}
+                    <tr class="weapon-row mode-row">
+                      <td class="col-name mode-name">– {mode.name}</td>
+                      <td class="col-stat stat-cell"></td>
+                      <td class="col-stat stat-cell"></td>
+                      <td class="col-stat stat-cell">{mode.RS}</td>
+                      <td class="col-stat stat-cell">{mode.AP}</td>
+                      <td class="col-stat stat-cell">{mode.D}</td>
+                      <td class="col-rules rules-cell">{@render rulesCell(mode.specialRules)}</td>
+                      <td class="col-traits traits-cell"></td>
+                    </tr>
+                  {/each}
+                {:else}
+                  <tr class="weapon-row">
+                    <td class="col-name weapon-name">{w.name}</td>
+                    <td class="col-stat stat-cell">{w.R}</td>
+                    <td class="col-stat stat-cell">{w.FP}</td>
+                    <td class="col-stat stat-cell">{w.RS}</td>
+                    <td class="col-stat stat-cell">{w.AP}</td>
+                    <td class="col-stat stat-cell">{w.D}</td>
+                    <td class="col-rules rules-cell">{@render rulesCell(w.specialRules)}</td>
+                    <td class="col-traits traits-cell">{fmtList(w.traits)}</td>
+                  </tr>
+                {/if}
               {/each}
             </tbody>
           </table>
@@ -590,6 +614,27 @@
     font-weight: 600;
     color: var(--color-text);
     letter-spacing: 0.02em;
+  }
+
+  /* Fire-mode sub-rows: the name row has no separator from its modes, and the
+     mode name is indented and muted. */
+  .weapon-row.mode-parent {
+    border-bottom: none;
+  }
+
+  .weapon-row.mode-parent td {
+    padding-bottom: 0.2rem;
+  }
+
+  .weapon-row.mode-row td {
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+  }
+
+  .mode-name {
+    padding-left: 1.8rem !important;
+    font-style: italic;
+    color: var(--color-text-muted);
   }
 
   .stat-cell {

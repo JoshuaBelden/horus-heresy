@@ -8,15 +8,23 @@
     calcSlottedUnitPoints,
     type DetachmentDefinition,
   } from '../stores/armies.svelte';
+  import { getFactionRules, ORDER_EXEMPLAR_ADVANTAGES } from '../data';
+  import { libraryStore } from '../stores/library.svelte';
   import DetachmentCard from './DetachmentCard.svelte';
 
   const { armyId, onback, onreport }: { armyId: string; onback: () => void; onreport: () => void } = $props();
 
   const army = $derived(armiesStore.list.find((a) => a.id === armyId)!);
   const totalPoints = $derived(army ? calcArmyPoints(army) : 0);
+  const armyRules = $derived(army ? getFactionRules(army.faction) : []);
 
-  // Every non-primary detachment can be added any number of times (no FO rules enforced).
-  const addableDetachments = DETACHMENT_DEFINITIONS.filter((d) => !d.primary);
+  // Every non-primary detachment can be added any number of times (no FO rules
+  // enforced). Faction-specific detachments are only offered to matching armies.
+  const addableDetachments = $derived(
+    DETACHMENT_DEFINITIONS.filter(
+      (d) => !d.primary && (!d.faction || d.faction === army?.faction),
+    ),
+  );
 
   function slotSummary(def: DetachmentDefinition): string {
     return def.slots.map((s) => `${s.slotType} ×${s.count}`).join(' · ');
@@ -47,8 +55,26 @@
 
   function clearSlot(detIndex: number, slotId: string) {
     const clone = JSON.parse(JSON.stringify(army));
+    // Removing the unit also clears any Prime designation on that slot.
     clone.detachments[detIndex].slots = clone.detachments[detIndex].slots.map(
-      (s: { id: string }) => (s.id === slotId ? { ...s, unit: null } : s),
+      (s: { id: string }) => (s.id === slotId ? { ...s, unit: null, prime: false } : s),
+    );
+    clone.updatedAt = Date.now();
+    armiesStore.update(clone);
+  }
+
+  function setPrimeSlot(detIndex: number, slotId: string, isPrime: boolean) {
+    const clone = JSON.parse(JSON.stringify(army));
+    clone.detachments[detIndex].slots = clone.detachments[detIndex].slots.map(
+      (s: { id: string; unit: SlottedUnit | null }) => {
+        if (s.id !== slotId) return s;
+        if (isPrime) return { ...s, prime: true };
+        // Un-designating drops the Prime Advantage and Order on the unit.
+        const unit = s.unit
+          ? { ...s.unit, primeAdvantage: undefined, primeOrder: undefined }
+          : s.unit;
+        return { ...s, prime: false, unit };
+      },
     );
     clone.updatedAt = Date.now();
     armiesStore.update(clone);
@@ -63,6 +89,50 @@
     clone.updatedAt = Date.now();
     armiesStore.update(clone);
   }
+
+  function setPrimeAdvantage(detIndex: number, slotId: string, advantage: string | undefined) {
+    // Drop any previously-selected Order if the new advantage doesn't grant one.
+    const keepsOrder = !!advantage && ORDER_EXEMPLAR_ADVANTAGES.includes(advantage);
+    const clone = JSON.parse(JSON.stringify(army));
+    clone.detachments[detIndex].slots = clone.detachments[detIndex].slots.map(
+      (s: { id: string; unit: SlottedUnit | null }) =>
+        s.id === slotId && s.unit
+          ? {
+              ...s,
+              unit: {
+                ...s.unit,
+                primeAdvantage: advantage,
+                primeOrder: keepsOrder ? s.unit.primeOrder : undefined,
+              },
+            }
+          : s,
+    );
+    clone.updatedAt = Date.now();
+    armiesStore.update(clone);
+  }
+
+  function setPrimeOrder(detIndex: number, slotId: string, order: string | undefined) {
+    const clone = JSON.parse(JSON.stringify(army));
+    clone.detachments[detIndex].slots = clone.detachments[detIndex].slots.map(
+      (s: { id: string; unit: SlottedUnit | null }) =>
+        s.id === slotId && s.unit
+          ? { ...s, unit: { ...s.unit, primeOrder: order } }
+          : s,
+    );
+    clone.updatedAt = Date.now();
+    armiesStore.update(clone);
+  }
+
+  // Every Prime Advantage selected across the army, for once-per-army limits.
+  const armyPrimeAdvantages = $derived(
+    army
+      ? army.detachments.flatMap((d) =>
+          d.slots
+            .map((s) => s.unit?.primeAdvantage)
+            .filter((a): a is string => !!a),
+        )
+      : [],
+  );
 
   const FACTION_COLORS: Record<string, string> = {
     'Dark Angels': '#1a5c1a',
@@ -86,10 +156,19 @@
       <button class="back-btn" onclick={onback}>← Back</button>
       <div class="army-info">
         <span class="army-name">{army.name}</span>
-        <span
-          class="faction-tag"
-          style="color: {FACTION_COLORS[army.faction] ?? '#5a7080'}; border-color: {FACTION_COLORS[army.faction] ?? '#5a7080'}55"
-        >{army.faction}</span>
+        <div class="army-meta">
+          <span
+            class="faction-tag"
+            style="color: {FACTION_COLORS[army.faction] ?? '#5a7080'}; border-color: {FACTION_COLORS[army.faction] ?? '#5a7080'}55"
+          >{army.faction}</span>
+          {#if armyRules.length > 0}
+            <span class="army-rules">
+              {#each armyRules as rule (rule)}
+                <button class="rule-link" onclick={() => libraryStore.openRule(rule)}>{rule}</button>
+              {/each}
+            </span>
+          {/if}
+        </div>
       </div>
       <div class="points-display">
         <span class="points-value">{totalPoints}</span>
@@ -105,9 +184,14 @@
           <DetachmentCard
             {detachment}
             {detIndex}
+            faction={army.faction}
+            {armyPrimeAdvantages}
             onassign={(slotId, unit) => assignUnit(detIndex, slotId, unit)}
             onclear={(slotId) => clearSlot(detIndex, slotId)}
             onrename={(slotId, nickname) => renameUnit(detIndex, slotId, nickname)}
+            onprime={(slotId, advantage) => setPrimeAdvantage(detIndex, slotId, advantage)}
+            onprimeorder={(slotId, order) => setPrimeOrder(detIndex, slotId, order)}
+            onprimeslot={(slotId, isPrime) => setPrimeSlot(detIndex, slotId, isPrime)}
           />
           {#if detachment.type !== 'Crusade Primary'}
             <button class="remove-det-btn" onclick={() => removeDetachment(detIndex)}>
@@ -226,6 +310,45 @@
     border: 1px solid;
     padding: 0.15em 0.5em;
     width: fit-content;
+  }
+
+  .army-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.6rem;
+  }
+
+  .army-rules {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.5rem;
+  }
+
+  .rule-link {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--color-accent);
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+    transition: color 0.12s;
+  }
+
+  .rule-link::before {
+    content: '◈ ';
+    color: var(--color-accent-dim);
+    text-decoration: none;
+  }
+
+  .rule-link:hover {
+    color: #fff;
   }
 
   .points-display {

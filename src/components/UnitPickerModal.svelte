@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { DetachmentSlotType, SlottedUnit, UnitProfile, UnitOption, MeleeWeapon, RangedWeapon, ModelGroup } from '../data/types';
+  import type { DetachmentSlotType, Faction, SlottedUnit, UnitProfile, UnitOption, MeleeWeapon, RangedWeapon, ModelGroup } from '../data/types';
   import { units, meleeWeapons, rangedWeapons, weaponLists } from '../data';
+  import { resolveUnitProfile } from '../stores/armies.svelte';
 
   function findWeapon(name: string): MeleeWeapon | RangedWeapon | undefined {
     return meleeWeapons.find((w) => w.name === name) ?? rangedWeapons.find((w) => w.name === name);
@@ -21,11 +22,13 @@
   const {
     slotType,
     currentUnit,
+    faction,
     onassign,
     oncancel,
   }: {
     slotType: DetachmentSlotType;
     currentUnit: SlottedUnit | null;
+    faction: Faction;
     onassign: (unit: SlottedUnit) => void;
     oncancel: () => void;
   } = $props();
@@ -205,6 +208,9 @@
   }
 
   function selectUnit(profile: UnitProfile) {
+    // Apply faction-specific option augmentation (e.g. Blades of the First
+    // Legion) so the option indices match those used for points/display.
+    profile = resolveUnitProfile(profile.name, faction) ?? profile;
     selectedProfile = profile;
     expanded = {};
 
@@ -440,6 +446,32 @@
       <span class="ws-cell">{weapon.SM}</span>
       <span class="ws-cell">{weapon.AP}</span>
       <span class="ws-cell">{weapon.D}</span>
+      {#if weapon.specialRules.length > 0}
+        <span class="ws-rules">{weapon.specialRules.join(', ')}</span>
+      {/if}
+      {#if weapon.traits.length > 0}
+        <span class="ws-traits">{weapon.traits.join(', ')}</span>
+      {/if}
+    {:else if weapon.modes && weapon.modes.length}
+      <span class="ws-cell ws-header">R</span>
+      <span class="ws-cell ws-header">FP</span>
+      <span class="ws-cell ws-header">RS</span>
+      <span class="ws-cell ws-header">AP</span>
+      <span class="ws-cell ws-header">D</span>
+      {#each weapon.modes as mode}
+        <span class="ws-mode">{mode.name}</span>
+        <span class="ws-cell">{weapon.R}</span>
+        <span class="ws-cell">{weapon.FP}</span>
+        <span class="ws-cell">{mode.RS}</span>
+        <span class="ws-cell">{mode.AP}</span>
+        <span class="ws-cell">{mode.D}</span>
+        {#if mode.specialRules.length > 0}
+          <span class="ws-rules">{mode.specialRules.join(', ')}</span>
+        {/if}
+      {/each}
+      {#if weapon.traits.length > 0}
+        <span class="ws-traits">{weapon.traits.join(', ')}</span>
+      {/if}
     {:else}
       <span class="ws-cell ws-header">R</span>
       <span class="ws-cell ws-header">FP</span>
@@ -448,15 +480,15 @@
       <span class="ws-cell ws-header">D</span>
       <span class="ws-cell">{weapon.R}</span>
       <span class="ws-cell">{weapon.FP}</span>
-      <span class="ws-cell">{(weapon as RangedWeapon).RS}</span>
+      <span class="ws-cell">{weapon.RS}</span>
       <span class="ws-cell">{weapon.AP}</span>
       <span class="ws-cell">{weapon.D}</span>
-    {/if}
-    {#if weapon.specialRules.length > 0}
-      <span class="ws-rules">{weapon.specialRules.join(', ')}</span>
-    {/if}
-    {#if weapon.traits.length > 0}
-      <span class="ws-traits">{weapon.traits.join(', ')}</span>
+      {#if weapon.specialRules.length > 0}
+        <span class="ws-rules">{weapon.specialRules.join(', ')}</span>
+      {/if}
+      {#if weapon.traits.length > 0}
+        <span class="ws-traits">{weapon.traits.join(', ')}</span>
+      {/if}
     {/if}
   </div>
 {/snippet}
@@ -1291,6 +1323,17 @@
     text-transform: uppercase;
     background: var(--color-bg);
     border-bottom: 1px solid var(--color-border);
+  }
+
+  .ws-mode {
+    grid-column: 1 / -1;
+    padding: 0.2rem 0.35rem;
+    color: var(--color-text-muted);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-top: 1px solid var(--color-border);
   }
 
   .ws-rules {

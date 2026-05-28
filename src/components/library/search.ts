@@ -22,7 +22,7 @@ export const mechanicEntries: MechanicEntry[] = [
     title: 'Reactions',
     pageRef: 'p.206',
     keywords:
-      'reaction points allotment reposition death or glory intercept return fire overwatch evade heroic intervention master of the legion',
+      'reaction points allotment reposition death or glory intercept return fire overwatch evade heroic intervention master of the legion advanced vengeance of the first legion dark angels',
   },
   {
     id: 'statuses',

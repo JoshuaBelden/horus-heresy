@@ -272,6 +272,72 @@ export const specialRules: SpecialRule[] = [
     description:
       'A Unit that is Disembarked from another Model that has the Assault Vehicle Special Rule may have a Charge declared for it in the Charge Sub-Phase of the same Player Turn without being forced to make a Disordered Charge.',
   },
+  {
+    name: 'Blades of the First Legion',
+    summary: 'Dark Angels wargear: long blades replacing power swords and power fists.',
+    description:
+      'The following options are available only to Models with the Dark Angels Trait.\n\nAny Model with the Command, Champion or Sergeant Sub-Type may have its power sword exchanged for one Calibanite warblade for +5 Points per Model.\n\nAny Model with the Command or Champion Sub-Type and the Dark Angels Trait may have its power fist exchanged for one Terranic greatsword for Free.',
+  },
+  {
+    name: 'Order Exemplars',
+    summary: 'A Unit with this Special Rule must select one Order of the Hekatonystika during Army selection.',
+    description:
+      "Within the First Legion there are innumerable separate Orders, each dedicated to a singular creed of war. The Cenobium stand as the greatest exemplars of these Orders, their champions and foremost warriors each a keeper of the secrets held by that Order and a practitioner of the form of war they embody.\n\nWhen a Unit that includes any Models with this Special Rule is selected as part of a Detachment, during Army selection, a single option from the Orders of the Hekatonystika must be selected for all Models in that Unit.",
+  },
+  {
+    name: 'Orders of the Hekatonystika',
+    summary: 'The six Orders an Order Exemplars Unit may select from.',
+    description:
+      'Each Order of the Hekatonystika specialised in the employment of one skill of war, one unique talent. A Unit with the Order Exemplars Special Rule selects one of the following for all its Models:\n\nAugurs of Weakness: When making attacks targeting a Unit that includes one or more Models with the Vehicle Type, Models with the Order Exemplars Special Rule gain the Armourbane Special Rule.\n\nIcons of Resolve: When part of a Unit that is successfully Charged by an enemy Unit, Models with the Order Exemplars Special Rule set their Leadership Characteristic to 10 for the duration of the current Assault Phase.\n\nSlayers of Kings: Whilst part of a Unit that is Locked in Combat with an enemy Unit that includes at least one Model with a Weapon Skill Characteristic of 6 or higher, the Attacks Characteristic of Models with the Order Exemplars Special Rule may be set to 1. If this option is used then the Terranic greatswords those Models have gain the Critical Hit (6+) Special Rule until the Combat ends.\n\nHunters of Beasts: Whilst part of a Unit that is Locked in Combat with an enemy Unit that includes one or more Models with a Toughness Characteristic of 6 or higher, the Damage Characteristic of Wounds caused by a Model with this Special Rule is modified by +1.\n\nReapers of Hosts: Whilst part of a Unit that is Locked in Combat with one or more enemy Units that outnumbers it, then all Models in that Unit with the Order Exemplars Special Rule modify their Attacks Characteristic by +1.\n\nBreakers of Witches: Whilst part of a Unit that is Locked in Combat with an enemy Unit that has one or more Models with the Malefic Sub-Type or Psyker Trait, Hit and Wound Tests made for Models with the Order Exemplars Special Rule in that Combat are modified by +1.',
+  },
+  {
+    name: 'Paladin of the Hekatonystika',
+    summary: 'Dark Angels Prime Advantage for a Centurion filling a Prime Slot. Once per Army.',
+    description:
+      'This Prime Advantage can only be selected once per Army. If a Centurion or Centurion with Jump Pack that has the Dark Angels Trait is selected to fill a Prime Force Organisation Slot, this Prime Advantage can be selected.\n\nOne Model in the Unit selected to fill the Prime Slot with this Prime Advantage gains the following benefits:\n\nHas its Base Weapon Skill Characteristic modified by +1.\n\nMust have its bolter exchanged for a Terranic greatsword for Free.\n\nGains the Order Exemplars (Orders of the Hekatonystika) Special Rule.',
+  },
+  {
+    name: 'Vengeance of the First Legion',
+    summary: 'Dark Angels Advanced Reaction: repeat the Fight Sub-Phase, once per Battle.',
+    description:
+      "An Advanced Reaction available to the Controlling Player of any Units that include only Models with the Dark Angels Trait. This Reaction allows the Controlling Player to choose to repeat the Fight Sub-Phase.\n\nTrigger: Once per Battle, the Reactive Player may declare this Advanced Reaction after the last Initiative Step of a Combat that includes a Unit under that Player's control which only includes Models with the Dark Angels Trait has been resolved, but before the Make Final Pile-in Moves Step.\n\nCost: The Reactive Player must spend 1 point of their Reaction Allotment to declare this Reaction, paid as soon as the declaration is made.\n\nTarget: The Target Unit is always a Unit in that Combat which only includes Models with the Dark Angels Trait. That Unit is the Reacting Unit.\n\nProcess: 1. Instead of proceeding to the Make Final Pile-in Moves Step of that Combat, the Players must return to Step 1 of that Combat and resolve it a second time, discarding any Combat Resolution Points gained during the first round (but not Combat Resolution Points scored from any Challenges during that Combat). 2. Models in the Reacting Unit gain the Shred (6+) Special Rule on any Weapons they have with the Sword of the Order Trait.",
+  },
+  {
+    name: 'Prime Slots',
+    summary: 'Filling a marked Prime Slot lets you select one Prime Advantage.',
+    description:
+      'Some Force Organisation Slots in a Detachment are marked as Prime Slots. A Prime Slot retains its indicated Battlefield Role, but if selected and filled with a Unit it offers an additional benefit. For each Prime Slot filled in a Detachment, the Controlling Player may select one Prime Advantage. Some Prime Advantages add benefits to the Unit selected to fill the Prime Slot, while others add benefits to the Detachment that includes the Prime Slot.\n\nIf the Unit selected to fill the Prime Slot includes any Models with the Unique Sub-Type, then the only Prime Advantage that may be selected is Logistical Benefit.',
+  },
+  {
+    name: 'Master Sergeant',
+    summary: 'Prime Advantage: a Sergeant gains +1 A/WS/LD and the Champion Sub-Type.',
+    description:
+      'One Model in the Unit selected to fill the Prime Slot that has the Sergeant Sub-Type gains +1 to its Attacks, Weapon Skill and Leadership Characteristics and the Champion Sub-Type (if it already has the Champion Sub-Type it instead increases its Leadership by an additional +1). This Advantage may only be selected once per Detachment.',
+  },
+  {
+    name: 'Combat Veterans',
+    summary: 'Prime Advantage: all Models in the Unit gain +1 LD/CL/IN/WP (max 10).',
+    description:
+      'All Models in the Unit selected to fill the Prime Slot gain a bonus of +1 to their Leadership, Cool, Intelligence and Willpower Characteristics to a maximum of 10 (this includes only Models selected as part of the Unit, not Models that later join the Unit either before or during a Battle).',
+  },
+  {
+    name: 'Paragon of Battle',
+    summary: 'Prime Advantage: a Command Model gains +1 A/WS/BS.',
+    description:
+      'One Model in the Unit selected to fill the Prime Slot that has the Command Sub-Type gains a bonus of +1 to its Attacks, Weapon Skill and Ballistic Skill Characteristics.',
+  },
+  {
+    name: 'Special Assignment',
+    summary: 'Prime Advantage (Command Slots only): may be filled by a High Command Unit.',
+    description:
+      'This Prime Advantage may only be selected for a Command Slot. A Command Slot for which this Prime Advantage is selected may be filled by a High Command Unit, but remains a Command Slot. Moreover, no additional Detachments of any kind may be selected due to this Slot regardless of their Battlefield Role or any Special Rules that the Unit selected to fill the Slot may have.',
+  },
+  {
+    name: 'Logistical Benefit',
+    summary: 'Prime Advantage: add one extra Force Organisation Slot to the Detachment.',
+    description:
+      'Add one additional Force Organisation Slot to the Detachment that includes the Prime Slot. This Slot may be of any Battlefield Role other than High Command, Command, Warlord or Lord of War. This Advantage may only be selected once per Detachment.',
+  },
 ];
 
 export const specialRuleMap: Record<string, SpecialRule> = Object.fromEntries(

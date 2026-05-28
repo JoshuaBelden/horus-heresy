@@ -2,7 +2,6 @@
   import {
     meleeWeapons as catalogueMelee,
     rangedWeapons as catalogueRanged,
-    units,
     wargear as wargearCatalogue,
     weaponLists,
   } from '../data';
@@ -14,7 +13,7 @@
     UnitProfile,
     WargearDetail,
   } from '../data/types';
-  import { armiesStore, calcArmyPoints } from '../stores/armies.svelte';
+  import { armiesStore, calcArmyPoints, resolveUnitProfile } from '../stores/armies.svelte';
   import { libraryStore } from '../stores/library.svelte';
   import { turnTrackerStore as tt } from '../stores/turnTracker.svelte';
   import TurnTracker from './TurnTracker.svelte';
@@ -99,6 +98,8 @@
     model: ModelProfile;
     ranged: RangedWeapon[];
     melee: MeleeWeapon[];
+    // Tooltip text when a Prime Advantage (e.g. Paladin) modified this model.
+    primeNote?: string;
   }
   interface UnitInstance {
     key: string;
@@ -137,7 +138,7 @@
     for (const det of army.detachments) {
       for (const s of det.slots) {
         if (!s.unit) continue;
-        const profile = units.find((u) => u.name === s.unit!.unitName);
+        const profile = resolveUnitProfile(s.unit.unitName, army.faction);
         if (!profile) continue;
 
         // Default wargear is the shared baseline carried by every model; selected
@@ -178,7 +179,26 @@
             addWeapon(choice.weaponName, attributeModel(profile, group.optionIndex));
         }
 
-        const models: ModelLoadout[] = profile.models.map((model, i) => {
+        // Paladin of the Hekatonystika Prime Advantage: one Model (the Command
+        // Model) gains WS +1 and exchanges its bolter for a Terranic greatsword.
+        const isPaladin = s.unit.primeAdvantage === 'Paladin of the Hekatonystika';
+        let paladinIdx = -1;
+        if (isPaladin) {
+          paladinIdx = profile.models.findIndex((m) =>
+            m.subtypes?.includes('Command'),
+          );
+          if (paladinIdx < 0) paladinIdx = 0;
+          const arr = perModelWeapons[paladinIdx];
+          const b = arr.indexOf('Bolter');
+          if (b >= 0) arr.splice(b, 1);
+          arr.push('Terranic greatsword');
+        }
+
+        const models: ModelLoadout[] = profile.models.map((baseModel, i) => {
+          const paladinModel = isPaladin && i === paladinIdx;
+          const model = paladinModel
+            ? { ...baseModel, WS: (baseModel.WS ?? 0) + 1 }
+            : baseModel;
           const uniq = [...new Set(perModelWeapons[i])];
           const ranged = uniq
             .map((n) => catalogueRanged.find((w) => w.name === n))
@@ -188,7 +208,15 @@
             .filter((w): w is MeleeWeapon => w !== undefined);
           // Weapon special rules are shown inline in the weapon tables, so they
           // are deliberately not merged into the unit's Special Rules list.
-          return { model, ranged, melee };
+          return paladinModel
+            ? {
+                model,
+                ranged,
+                melee,
+                primeNote:
+                  'Paladin of the Hekatonystika: Weapon Skill +1; bolter exchanged for a Terranic greatsword.',
+              }
+            : { model, ranged, melee };
         });
 
         const equipment = [...new Set(equipmentNames)]
@@ -361,16 +389,41 @@
       </thead>
       <tbody>
         {#each weapons as w (w.name)}
-          <tr>
-            <td class="col-name">{w.name}</td>
-            <td>{w.R ?? '—'}</td>
-            <td>{w.FP ?? '—'}</td>
-            <td>{w.RS ?? '—'}</td>
-            <td>{w.AP ?? '—'}</td>
-            <td>{w.D ?? '—'}</td>
-            <td class="col-rules">{@render rulesCell(w.specialRules ?? [])}</td>
-            <td class="col-traits">{@render rulesCell(w.traits ?? [])}</td>
-          </tr>
+          {#if w.modes && w.modes.length}
+            <tr class="mode-parent">
+              <td class="col-name">{w.name}</td>
+              <td>{w.R ?? '—'}</td>
+              <td>{w.FP ?? '—'}</td>
+              <td>—</td>
+              <td>—</td>
+              <td>—</td>
+              <td class="col-rules"></td>
+              <td class="col-traits">{@render rulesCell(w.traits ?? [])}</td>
+            </tr>
+            {#each w.modes as mode}
+              <tr class="mode-row">
+                <td class="col-name mode-name">– {mode.name}</td>
+                <td></td>
+                <td></td>
+                <td>{mode.RS}</td>
+                <td>{mode.AP}</td>
+                <td>{mode.D}</td>
+                <td class="col-rules">{@render rulesCell(mode.specialRules)}</td>
+                <td class="col-traits"></td>
+              </tr>
+            {/each}
+          {:else}
+            <tr>
+              <td class="col-name">{w.name}</td>
+              <td>{w.R ?? '—'}</td>
+              <td>{w.FP ?? '—'}</td>
+              <td>{w.RS ?? '—'}</td>
+              <td>{w.AP ?? '—'}</td>
+              <td>{w.D ?? '—'}</td>
+              <td class="col-rules">{@render rulesCell(w.specialRules ?? [])}</td>
+              <td class="col-traits">{@render rulesCell(w.traits ?? [])}</td>
+            </tr>
+          {/if}
         {/each}
       </tbody>
     </table>
@@ -534,7 +587,10 @@
                   <div class="model-block">
                     <div class="model-name">
                       {ml.model.name}{#if ml.model.subtypes && ml.model.subtypes.length}
-                        ({ml.model.subtypes.join(', ')}){/if}
+                        ({ml.model.subtypes.join(', ')}){/if}{#if ml.primeNote}<span
+                          class="prime-note"
+                          title={ml.primeNote}>◈ Prime</span
+                        >{/if}
                     </div>
                     <div class="stats-table-wrap">
                       <table class="stats-table">
@@ -1102,6 +1158,13 @@
     color: var(--color-text-muted);
   }
 
+  .prime-note {
+    margin-left: 0.4rem;
+    color: var(--color-gold);
+    cursor: help;
+    text-shadow: 0 0 6px rgba(201, 147, 58, 0.4);
+  }
+
   .stats-table-wrap {
     overflow-x: auto;
   }
@@ -1178,6 +1241,13 @@
     text-align: left;
     color: var(--color-text);
     font-weight: 600;
+  }
+
+  .weapons-table .mode-name {
+    padding-left: 1.4rem;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--color-text-muted);
   }
 
   .weapons-table .col-rules {

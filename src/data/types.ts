@@ -132,6 +132,17 @@ export interface SpecialRule {
   description: string;
 }
 
+// A fire mode is a sub-profile of a single ranged weapon (e.g. Sustained /
+// Maximal fire). When present, RS/AP/D/specialRules are read per-mode; the
+// weapon's top-level R/FP/traits/category remain shared across modes.
+export interface WeaponFireMode {
+  name: string;
+  RS: number;
+  AP: number | string;
+  D: number | string;
+  specialRules: string[];
+}
+
 export interface RangedWeapon {
   name: string;
   R: number | string;
@@ -142,6 +153,10 @@ export interface RangedWeapon {
   specialRules: string[];
   traits: string[];
   category?: RangedWeaponCategory;
+  // Optional fire-mode sub-profiles. If set, both modes always apply (no user
+  // selection) and renderers show one sub-row per mode. Top-level RS/AP/D/
+  // specialRules act as a fallback/summary for views that don't expand modes.
+  modes?: WeaponFireMode[];
 }
 
 export interface MeleeWeapon {
@@ -230,7 +245,14 @@ export type DetachmentType =
   | 'First Strike'
   | 'Combat Retinue'
   | 'Officer Cadre'
-  | 'Army Vanguard';
+  | 'Army Vanguard'
+  // Dark Angels Auxiliary Detachments
+  | 'Ironwing Gauntlet'
+  | 'Dreadwing Cadre'
+  | 'Stormwing Muster'
+  | 'Ravenwing Lance'
+  | 'Deathwing Conclave'
+  | 'Firewing Echelon';
 
 export interface SelectedChoice {
   optionIndex: number;
@@ -244,12 +266,20 @@ export interface SlottedUnit {
   nickname?: string;
   selectedChoices: SelectedChoice[];
   modelGroups?: ModelGroup[];
+  // Name of the Prime Advantage selected for this unit when it fills a Prime
+  // Slot (see primeAdvantages). Undefined when none is chosen.
+  primeAdvantage?: string;
+  // Order of the Hekatonystika selected when the Prime Advantage grants the
+  // Order Exemplars rule (Paladin of the Hekatonystika).
+  primeOrder?: string;
 }
 
 export interface DetachmentSlot {
   id: string;
   slotType: DetachmentSlotType;
   unit: SlottedUnit | null;
+  // Marks this as a Prime Slot — filling it lets the player pick a Prime Advantage.
+  prime?: boolean;
 }
 
 export interface ArmyDetachment {

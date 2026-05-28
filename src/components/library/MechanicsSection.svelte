@@ -86,6 +86,17 @@
           declares a challenge. If refused, "Disgraced".
         </p>
       </div>
+      <div class="reaction-item">
+        <span class="reaction-name"
+          >Advanced (Dark Angels): Vengeance of the First Legion</span
+        ><span class="reaction-cost">Cost 1</span>
+        <p class="reaction-trigger">
+          Once per Battle, after the last Initiative Step of a Combat including a
+          DA-only unit, but before the Make Final Pile-in. Resolve that Combat a
+          second time (discard CRP from the first round, keep Challenge CRP). The
+          Reacting Unit's Sword of the Order weapons gain Shred (6+).
+        </p>
+      </div>
     </div>
   {:else if id === 'statuses'}
     <p class="phase-note">
