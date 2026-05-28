@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { STATUSES } from '../../data/statuses';
   import { libraryStore } from '../../stores/library.svelte';
   import { filterMechanics } from './search';
 
@@ -92,26 +93,13 @@
       objectives, no Stationary benefits.
     </p>
     <div class="status-grid">
-      <div class="status-item">
-        <span class="status-name">Pinned</span><span class="status-desc"
-          >Can't Move, Rush or Charge. Can't Pursue or Disengage.</span
-        >
-      </div>
-      <div class="status-item">
-        <span class="status-name">Suppressed</span><span class="status-desc"
-          >Attacks as Snap Shots only.</span
-        >
-      </div>
-      <div class="status-item">
-        <span class="status-name">Stunned</span><span class="status-desc"
-          >Can't declare Reactions.</span
-        >
-      </div>
-      <div class="status-item">
-        <span class="status-name">Routed</span><span class="status-desc"
-          >Must fall back during Movement. All other status penalties apply.</span
-        >
-      </div>
+      {#each STATUSES as s (s.id)}
+        <div class="status-item">
+          <span class="status-name">{s.name}</span><span class="status-desc"
+            >{s.description}</span
+          >
+        </div>
+      {/each}
     </div>
   {:else if id === 'setup'}
     <p class="phase-note">

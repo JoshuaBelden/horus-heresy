@@ -18,6 +18,7 @@
   import { libraryStore } from '../stores/library.svelte';
   import { turnTrackerStore as tt } from '../stores/turnTracker.svelte';
   import TurnTracker from './TurnTracker.svelte';
+  import StatusControl from './StatusControl.svelte';
   import { turnSequence, type TrackerSquad } from '../data/turnSequence';
 
   const { armyId, onback }: { armyId: string; onback: () => void } = $props();
@@ -37,6 +38,39 @@
   // Rule references open the shared Library panel and jump to the rule.
   function openRule(ruleName: string) {
     libraryStore.openRule(ruleName);
+  }
+
+  // A model's Type / Sub-Type is documented in the Library as a special rule
+  // named e.g. "Infantry Type" or "Sergeant Sub-Type" (a few, like "Walker",
+  // use the bare label). Returns the matching rule name, or undefined if the
+  // label has no Library entry to link to.
+  function typeRule(label: string, kind: 'Type' | 'Sub-Type'): string | undefined {
+    for (const name of [`${label} ${kind}`, label]) {
+      if (lookupRule(name)) return name;
+    }
+    return undefined;
+  }
+
+  interface RoleSegment {
+    label: string;
+    rule?: string;
+    sep: string;
+  }
+
+  // Builds the "Type - Sub-Type" combat-role line as ordered segments: each
+  // carries the separator that precedes it and, when documented, the Library
+  // rule it links to.
+  function roleSegments(models: ModelLoadout[]): RoleSegment[] {
+    const segs: RoleSegment[] = [];
+    const types = [...new Set(models.map((m) => m.model.type))];
+    const subTypes = [...new Set(models.flatMap((m) => m.model.subtypes ?? []))];
+    types.forEach((t, i) => {
+      segs.push({ label: t, rule: typeRule(t, 'Type'), sep: i === 0 ? '' : ', ' });
+    });
+    subTypes.forEach((st, i) => {
+      segs.push({ label: st, rule: typeRule(st, 'Sub-Type'), sep: i === 0 ? ' - ' : ', ' });
+    });
+    return segs;
   }
 
   // Unit blocks are collapsed by default; track which slots are expanded.
@@ -483,7 +517,18 @@
                   {/if}
                 </div>
 
+                {#if tt.active}
+                  <StatusControl squadId={inst.key} />
+                {/if}
+
                 {#if isOpen}
+                {@const segments = roleSegments(inst.models)}
+                <div class="unit-block-role">
+                  {#each segments as seg (seg.label)}{seg.sep}{#if seg.rule}<button
+                        class="role-link"
+                        onclick={() => openRule(seg.rule!)}>{seg.label}</button
+                      >{:else}{seg.label}{/if}{/each}
+                </div>
                 {#each inst.models as ml (ml.model.name)}
                   {@const statCols = isVehicleModel(ml.model.type) ? VEHICLE_STAT_KEYS : STAT_KEYS}
                   <div class="model-block">
@@ -951,6 +996,35 @@
     font-weight: 700;
     color: var(--color-gold);
     white-space: nowrap;
+  }
+
+  .unit-block-role {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .role-link {
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: var(--color-accent);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-dim);
+    text-underline-offset: 2px;
+    transition: color 0.12s;
+  }
+
+  .role-link:hover {
+    color: #fff;
+    text-decoration-color: var(--color-accent);
   }
 
   /* ── Loadout / Rule References ───────────────── */

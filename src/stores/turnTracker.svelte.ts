@@ -1,3 +1,4 @@
+import { ROUTED_ID } from '../data/statuses';
 import { turnSequence } from '../data/turnSequence';
 
 // Session-only turn-tracker state, shared between the Turn Tracker bar and the
@@ -12,6 +13,9 @@ class TurnTrackerStore {
   squadGone = $state<Record<string, Record<string, boolean>>>({});
   // squadId → is under attack (opponent's turn)
   targeted = $state<Record<string, boolean>>({});
+  // squadId → list of active status ids (Pinned, Suppressed, …). Persists across
+  // "New Turn" — statuses linger until cleared, unlike per-turn gone/targeted state.
+  statuses = $state<Record<string, string[]>>({});
 
   start(): void {
     this.active = true;
@@ -52,6 +56,30 @@ class TurnTrackerStore {
 
   toggleTargeted(squadId: string): void {
     this.targeted = { ...this.targeted, [squadId]: !this.targeted[squadId] };
+  }
+
+  getStatuses(squadId: string): string[] {
+    return this.statuses[squadId] ?? [];
+  }
+
+  hasStatus(squadId: string, id: string): boolean {
+    return this.getStatuses(squadId).includes(id);
+  }
+
+  toggleStatus(squadId: string, id: string): void {
+    const cur = this.getStatuses(squadId);
+    let next: string[];
+    if (cur.includes(id)) next = cur.filter((s) => s !== id);
+    else if (id === ROUTED_ID) next = [ROUTED_ID]; // Routed clears all others.
+    else next = [...cur, id];
+    this.statuses = { ...this.statuses, [squadId]: next };
+  }
+
+  removeStatus(squadId: string, id: string): void {
+    this.statuses = {
+      ...this.statuses,
+      [squadId]: this.getStatuses(squadId).filter((s) => s !== id),
+    };
   }
 }
 
