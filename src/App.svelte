@@ -4,9 +4,11 @@
   import UnitList from './components/UnitList.svelte';
   import WargearList from './components/WargearList.svelte';
   import LibraryPanel from './components/library/LibraryPanel.svelte';
+  import DiceSimulator from './components/DiceSimulator.svelte';
   import { libraryStore } from './stores/library.svelte';
 
   let section = $state<'roster' | 'wargear' | 'combat' | 'army'>('army');
+  let diceOpen = $state(false);
 </script>
 
 <div
@@ -50,6 +52,30 @@
       class:active={section === 'combat'}
       onclick={() => (section = 'combat')}>Combat Simulator</button
     >
+    <button
+      class="dice-btn"
+      onclick={() => (diceOpen = true)}
+      title="Dice Simulator"
+      aria-label="Dice Simulator"
+    >
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <rect
+          x="3"
+          y="3"
+          width="18"
+          height="18"
+          rx="3"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+        />
+        <circle cx="8" cy="8" r="1.6" fill="currentColor" />
+        <circle cx="16" cy="8" r="1.6" fill="currentColor" />
+        <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+        <circle cx="8" cy="16" r="1.6" fill="currentColor" />
+        <circle cx="16" cy="16" r="1.6" fill="currentColor" />
+      </svg>
+    </button>
   </nav>
 
   <main class="main-content">
@@ -71,6 +97,10 @@
   </footer>
 
   <LibraryPanel />
+
+  {#if diceOpen}
+    <DiceSimulator onclose={() => (diceOpen = false)} />
+  {/if}
 </div>
 
 <style>
@@ -229,6 +259,22 @@
 
   .nav-btn:hover:not(.active) {
     color: var(--color-text);
+  }
+
+  .dice-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    padding: 0.85rem 1.25rem;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+
+  .dice-btn:hover {
+    color: var(--color-accent);
   }
 
   /* ── Main ────────────────────────────────────── */
